@@ -4,7 +4,8 @@ import { range } from "@/utils";
 import { Card } from "./Card";
 import { useCopyState } from "@/hooks";
 import { Line } from "@/components/Line";
-import { State } from "@/types/global";
+import { State } from "@/types";
+
 const hex = [...range(1, 9), ..."abcdef".split("").map((s) => s.toUpperCase())].map(String);
 export interface ChangeColorComponentProps {
   state: State<null | string>;
@@ -76,7 +77,7 @@ export const ChangeColorComponent = ({ state }: ChangeColorComponentProps) => {
       element.onmousemove = null;
       context?.clearRect(0, 0, element.width, element.height);
     };
-  }, [colorsDetectionCanvas.current]);
+  }, [colorsDetectionCanvas]);
   return (
     <Card className="inline-block w-[316px] h-fit">
       <div className="p-2">

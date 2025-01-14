@@ -7,7 +7,7 @@ import {
   FixedProfileView,
   IframeLayout,
   KeyboardView,
-  MenuList,
+  MenuLayout,
   Notifications,
   PDFView,
   SettingUpdateView,
@@ -16,11 +16,14 @@ import {
   SettingsView,
   EnumLayout,
   ApplicationsLayout,
+  BottomSheetLayout,
+  ControlsLayout,
 } from "@/layouts";
 export interface LayoutesProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  profileContent?: React.ReactNode;
 }
-export const Layoutes = ({ children }: LayoutesProps) => {
+export const Layoutes = ({ children, profileContent }: LayoutesProps) => {
   return (
     <EmptyComponent>
       {children}
@@ -28,7 +31,7 @@ export const Layoutes = ({ children }: LayoutesProps) => {
       <ApplicationsLayout />
       <PDFView />
       <IframeLayout />
-      <FixedProfileView />
+      <FixedProfileView children={profileContent} />
       <Commands />
       <SettingsView />
       <SettingUpdateView />
@@ -38,9 +41,11 @@ export const Layoutes = ({ children }: LayoutesProps) => {
       <Notifications />
       <Toasts />
       <DialogBoxLayout />
-      <MenuList />
+      <MenuLayout />
       <TitleProvider />
       <DevReadingHTML />
+      <BottomSheetLayout />
+      <ControlsLayout />
     </EmptyComponent>
   );
 };

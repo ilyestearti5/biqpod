@@ -1,43 +1,24 @@
 import { tw } from "@/utils";
-import { ReactElement, position } from "@/types/global";
+
 import { handelShadowColor, useColorMerge } from "@/hooks";
+import { Biqpod, ReactElement } from "@/types";
 export interface PanelSideProps extends ReactElement {
-  position: position;
+  position?: Biqpod.Types.Axis;
 }
 export function PanelSide({ position, style, className, children, ...props }: PanelSideProps) {
   const colorMerge = useColorMerge();
   return (
     <div
       style={{
-        left: position ? `${position[0]}px` : "",
-        top: position ? `${position[1]}px` : "",
+        left: position ? `${position.x}px` : "",
+        top: position ? `${position.y}px` : "",
       }}
-      className={tw(
-        `
-          transition-all
-          duration-300
-          -translate-y-1/2
-          fixed
-          w-[500px]
-          z-[1000]
-        `,
-        !position && "hidden",
-      )}
+      className={tw(`z-[1000] fixed w-[500px] transition-all -translate-y-1/2 duration-300`, !position && "hidden")}
     >
       <div
         {...props}
         tabIndex={1}
-        className={tw(
-          `
-            ml-[-3px]
-            rounded-lg
-            border
-            border-solid
-            border-transparent
-            relative
-          `,
-          className,
-        )}
+        className={tw(`relative ml-[-3px] border border-transparent border-solid rounded-lg`, className)}
         style={{
           ...colorMerge({
             borderColor: "borders",
@@ -56,19 +37,7 @@ export function PanelSide({ position, style, className, children, ...props }: Pa
       >
         {children}
         <span
-          className={tw(`
-            absolute
-            top-1/2
-            right-full
-            -translate-y-1/2
-            inline-block
-            w-0
-            h-0
-            border-8
-            border-solid
-            border-l-transparent
-            border-y-transparent
-          `)}
+          className={tw(`inline-block top-1/2 right-full absolute border-8 border-y-transparent border-l-transparent border-solid w-0 h-0 -translate-y-1/2`)}
           style={{
             ...colorMerge({
               borderRightColor: "secondary.background",

@@ -2,19 +2,12 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { store } from "@/store";
 import { Delay, con, transformCase } from "@/utils/index";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
 import commands from "@/apis/commands";
-import { FullStateManagment } from "@/types/global";
+import { Biqpod, FullStateManagment, TableDefConfig } from "@/types";
 const { data } = commands;
 export type CommandIds = keyof typeof data;
+export type Command = Biqpod.System.Command;
 // Data Rendering Of One Command
-export interface Command {
-  commandId: string;
-  label?: string;
-  commands?: (Command["commandId"] | PayloadAction<any> | number)[];
-  private?: boolean;
-  blocked?: boolean;
-}
 export const name = "commands";
 export function execList(cmdId: CommandIds, state: FullStateManagment = store.getState()): (PayloadAction<any> | number)[] {
   //

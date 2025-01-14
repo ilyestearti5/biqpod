@@ -1,15 +1,13 @@
 import React from "react";
-import { State } from "@/types/global";
 import { tw } from "@/utils";
 import { useCopyState } from "@/hooks";
 import { useColorMerge } from "@/hooks";
 import { Button } from "@/components/Button";
 import { Tip } from "@/components/Tip";
-import { faExchange, faEye, faLowVision } from "@fortawesome/free-solid-svg-icons";
 import { execAction, useAction } from "@/data/system/actions.model";
-import { FeildGeneralProps } from "@/types/global";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
 import { Translate } from "../Translate";
+import { FeildGeneralProps, SettingConfig, State } from "@/types";
+import { allIcons } from "@/apis";
 export type PasswordFeildProps = FeildGeneralProps<string | undefined, SettingConfig["password"]>;
 export interface PasswordProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
   state: State<string | undefined>;
@@ -35,7 +33,7 @@ export function Password({ eays = true, state, onFocus, onBlur, className, style
           focused.set(false);
         }}
         type={show.get ? "text" : "password"}
-        className={tw(`p-2 text-xs border border-solid border-transparent font-[inherit] whitespace-nowrap rounded-sm w-full`, className)}
+        className={tw(`p-2 border border-transparent border-solid rounded-sm w-full font-[inherit] text-xs whitespace-nowrap`, className)}
         style={{
           ...colorMerge("field.background", {
             borderColor: focused.get ? "primary" : "borders",
@@ -60,7 +58,7 @@ export function Password({ eays = true, state, onFocus, onBlur, className, style
             elementRef.current.focus();
             elementRef.current.setSelectionRange(0, 1000, "forward");
           }}
-          icon={show.get ? faLowVision : faEye}
+          icon={show.get ? allIcons.solid.faLowVision : allIcons.solid.faEye}
         />
       )}
     </div>
@@ -111,7 +109,7 @@ export function PasswordFeild({ state, config = {}, id }: PasswordFeildProps) {
             onClick={() => {
               execAction("password.change", id);
             }}
-            icon={faExchange}
+            icon={allIcons.solid.faExchange}
             className="px-2 py-1"
           >
             <Translate content="change" />

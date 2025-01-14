@@ -1,10 +1,10 @@
 import { handelGradientColor, useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
-import { ReactElement } from "@/types/global";
 import React from "react";
 import { delay } from "@/utils/index";
 import { useSettingValue } from "@/hooks";
 import { useAsyncEffect, useCopyState } from "@/hooks";
+import { ReactElement } from "@/types";
 export interface OverlaysProps extends ReactElement {
   onLoadContent?: () => void;
   animted?: boolean;
@@ -27,7 +27,7 @@ export function DownOverlay({ hidden, animted, className, style, children, onLoa
   return (
     <div
       className={tw(
-        `fixed inset-0 bg-opacity-40 flex justify-center items-center z-[100000000000000000]`,
+        `z-[100000000000000000] fixed inset-0 flex justify-center items-center bg-opacity-40`,
         isAnimation && "transition-[transform] duration-700",
         !hidden && "translate-y-0",
         hidden && `translate-y-full pointer-events-none`,
@@ -50,7 +50,6 @@ export function DownOverlay({ hidden, animted, className, style, children, onLoa
   );
 }
 export function BlurOverlay({ className, animted, style, hidden, onLoadContent, children, onTransitionEnd, ...props }: OverlaysProps) {
-  const colorMerge = useColorMerge();
   const hiddenTransition = useCopyState(hidden);
   React.useEffect(() => {
     if (!hidden) {
@@ -70,7 +69,7 @@ export function BlurOverlay({ className, animted, style, hidden, onLoadContent, 
     <div
       ref={elementRf}
       className={tw(
-        `fixed inset-0 bg-opacity-40 flex justify-center scale-100 items-center z-[100000000000000000]`,
+        `z-[100000000000000000] fixed inset-0 flex justify-center items-center bg-opacity-40 scale-100`,
         isAnimation && "transition-[opacity,transform] duration-300",
         hidden && `pointer-events-none opacity-0 transform scale-0`,
         !hidden && `opacity-100`,

@@ -1,5 +1,5 @@
 import { allIcons } from "@/apis";
-import { BlurOverlay, Button, Card, CircleTip, EmptyComponent, Line, Translate } from "@/components";
+import { BlurOverlay, Button, Card, CircleTip, Line, Translate } from "@/components";
 import { useCopyState } from "@/hooks";
 import React from "react";
 export const ColorLayout = () => {
@@ -14,14 +14,14 @@ export const ColorLayout = () => {
         return;
       }
       // for mobile
-      const touchCallback = (e: TouchEvent) => {
+      const touchCallback = () => {
         // const clientY = e.touches[0].clientY;
       };
       allColorsCanvasElement.current.addEventListener("touchstart", touchCallback);
       allColorsCanvasElement.current.addEventListener("touchmove", touchCallback);
       const width = allColorsCanvasElement.current.clientWidth;
       const height = allColorsCanvasElement.current.clientHeight;
-      let allCases = [
+      const allCases = [
         //r,g,b
         [1, 0, 0],
         [0, 1, 0],
@@ -43,7 +43,7 @@ export const ColorLayout = () => {
         context.clearRect(0, 0, width, height);
       };
     }
-  }, [allColorsCanvasElement.current]);
+  }, [allColorsCanvasElement]);
   return (
     <BlurOverlay hidden={true}>
       <Card className="flex-none justify-between w-fit">

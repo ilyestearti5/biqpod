@@ -1,5 +1,5 @@
 import { useColorMerge } from "@/hooks";
-import { ReactElement } from "@/types/global";
+import { ReactElement } from "@/types";
 import { twMerge } from "tailwind-merge";
 export type CardProps = ReactElement;
 export const Card = ({ className, style, ...props }: CardProps) => {

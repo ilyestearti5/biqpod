@@ -1,4 +1,3 @@
-import React from "react";
 import { notifayHooks } from "@/data/system/notifications.model";
 import { tw } from "@/utils";
 import { useSettingValue, useColorMerge, useCopyState } from "@/hooks";
@@ -8,11 +7,11 @@ import { List } from "@/components/List";
 import { LineLoading } from "@/components/Loading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { faCheckDouble, faChevronDown, faChevronUp, faClose, faInfoCircle, faWarning, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { ColorIds } from "@/data/system/colors.model";
 import { execCommand } from "@/data/system/command.model";
 import { execAction } from "@/data/system/actions.model";
 import { MarkDown, Scroll } from "@/components";
+import { allIcons } from "@/apis";
 export const NotifaysSlot = () => {
   const notifications = notifayHooks.getAll();
   return (
@@ -48,25 +47,14 @@ export const NotifaysSlot = () => {
                 },
               ),
             }}
-            className={tw(
-              `
-                overflow-hidden
-                transform
-                transition-[transform,opacity]
-                relative
-                max-h-[calc(80vh+50px)]
-                border-2
-                border-solid
-                border-transparent
-              `,
-            )}
+            className={tw(`relative border-2 border-transparent border-solid max-h-[calc(80vh+50px)] transform transition-[transform,opacity] overflow-hidden`)}
             onMouseEnter={() => hover.set(true)}
             onMouseLeave={() => hover.set(false)}
           >
-            <div className={tw(`relative p-3 flex justify-between items-center`)}>
-              <div className={`truncate text-xl flex items-center gap-2`}>
+            <div className={tw(`relative flex justify-between items-center p-3`)}>
+              <div className={`truncate text-xl max-md:text-lg flex items-center gap-2`}>
                 <FontAwesomeIcon
-                  icon={iwes<IconDefinition>(faInfoCircle, faWarning, faXmarkCircle, faCheckDouble)}
+                  icon={iwes<IconDefinition>(allIcons.solid.faInfoCircle, allIcons.solid.faWarning, allIcons.solid.faXmarkCircle, allIcons.solid.faCheckDouble)}
                   style={{
                     ...colorMerge({
                       color: iwes<ColorIds>("notifay.info", "notifay.warning", "notifay.error", "notifay.success"),
@@ -76,25 +64,13 @@ export const NotifaysSlot = () => {
                 <span>{notifay.title}</span>
               </div>
               <div
-                className={tw(`
-                  absolute
-                  flex
-                  gap-x-2
-                  top-1/2
-                  h-2/3
-                  w-[5px]
-                  transform
-                  -translate-y-1/2
-                  left-0
-                  rounded-ee-md
-                  rounded-se-md
-                `)}
+                className={tw(`top-1/2 left-0 absolute flex gap-x-2 rounded-ee-md rounded-se-md w-[5px] h-2/3 transform -translate-y-1/2`)}
                 style={{
                   ...colorMerge(iwes<ColorIds>("notifay.info", "notifay.warning", "notifay.error", "notifay.success")),
                 }}
               />
               <div
-                className="flex gap-1 text-xl"
+                className="flex gap-1 text-xl max-md:text-lg"
                 style={{
                   visibility: hover.get || status.isSubmited ? "visible" : "hidden",
                 }}
@@ -104,7 +80,7 @@ export const NotifaysSlot = () => {
                     onClick={() => {
                       notifayHooks.setOneFeild(notifay.id, "showDesc", !notifay.showDesc);
                     }}
-                    icon={notifay.showDesc ? faChevronUp : faChevronDown}
+                    icon={notifay.showDesc ? allIcons.solid.faChevronUp : allIcons.solid.faChevronDown}
                   />
                 )}
                 {notifay.removable && (
@@ -112,19 +88,19 @@ export const NotifaysSlot = () => {
                     onClick={() => {
                       notifayHooks.remove([notifay.id]);
                     }}
-                    icon={faClose}
+                    icon={allIcons.solid.faClose}
                   />
                 )}
               </div>
             </div>
             {notifay.desc && (
-              <div className={tw("h-[0px]", isAnimation && "transition-[height] duration-700", notifay.showDesc && "h-[170px]")}>
+              <div className={tw("h-[0px] overflow-hidden", isAnimation && "transition-[height] duration-700", notifay.showDesc && "h-full")}>
                 <Scroll className="p-6">
                   <MarkDown value={notifay.desc} />
                 </Scroll>
               </div>
             )}
-            {Array.isArray(notifay.buttons) && (
+            {!!notifay.buttons?.length && (
               <div className="flex justify-end p-5 overflow-x-auto">
                 {notifay.buttons.map(({ command, label }, index) => {
                   return (
@@ -149,6 +125,6 @@ export const NotifaysSlot = () => {
           </div>
         );
       }}
-    ></List>
+    />
   );
 };

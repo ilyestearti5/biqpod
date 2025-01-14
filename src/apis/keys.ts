@@ -117,6 +117,11 @@ export default {
       value: "control+shift+p",
     },
     {
+      command: "commands.open",
+      when: "focused != 'findCommand' || !state.object.data.commandId",
+      value: "f1",
+    },
+    {
       repeation: false,
       command: "notification.openAndExpandMoreAndFocus",
       when: "focused != 'notifications'",
@@ -254,13 +259,13 @@ export default {
       repeation: false,
       command: "enum/submit",
       value: "space",
-      when: "!state.object.data.enumIsLoading && state.object.data.enum.id",
+      when: "!state.object.data.enum.isLoading && state.object.data.enum.id",
     },
     {
       repeation: false,
       command: "enum/submit",
       value: "enter",
-      when: "!state.object.data.enumIsLoading && state.object.data.enum.id",
+      when: "!state.object.data.enum.isLoading && state.object.data.enum.id",
     },
     {
       repeation: false,

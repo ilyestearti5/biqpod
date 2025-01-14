@@ -90,7 +90,7 @@ export function Button({
         ...colorMerge("primary"),
         ...mergeObject(fullStyle),
       }}
-      className={tw("btn rounded-md cursor-pointer w-full px-3 py-2 relative capitalize overflow-hidden transition-[transform,box-shadow] active:scale-95", className)}
+      className={tw("relative px-3 py-2 rounded-md w-full capitalize transition-[transform,box-shadow] cursor-pointer overflow-hidden btn active:scale-95", className)}
       {...props}
     >
       {range(1, 3).map((index) => {

@@ -31,6 +31,10 @@ export default {
             value: "Outfit",
           },
           {
+            value: "Playwrite AU SA",
+            content: "Playwrite AU SA",
+          },
+          {
             content: "Karla",
             value: "Karla",
           },
@@ -78,7 +82,7 @@ export default {
       },
       def: "Outfit",
       desc: "change one between this fonts ${state.settings.entities['preferences/font.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
-      name: "change font of app",
+      name: "Font",
     },
     "preferences/toastTime.number": {
       config: {
@@ -149,6 +153,11 @@ export default {
       desc: "viibility of **left side**  component",
       name: "left side visibility",
     },
+    "sides/viewPosition.boolean": {
+      def: false,
+      desc: "position of left side and right side views (externel **true**) (internel **false**)",
+      name: "sides extra position?",
+    },
     "visibility/notifays.boolean": {
       def: false,
       desc: "visibility of **notification** view",
@@ -169,7 +178,7 @@ export default {
         style: "checkbox",
       },
       def: false,
-      desc: "change the theme of the app to dark mode",
+      desc: "switch between dark mode and light mode",
       name: "dark mode",
     },
     "window/lang.enum": {
@@ -206,8 +215,8 @@ export default {
         ],
       },
       def: "en",
-      desc: "change one between this langs ${state.settings.entities['window/lang.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
-      name: "change lang of app",
+      desc: "choise one of langs: ${state.settings.entities['window/lang.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
+      name: "language",
     },
     "preferences/scrollAnimation.boolean.boolean": {
       def: false,
@@ -223,6 +232,17 @@ export default {
       name: "clear all notifications",
       desc: "ask before clearing all notifications",
       def: true,
+    },
+    "ui/native.boolean": {
+      name: "native ui",
+      desc: "use the native ui for `dialog`, `notification`, `menu`, `toast`",
+      def: true,
+      when: "isDesktop",
+    },
+    "developer/seeComponent.boolean": {
+      name: "See Elements Components",
+      desc: "See Elements Components In Screen",
+      def: false,
     },
   },
 };

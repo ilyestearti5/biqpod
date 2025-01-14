@@ -1,5 +1,5 @@
 import React from "react";
-import { setFocused, tw } from "@/utils";
+import { setFocused } from "@/utils";
 import { SettingsSide } from "./SettingsSide";
 import { Settings } from "./Settings";
 import { HeaderSettings } from "./HeaderSettings";
@@ -8,6 +8,7 @@ import { settingHooks, useSettingValue } from "@/hooks";
 import { useColorMerge } from "@/hooks";
 import { DownOverlay } from "@/components/Overlays";
 import { visibilityTemp } from "@/reducers/Object/allTemps";
+import { Card } from "@/components";
 const settingVisibility = "visibility/configurations.boolean";
 export function SettingsView() {
   const visibility = useSettingValue(settingVisibility);
@@ -37,19 +38,8 @@ export function SettingsView() {
         }
       }}
     >
-      <div
-        className={tw(`
-          overflow-hidden
-          absolute
-          transform
-          -translate-y-1/2
-          -translate-x-1/2
-          top-1/2
-          left-1/2
-          rounded-2xl
-          border
-          border-solid
-        `)}
+      <Card
+        className="max-md:rounded-none md:w-[70vw] max-md:w-full lg:w-[80vw] md:h-[70vh] max-md:h-full"
         style={{
           ...colorMerge("secondary.background", {
             borderColor: "borders",
@@ -58,11 +48,11 @@ export function SettingsView() {
       >
         <HeaderSettings />
         <Line />
-        <div className="flex w-[70vw] h-[70vh]">
+        <div className="flex h-full">
           <SettingsSide />
           <Settings />
         </div>
-      </div>
+      </Card>
     </DownOverlay>
   );
 }

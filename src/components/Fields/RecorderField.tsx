@@ -1,23 +1,25 @@
 import React from "react";
 import { CircleTip } from "@/components/CircleTip";
-import { faMicrophone, faPause, faPlay, faStop, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useCopyState } from "@/hooks";
+import { handelShadowColor, showToast, useCopyState } from "@/hooks";
 import { useColorMerge } from "@/hooks";
-import { FeildGeneralProps } from "@/types/global";
+
 import { openDuringNotifay } from "@/data/system/notifications.model";
-import { EmptyComponent } from "../EmptyComponent";
-import { openDialog } from "@/functions/app/web/web-utils";
+import { openDialog } from "@/functions/web-utils";
+import { allIcons } from "@/apis";
+import { tw } from "@/utils";
+import { FeildGeneralProps } from "@/types";
 export type RecorderFeildProps = FeildGeneralProps<string | null, {}>;
 export function RecorderFeild({ id, state }: RecorderFeildProps) {
   const mediaRecorder = useCopyState<MediaRecorder | null>(null);
   const chunks = useCopyState<BlobPart[]>([]);
   const audioRef = React.useRef<HTMLAudioElement>(null);
-  const colorMerge = useColorMerge();
-  const isStartRecorder = useCopyState(false);
-  const isStarted = useCopyState(false);
+  const isRecording = useCopyState(false);
+  const isPlay = useCopyState(false);
+  const timer = useCopyState<number | null>(null);
   const handleStartRecording = React.useCallback(async () => {
     const localChunks: BlobPart[] = [];
     try {
+      state.set(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (stream) {
         const recorder = new MediaRecorder(stream);
@@ -48,13 +50,7 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
     } catch (error: any) {
       chunks.set([]);
       mediaRecorder.set(null);
-      await openDuringNotifay({
-        type: "error",
-        title: "Error detected",
-        desc: String(error.message),
-        id: "recorder.error",
-        showDesc: true,
-      });
+      showToast("[Error] : " + error.message, "error");
     }
   }, []);
   const handleStopRecording = React.useCallback(() => {
@@ -68,19 +64,19 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
   React.useEffect(() => {
     if (audioRef.current) {
       audioRef.current.onplay = () => {
-        isStarted.set(true);
+        isPlay.set(true);
       };
       audioRef.current.onpause = () => {
-        isStarted.set(false);
+        isPlay.set(false);
       };
       audioRef.current.onended = () => {
-        isStarted.set(false);
+        isPlay.set(false);
       };
     }
-  }, [audioRef.current]);
-  const timer = useCopyState<number | null>(null);
+  }, [audioRef]);
   React.useEffect(() => {
-    if (isStarted.get) {
+    if (isPlay.get || isRecording.get) {
+      timer.set(0);
       const timerInterval = setInterval(() => {
         timer.set((s) => (s ?? 0) + 1);
       }, 1000);
@@ -90,65 +86,97 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
     } else {
       timer.set(null);
     }
-  }, [isStarted.get]);
+  }, [isPlay.get, isRecording.get]);
+  const date = React.useMemo(() => {
+    if (timer.get === null) {
+      return null;
+    }
+    const rest = timer.get % 60;
+    const device = +(timer.get / 60).toFixed(0);
+    return `${device >= 10 ? device : `0${device}`}:${rest >= 10 ? rest : `0${rest}`}`;
+  }, [timer.get]);
+  const colorMerge = useColorMerge();
+  React.useEffect(() => {
+    isRecording.set(false);
+    isPlay.set(false);
+  }, [state.get]);
   return (
-    <div className="flex gap-2">
-      <div className="inline-flex relative gap-1">
-        {state.get && (
-          <EmptyComponent>
-            <CircleTip
-              icon={faXmark}
-              onClick={async () => {
-                const { response } = await openDialog({
-                  title: "Delete audio",
-                  message: "Are you sure you want to delete the audio?",
-                  type: "warning",
-                  buttons: ["No", "Yes"],
-                });
-                if (response === 1) state.set(null);
-              }}
-            />
-            <CircleTip
-              onClick={() => {
-                !isStarted.get ? audioRef.current?.play() : audioRef.current?.pause();
-              }}
-              icon={isStarted.get ? faPause : faPlay}
-            />
-          </EmptyComponent>
-        )}
+    <div
+      style={{
+        ...colorMerge("primary.background", {
+          borderColor: "borders",
+        }),
+      }}
+      className="inline-flex relative items-center p-2 border border-transparent border-solid rounded-full"
+    >
+      <div
+        style={{
+          backgroundColor: "red",
+          color: "white",
+          ...colorMerge({
+            boxShadow: handelShadowColor([
+              {
+                size: 20,
+                colorId: "shadow.color",
+                blur: 30,
+              },
+            ]),
+          }),
+        }}
+        className={tw("inline-flex bottom-[90%] absolute inset-x-0 justify-center items-center p-1 rounded-full text-xs transition-transform scale-0", date !== null && "scale-100")}
+      >
+        {date}
+      </div>
+      <div className={tw("flex gap-1 mr-0 w-0 h-0 transition-[transform,margin,width] duration-300 scale-0", state.get && "mr-1 w-full scale-100 h-full")}>
+        <CircleTip
+          icon={allIcons.solid.faXmark}
+          onClick={async () => {
+            const { response } = await openDialog({
+              title: "Delete",
+              message: "Are you sure you want to delete audio?",
+              type: "warning",
+              buttons: ["yes", "no"],
+              defaultId: 0,
+            });
+            if (!response) state.set(null);
+          }}
+          className={tw("transition-[width,height]", !state.get && "w-[0px] h-[0px]")}
+        />
+        <CircleTip
+          onClick={() => {
+            !isPlay.get ? audioRef.current?.play() : audioRef.current?.pause();
+          }}
+          className={tw("transition-[width,height]", !state.get && "w-[0px] h-[0px]")}
+          icon={isPlay.get ? allIcons.solid.faPause : allIcons.solid.faPlay}
+        />
+      </div>
+      <span>
         <CircleTip
           id={id}
-          style={{
-            ...colorMerge(
-              isStartRecorder.get && {
-                backgroundColor: "primary",
-                color: "primary.content",
-              },
-            ),
-          }}
           onClick={async () => {
             if (state.get) {
               const { response } = await openDialog({
-                title: "Overwrite audio",
-                message: "Are you sure you want to overwrite the audio?",
+                title: "Overwrite",
+                message: "Are you sure you want to overwrite audio?",
                 type: "warning",
-                buttons: ["No", "Yes"],
+                buttons: ["yes", "no"],
+                defaultId: 0,
               });
-              if (!response) {
+              if (response) {
                 return;
               }
             }
-            isStartRecorder.set((s) => !s);
-            if (isStartRecorder.get) {
+            isRecording.set((s) => !s);
+            if (isRecording.get) {
               handleStopRecording();
             } else {
               handleStartRecording();
             }
           }}
-          icon={isStartRecorder.get ? faStop : faMicrophone}
+          icon={isRecording.get ? allIcons.solid.faStop : allIcons.solid.faMicrophone}
         />
-        {state.get && <audio ref={audioRef} src={state.get} />}
-      </div>
+      </span>
+      <audio hidden ref={audioRef} src={state.get ?? undefined} />
     </div>
   );
 }

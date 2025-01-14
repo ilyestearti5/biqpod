@@ -1,8 +1,8 @@
 import { range, tw } from "@/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ColorIds, useColorMerge } from "@/hooks";
-import { IconProps } from "./Icon";
 import { allIcons } from "@/apis";
+import { IconProps } from "./Icon";
 export interface StartsProps {
   length?: number;
   starts?: number;

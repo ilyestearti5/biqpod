@@ -1,10 +1,9 @@
+import { Biqpod, ReactElement } from "@/types";
 import { tw } from "@/utils";
-import { ReactElement, position } from "@/types/global";
-
 export interface ViewPanelProps extends ReactElement {
-  position: position;
+  position?: Biqpod.Types.Axis;
 }
-export function ViewPanel({ ref, position: [left, top] = [0, 0], children, style, className, ...props }: ViewPanelProps) {
+export function ViewPanel({ ref, position: { x: left, y: top } = { x: -20000, y: -2000 }, children, style, className, ...props }: ViewPanelProps) {
   return (
     <div
       ref={ref}

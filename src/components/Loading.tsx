@@ -1,7 +1,7 @@
 import { handelGradientColor, useColorMerge } from "@/hooks";
 import { tw, range, mergeObject } from "@/utils";
-import { ReactElement } from "@/types/global";
 import { Icon, IconProps } from "./Icon";
+import { ReactElement } from "@/types";
 export function LineLoading() {
   const colorMerge = useColorMerge();
   return (
@@ -12,7 +12,7 @@ export function LineLoading() {
       }}
     >
       <div
-        className={tw(`absolute h-full left-0 transform animate-loading`)}
+        className={tw(`left-0 absolute h-full transform animate-loading`)}
         style={{
           ...colorMerge({
             background: handelGradientColor("to right", "transparent", "primary"),
@@ -20,7 +20,7 @@ export function LineLoading() {
         }}
       />
       <div
-        className={tw(`absolute h-full right-0 transform animate-loading`)}
+        className={tw(`right-0 absolute h-full transform animate-loading`)}
         style={{
           ...colorMerge({
             background: handelGradientColor("to right", "primary", "transparent"),
@@ -37,9 +37,9 @@ export const CircleLoading = ({ className, circleClassName, ...props }: CircleLo
   const colorMerge = useColorMerge();
   return (
     <span>
-      <span className={tw("relative inline-flex items-center justify-center text-xs w-[25px] h-[25px]", className)} {...props}>
+      <span className={tw("inline-flex relative justify-center items-center w-[25px] h-[25px] text-xs", className)} {...props}>
         <span
-          className={tw("absolute inline-block w-full h-full rounded-full border-[2px] border-solid border-transparent animate-spin", circleClassName)}
+          className={tw("inline-block absolute border-[2px] border-transparent border-solid rounded-full w-full h-full animate-spin", circleClassName)}
           style={{
             ...colorMerge({
               borderTopColor: "primary",
@@ -67,7 +67,7 @@ export const BallLoading = ({ balls = 3, ballClassName = "", ballStyle, icon, ic
         return (
           <span
             key={index}
-            className={tw("inline-flex items-center justify-center animate-ty w-[30px] h-[30px] rounded-full", ballClassName)}
+            className={tw("inline-flex justify-center items-center rounded-full w-[30px] h-[30px] animate-ty", ballClassName)}
             style={{
               ...colorMerge("primary", {
                 color: "primary.content",
@@ -87,14 +87,59 @@ export interface CardWaitProps extends ReactElement {}
 export const CardWait = ({ className, children, ...props }: CardWaitProps) => {
   const colorMerge = useColorMerge();
   return (
-    <div className={tw("relative h-full w-full overflow-hidden", className)} {...props}>
+    <div className={tw("relative w-full h-full overflow-hidden", className)} {...props}>
       <div
         style={{
           ...colorMerge("gray.opacity"),
         }}
-        className="absolute inset-[10px] rounded-xl animate-pulse"
-      />
+        className="absolute inset-[10px] rounded-xl animate-pulse overflow-hidden"
+      >
+        <div
+          className="absolute w-2/3 h-full animate-move-right"
+          style={{
+            ...colorMerge({
+              background: handelGradientColor("to right", "transparent", "gray.opacity", "transparent"),
+            }),
+          }}
+        />
+      </div>
       {children}
     </div>
   );
+};
+export const CardioLoading = () => {
+  const colorMerge = useColorMerge();
+  return (
+    <svg className={tw("cardio-loading-container")} x="0px" y="0px" viewBox="0 0 50 31.25" height="31.25" width="50" preserveAspectRatio="xMidYMid meet">
+      <path
+        style={{
+          ...colorMerge({
+            stroke: "primary",
+          }),
+        }}
+        className="track"
+        strokeWidth="4"
+        fill="none"
+        pathLength="100"
+        d="M0.625 21.5 h10.25 l3.75 -5.875 l7.375 15 l9.75 -30 l7.375 20.875 v0 h10.25"
+      />
+      <path
+        style={{
+          ...colorMerge({
+            stroke: "primary",
+          }),
+        }}
+        className="car"
+        strokeWidth="4"
+        fill="none"
+        pathLength="100"
+        d="M0.625 21.5 h10.25 l3.75 -5.875 l7.375 15 l9.75 -30 l7.375 20.875 v0 h10.25"
+      />
+    </svg>
+  );
+};
+export const Loadings = {
+  Circle: CircleLoading,
+  Ball: BallLoading,
+  Cardio: CardioLoading,
 };

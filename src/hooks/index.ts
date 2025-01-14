@@ -1,14 +1,11 @@
-import pouchdbUpsert from "pouchdb-upsert";
-import PouchDB from "pouchdb";
 import React from "react";
 import { store } from "@/store";
 import { viewTemps, cameraTemp, iframeTemp } from "@/reducers/Object/allTemps";
 import { viewHooks } from "@/data/system/views.model";
 import { ToastType, toastHooks } from "@/data/system/toasts.model";
 import { TextAreaProps } from "@/components/TextArea";
-import { SettingValueType, SettingConfig } from "@/reducers/Settings/SettingConfig";
-import { Setting, settingHooks, SettingIds } from "@/reducers/Settings/settings.model";
-import { setTemp, getTemp } from "@/reducers/Object/object.slice";
+import { settingHooks, SettingIds } from "@/data/system/settings.model";
+import { setTemp, getTemp, useTemp, getTempFromStore } from "@/reducers/Object/object.slice";
 import { getMainCloud } from "@/apis/server.config";
 import { QueryStatus } from "react-query";
 import { NotificationType, notifayHooks } from "@/data/system/notifications.model";
@@ -18,15 +15,14 @@ import { EntityId, nanoid } from "@reduxjs/toolkit";
 import { con, Db, Delay, getSeparateSearchInput, include, isLike, mergeArray, transformCase, valueFromString } from "@/utils/index";
 import { Command, CommandIds, commandsHooks } from "@/data/system/command.model";
 import { ColorIds, colorHooks, Color } from "@/data/system/colors.model";
-import { CameraConfig, CameraResult, CssColorKeys, FullCameraResult, FullStateManagment, Nothing } from "@/types/global";
 import { langHooks } from "@/data/system/lang.model";
+import { Biqpod, CameraConfig, CameraResult, FullCameraResult, FullStateManagment, Nothing, SettingConfig, SettingValueType } from "@/types";
 export * from "@/reducers/Global/keyboard.slice";
 export * from "@/reducers/Global/title.slice";
 export * from "@/reducers/Object/object.slice";
 export * from "@/reducers/Global/title.slice";
-export * from "@/functions/app/web/web-utils";
-export * from "@/reducers/Settings/settings.model";
-export * from "@/reducers/Settings/SettingConfig";
+export * from "@/functions/web-utils";
+export * from "@/data/system/settings.model";
 export * from "@/reducers/Object/allTemps";
 export * from "@/data/system/views.model";
 export * from "@/data/system/tree.model";
@@ -41,19 +37,6 @@ export * from "@/data/system/field.model";
 export * from "@/data/system/command.model";
 export * from "@/data/system/colors.model";
 export * from "@/data/system/actions.model";
-export * from "./api/googleApi";
-PouchDB.plugin(pouchdbUpsert);
-export type UserDB = Partial<{
-  nickname: string | null;
-  firstname: string | null;
-  lastname: string | null;
-  email: string | null;
-  phone: string | null;
-  photo: string | null;
-  uid: string;
-  birthDay: number | null;
-  extraData: Record<string, any>;
-}>;
 export function useAsyncMemo<T>(callback: () => Promise<T>, deps: any[] = [], cleanUp?: (deps: any[]) => void): T | null {
   const state = useCopyState<T | null>(null);
   React.useEffect(() => {
@@ -133,7 +116,7 @@ export function useEffectDelay(fn: () => Promise<void> | void | (() => Promise<v
   }, [...deps, time]);
   return isLoading.get;
 }
-export const useIdleStatus = <T>(fn: () => Promise<T>, deps: any[] = []) => {
+export function useIdleStatus<T>(fn: () => Promise<T>, deps: any[] = []) {
   const status = useCopyState<QueryStatus | "ready">("ready");
   const data = useCopyState<T | null>(null);
   const error = useCopyState<any | null>(null);
@@ -157,10 +140,10 @@ export const useIdleStatus = <T>(fn: () => Promise<T>, deps: any[] = []) => {
     data,
     error,
   };
-};
+}
 // settings
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-export function useSettingById<ID extends keyof SettingValueType>(settingId: `${string}.${ID}`): Setting<ID> | null {
+export function useSettingById<ID extends keyof SettingValueType>(settingId: `${string}.${ID}`): Biqpod.System.Setting.Type<ID> | null {
   const setting = settingHooks.getOne(settingId);
   const result = React.useMemo(() => {
     return setting ? setting : null;
@@ -196,7 +179,7 @@ export function usePublicSettingsFilter() {
       return settings;
     }
   }, [viewSetting, settings]);
-  const findBy = useSettingValue("settings/findBy.enum") as keyof Setting<keyof SettingConfig> | "nice" | undefined;
+  const findBy = useSettingValue("settings/findBy.enum") as keyof Biqpod.System.Setting.Type<keyof SettingConfig> | "nice" | undefined;
   //
   const separateSearchInput = React.useMemo(() => {
     return Object.entries(getSeparateSearchInput(String(value))).map(([key, value]) => [key, value.join(" ")]);
@@ -250,7 +233,23 @@ export function setFieldValue(fieldId: string, value: string) {
 export function removeField(fieldId: string) {
   fieldHooks.remove([fieldId]);
 }
-export function useSettingValue<ID extends keyof SettingConfig>(settingId: Setting<ID>["settingId"]) {
+export function useDeviceType() {
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth > 768 && window.innerWidth <= 1024);
+  const [isDesktop, setIsDesktop] = React.useState(window.innerWidth > 1024);
+  React.useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
+      setIsDesktop(width > 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return { isMobile, isTablet, isDesktop };
+}
+export function useSettingValue<ID extends keyof SettingConfig>(settingId: Biqpod.System.Setting.Type<ID>["settingId"]) {
   const setting = useSettingById(settingId);
   return setting?.value;
 }
@@ -277,7 +276,9 @@ export function useShortcutsOfAction(actionName: string) {
   }, [allKeys]);
 }
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-export const showSetting = (settingId: SettingIds | Setting<keyof SettingConfig>["settingId"] | null) => viewTemps.setTemp("settings", settingId?.toString());
+export function showSetting(settingId: SettingIds | Biqpod.System.Setting.Type<keyof SettingConfig>["settingId"] | null) {
+  return viewTemps.setTemp("settings", settingId?.toString());
+}
 export function usePublicCommands() {
   const commands = commandsHooks.getAll();
   return React.useMemo(() => commands.filter((cmd) => !cmd.private), [commands]);
@@ -439,13 +440,13 @@ export function checkFormByFeilds(fields: string[], state: FullStateManagment = 
     isValide: controls.every(({ isValide }) => isValide),
   };
 }
-export function showToast(message: ToastType["message"], type: ToastType["type"] = "info", id = nanoid(), time: number = ToastTime.short) {
+export function showToast(message: ToastType["message"], type: ToastType["type"] = "info", { id = nanoid(), ...options }: Omit<ToastType, "message" | "type"> = {}) {
   toastHooks.add([
     {
       message,
-      type,
-      time,
       id,
+      type,
+      ...options,
     },
   ]);
   return id;
@@ -454,7 +455,7 @@ export enum ToastTime {
   short = 5,
   long = 10,
 }
-export const scanQr = async () => {
+export async function scanQr() {
   const id = nanoid();
   cameraTemp.setTemp("id", id);
   cameraTemp.setTemp("type", "scanQr");
@@ -471,7 +472,7 @@ export const scanQr = async () => {
       },
     );
   });
-};
+}
 export function openCamera<T extends keyof FullCameraResult>(type: T) {
   return new Promise<CameraResult<T>>(async (res, rej) => {
     const isOpendBefore = store.getState().object.data?.camera?.id;
@@ -505,7 +506,7 @@ export function openCamera<T extends keyof FullCameraResult>(type: T) {
   });
 }
 // This Values Represent No Value
-export function useColorMerge<T extends Partial<Record<CssColorKeys, ColorIds | ReturnColorHandelFunction>>>() {
+export function useColorMerge<T extends Partial<Record<Biqpod.Types.CssColorKeys, ColorIds | ReturnColorHandelFunction>>>() {
   const allColors = colorHooks.getEntity();
   const isDark = useSettingValue("window/dark.boolean");
   return React.useCallback(
@@ -585,7 +586,7 @@ export function handelShadowColor(
       })
       .join(" , ");
 }
-export const onceState = <T extends object | string | number | boolean | null>(stateDir: string, comparedValue: T | ((val: T | undefined) => boolean), on: (state: FullStateManagment) => void) => {
+export function onceState<T extends object | string | number | boolean | null>(stateDir: string, comparedValue: T | ((val: T | undefined) => boolean), on: (state: FullStateManagment) => void) {
   const callback = () => {
     const state = store.getState();
     const { value } = valueFromString<T>(state, stateDir);
@@ -597,8 +598,8 @@ export const onceState = <T extends object | string | number | boolean | null>(s
   };
   const un = store.subscribe(callback);
   return un;
-};
-export const onState = <T extends object | string | number | boolean | null>(stateDir: string, comparedValue: T | ((val: T | undefined) => boolean), on?: (state: FullStateManagment) => void) => {
+}
+export function onState<T extends object | string | number | boolean | null>(stateDir: string, comparedValue: T | ((val: T | undefined) => boolean), on?: (state: FullStateManagment) => void) {
   const callback = () => {
     const state = store.getState();
     const { value, isValide } = valueFromString<T>(state, stateDir);
@@ -612,36 +613,55 @@ export const onState = <T extends object | string | number | boolean | null>(sta
     }
   };
   return store.subscribe(callback);
-};
+}
 export { store };
-export const initUser = () => {
-  const inited = useCopyState(false);
+export function initUser() {
+  const loading = useTemp<boolean>("user-is-loading");
+  const currentUid = useCopyState<Nothing | string>(null);
   React.useEffect(() => {
-    return getMainCloud().app.auth.onAuthStateChanged((data) => {
-      inited.set(true);
-      setTemp("userInfo", data);
+    return getMainCloud().app.auth.onAuthStateChanged(async (uid) => {
+      loading.set(false);
+      currentUid.set(uid);
     });
   }, []);
-};
-export const useUserLoading = () => {
+  useAsyncEffect(async () => {
+    if (currentUid.get) {
+      const mainCloud = getMainCloud();
+      const userInfo = await mainCloud.app.auth.setUserData();
+      if (userInfo) {
+        await mainCloud.app.nosql.upsertDoc(["users", currentUid.get], userInfo);
+      }
+    }
+  }, [currentUid.get]);
+  React.useEffect(() => {
+    if (currentUid.get) {
+      return getMainCloud().app.nosql.onDocSnapshot<Biqpod.Account.User>(["users", currentUid.get], (data) => {
+        setTemp("user-info", data ? { ...data, uid: currentUid.get } : null);
+      });
+    } else {
+      setTemp("user-info", null);
+    }
+  }, [currentUid.get]);
+}
+export function useUserIsLoading() {
   const userIsLoading = getTemp<boolean>("user-is-loading");
   return React.useMemo(() => {
     return userIsLoading ?? true;
   }, [userIsLoading]);
-};
-export const useUser = () => {
-  return getTemp<UserDB>("userInfo");
-};
-export const showProfile = () => {
+}
+export function useUser() {
+  return getTemp<Biqpod.Account.User>("user-info");
+}
+export function showProfile() {
   viewTemps.setTemp("profile-view", true);
-};
-export const closeProfile = () => {
+}
+export function closeProfile() {
   viewTemps.setTemp("profile-view", false);
-};
-export const showPdf = (content: null | string) => {
+}
+export function showPdf(content: null | string) {
   viewTemps.setTemp("pdf", content);
-};
-export const showNotification = ({ ...notification }: Partial<NotificationType>) => {
+}
+export function showNotification({ ...notification }: Partial<NotificationType>) {
   settingHooks.setOneFeild(`visibility/notifays.boolean`, "value", true);
   notifayHooks.add([
     {
@@ -655,40 +675,40 @@ export const showNotification = ({ ...notification }: Partial<NotificationType>)
       ...notification,
     },
   ]);
-};
-export const useChangedSetting = () => {
+}
+export function useChangedSetting() {
   const settings = settingHooks.getAll();
   return React.useMemo(() => settings.filter(({ def, value }) => !isLike(def, value)), [settings]);
-};
-export const showFrame = (src: string | URL, id = nanoid()) => {
+}
+export function showFrame(src: string | URL, id = nanoid()) {
   const customId = "iframe-" + id;
   iframeTemp.setTemp("id", customId);
   iframeTemp.setTemp("src", src.toString());
   return customId;
-};
-export const closeFrame = () => {
+}
+export function closeFrame() {
   iframeTemp.setTemp("id", null);
   iframeTemp.setTemp("src", null);
-};
-export const showApplications = () => {
+}
+export function showApplications() {
   viewTemps.setTemp("applications", true);
-};
-export const closeApplications = () => {
+}
+export function closeApplications() {
   viewTemps.setTemp("applications", false);
-};
-export const setColorFor = (colorId: ColorIds | string, value: string, theme: "default" | "dark" | "light" = "dark") => {
+}
+export function setColorFor(colorId: ColorIds | string, value: string, theme: "default" | "dark" | "light" = "dark") {
   colorHooks.setOneFeild(colorId, theme, value);
-};
-export const setDarkColor = (colorId: ColorIds | string, value: string) => {
+}
+export function setDarkColor(colorId: ColorIds | string, value: string) {
   setColorFor(colorId, value, "dark");
-};
-export const setLightColor = (colorId: ColorIds | string, value: string) => {
+}
+export function setLightColor(colorId: ColorIds | string, value: string) {
   setColorFor(colorId, value, "light");
-};
-export const setDefaultColor = (colorId: ColorIds | string, value: string) => {
+}
+export function setDefaultColor(colorId: ColorIds | string, value: string) {
   setColorFor(colorId, value, "default");
-};
-export const addNewWord = (text: string, langs: Record<string, string>) => {
+}
+export function addNewWord(text: string, langs: Record<string, string>) {
   const word = transformCase(text, "normal", "cabab").toLowerCase();
   langHooks.upsert([
     {
@@ -696,8 +716,8 @@ export const addNewWord = (text: string, langs: Record<string, string>) => {
       ...langs,
     },
   ]);
-};
-export const getTheme = async (themeId: string) => {
+}
+export async function getTheme(themeId: string) {
   const blob = await getMainCloud().app.storage.getFileContent(["global", "themes", themeId.concat(".json")]);
   const fileContent = await blob?.text();
   if (fileContent) {
@@ -705,12 +725,12 @@ export const getTheme = async (themeId: string) => {
     return result;
   }
   return null;
-};
-export const addCommand = (command: Command, keys: Omit<Key, "command">[]) => {
+}
+export function addCommand(command: Command, keys: Omit<Key, "command">[]) {
   commandsHooks.add([command]);
   defineKeys(command.commandId, keys);
-};
-export const defineKeys = (command: CommandIds | string, keys: Omit<Key, "command">[]) => {
+}
+export function defineKeys(command: CommandIds | string, keys: Omit<Key, "command">[]) {
   const state = store.getState();
   const length = state.keys.ids.length;
   keyHooks.add(
@@ -722,16 +742,36 @@ export const defineKeys = (command: CommandIds | string, keys: Omit<Key, "comman
       };
     }),
   );
-};
-export const setTheme = async (themeId: string) => {
+}
+export async function setTheme(themeId: string) {
   const jsonContent = await getTheme(themeId);
   if (jsonContent) {
     colorHooks.upsert(jsonContent);
   }
-};
-export const showBottomSheet = () => {
-  viewTemps.setTemp("bottomSheet", true);
-};
-export const closeBottomSheet = () => {
-  viewTemps.setTemp("bottomSheet", false);
-};
+}
+export type size = "px" | "rem" | "em" | "vh" | "vw" | "vmin" | "vmax" | "%";
+export interface BottomSheetOptions {
+  force?: boolean;
+  id?: string;
+  min?: number | `${number}${size}`;
+  max?: number | `${number}${size}`;
+}
+export class JSXElement {
+  static list: Record<string, JSX.Element> = {};
+  static save(id: string, element: JSX.Element) {
+    this.list[id] = element;
+  }
+}
+export function showBottomSheet(element: JSX.Element, { force = false, id: newId = nanoid(), min = `${80}%`, max = `${80}%` }: BottomSheetOptions = {}) {
+  if (!force) {
+    const id = getTempFromStore<string>("bottomSheet.id");
+    if (id) {
+      throw "Bottom Sheet Opend Before";
+    }
+  }
+  JSXElement.save(newId, element);
+  viewTemps.setTemp("bottomSheet", { id: newId, min, max });
+}
+export function closeBottomSheet() {
+  viewTemps.setTemp("bottomSheet", null);
+}

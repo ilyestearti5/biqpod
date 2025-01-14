@@ -1,36 +1,30 @@
-import { getTempFromStore, showFrame } from "@/hooks";
+import { showFrame } from "@/hooks";
 import { delay } from "@/utils";
-import { getMainCloud } from "./server.config";
+import { getMainCloud, Path } from "./server.config";
 import * as brands from "@fortawesome/free-brands-svg-icons";
 import * as regular from "@fortawesome/free-regular-svg-icons";
 import * as solid from "@fortawesome/free-solid-svg-icons";
-import PouchDB from "pouchdb";
+import { Biqpod, ProjectConfig } from "@/types";
 export * from "./server.config";
-export interface ProjectConfig {
-  label?: string;
-  id: string;
-  imageUrl?: string;
-  auth?: Partial<Record<string, string>>;
-  payout?: Partial<Record<string, string>>;
-  site?: string;
-}
-declare interface GenerateAuthUrlResult {
+export interface GenerateAuthUrlResult {
   url: string;
 }
-declare interface GenerateAuthUrlParams {
+export interface GenerateAuthUrlParams {
   projectId: string;
-  key?: string;
-  mode?: "live" | "sandbox";
+  dev?: boolean;
+  type?: "redirect" | "close";
+  email?: string;
+  path?: string;
 }
-declare interface SignInAccountProps extends GenerateAuthUrlParams {
+export interface SignInAccountProps extends GenerateAuthUrlParams {
   place: "window" | "frame" | "redirect";
 }
 export async function generateAuthUrl(params: GenerateAuthUrlParams) {
-  const fn = await getFunction<GenerateAuthUrlParams, GenerateAuthUrlResult>("generate-auth-url", params.mode ? "sandbox" : "live");
+  const fn = await getFunction<GenerateAuthUrlResult>("generate-auth-url", params.dev);
   if (!fn) {
     throw "Function not found";
   }
-  return await fn.callback(params);
+  return await fn(params);
 }
 export async function signInAccount({ place, ...props }: SignInAccountProps) {
   const { url } = await generateAuthUrl(props);
@@ -48,34 +42,40 @@ export async function signInAccount({ place, ...props }: SignInAccountProps) {
   }
 }
 export async function getProjectConfig(projectId: string): Promise<ProjectConfig> {
-  const data = await getMainCloud().app.database.getDoc<ProjectConfig>(["projects", projectId]);
+  const data = await getMainCloud().app.nosql.getDoc<ProjectConfig>(["projects", projectId]);
   return {
     ...data!,
     id: projectId,
   };
 }
-export function onManySnaping<T extends string>(props: Record<T, string>, callback: (executed: T) => void, skip = 0): Record<T, Function> {
-  let o: Record<string, Function> = {};
-  for (let prop in props) {
+export function onManySnaping<T extends string>(
+  props: Record<T, { path: Path; selection?: Biqpod.Cloud.Database.NoSQL.Selection<Record<string, any>> }>,
+  callback: (executed: T) => void,
+  skip = 0,
+): Record<T, Function> {
+  const o: Record<string, Function> = {};
+  for (const prop in props) {
     let some = skip;
-    o[prop] = getMainCloud().app.database.onCollectionSnapshot(props[prop], () => {
-      if (some) {
-        some--;
-        return;
-      }
-      callback(prop);
-    });
+    const { path, selection } = props[prop];
+    o[prop] = getMainCloud().app.nosql.onCollectionSnapshot(
+      path,
+      () => {
+        if (some) {
+          some--;
+          return;
+        }
+        callback(prop);
+      },
+      selection,
+    );
   }
   return o;
 }
-export function getFunction<T = any, P = any>(name: string, mode = getTempFromStore<"sandbox" | "live">("env.mode") || "sandbox", metaData: object = {}) {
-  return getMainCloud().app.functions.getFunction<T, P>(name, mode, metaData);
+export function getFunction<R, P = any>(name: string, mode?: boolean, metaData: object = {}) {
+  return getMainCloud().app.functions.getFunction<R, P>(name, mode, metaData);
 }
-export function getUserFunction<T = any, P = any>(name: string, mode = getTempFromStore<"sandbox" | "live">("env.mode") || "sandbox", metaData: object = {}) {
-  return getMainCloud().app.functions.getUserFunction<T, P>(name, mode, metaData);
-}
-export function getLocalDB() {
-  return new PouchDB(import.meta.env.VITE_LOCAL_DATA_BASE);
+export function getUserFunction<R, P = any>(name: string, mode?: boolean, metaData: object = {}) {
+  return getMainCloud().app.functions.getUserFunction<R, P>(name, mode, metaData);
 }
 export const allIcons = {
   solid,

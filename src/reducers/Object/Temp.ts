@@ -1,4 +1,4 @@
-import { FullStateManagment } from "@/types/global";
+import { FullStateManagment } from "@/types";
 import { getTemp, getTempFromStore, setTemp, useTemp } from "./object.slice";
 export class Temp {
   static allTemps: Record<string, Temp> = {};

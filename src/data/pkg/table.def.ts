@@ -1,13 +1,13 @@
 import React from "react";
-import { defaultObject, Delay } from "@/utils/index";
+import { defaultObject } from "@/utils/index";
 import { store } from "@/store";
 import { EntityId, PayloadAction, Update, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
-import { GetOptinal, InitState, TableDefConfig } from "@/types/global";
-import { useAsyncEffect, useCopyState, useDref } from "@/hooks";
+import { useCopyState, useDref } from "@/hooks";
+import { Biqpod, InitState, TableDefConfig } from "@/types";
 export type InsertRowParams<T> = PayloadAction<readonly T[] | Record<EntityId, T>>;
-export function defineTable<T extends object, I extends keyof T, N extends string, A extends object, O extends GetOptinal<T> = any>(config: TableDefConfig<T, I, N, A>) {
-  let { name, default: def, id, actions, uniques = [], onSave, onRead, reduxStore } = config;
+export function defineTable<T extends object, I extends keyof T, N extends string, A extends object, O extends Biqpod.Types.GetOptinal<T> = any>(config: TableDefConfig<T, I, N, A>) {
+  const { name, default: def, id, actions, uniques = [], reduxStore } = config;
 
   const getNeededStore = () => reduxStore?.() || store;
 
@@ -298,55 +298,6 @@ export function defineTable<T extends object, I extends keyof T, N extends strin
     const id = hooks.getId();
     const writeStatus = hooks.getWriteStatus();
     const timeLoading = hooks.getLoadingTime();
-    useAsyncEffect(async () => {
-      if (status == "idle") {
-        const time = new Delay();
-        time.clear();
-        hooks.setStatus("loading");
-        await time.start(timeLoading);
-        try {
-          if (!onRead) {
-            return;
-          }
-          let result = onRead();
-          if (result instanceof Promise) {
-            result = await result;
-          }
-          hooks.setChanged(false);
-          hooks.setStatus("success");
-          hooks.setAll(result);
-        } catch {
-          hooks.setAll([]);
-          hooks.setStatus("error");
-        }
-      }
-    }, [status]);
-    useAsyncEffect(async () => {
-      if (writeStatus == "idle") {
-        hooks.setWriteStatus("loading");
-        const o: any = {};
-        // desc: get all data from store
-        try {
-          const state = getNeededStore().getState();
-          const { [name]: data } = state;
-          Object.values((data as Init).entities).forEach((item) => {
-            if (!item) {
-              return;
-            }
-            const { [id]: idValue, ...props } = item;
-            o[idValue] = props;
-          });
-          const a = onSave?.(o, config, state);
-          if (a instanceof Promise) {
-            await a;
-          }
-          hooks.setWriteStatus("success");
-          hooks.setWriteStatus("ready");
-        } catch (e) {
-          hooks.setWriteStatus("error");
-        }
-      }
-    }, [writeStatus]);
     React.useEffect(() => {
       const allData = Object.entries(config.data || {}).map(([key, value]) => {
         return {

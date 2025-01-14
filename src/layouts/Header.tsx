@@ -55,24 +55,7 @@ export function Header({ children }: HeaderProps) {
         }}
         title={visibility ? "hide header bar" : "open header bar"}
         className={tw(
-          `
-            absolute
-            top-full
-            left-1/2
-            -translate-x-1/2
-            w-[300px]
-            rounded-ee-lg
-            rounded-es-lg
-            flex
-            items-center
-            justify-center
-            cursor-pointer
-            overflow-hidden
-            shadow-2xl
-            border-solid
-            border-transparent
-            z-10
-           `,
+          `top-full left-1/2 z-10 absolute flex justify-center items-center shadow-2xl border-transparent border-solid rounded-ee-lg rounded-es-lg w-[300px] -translate-x-1/2 cursor-pointer overflow-hidden`,
           animation && `transition-[height] duration-200`,
           !showIcon.get || !shift ? "h-[0px]" : "border-b border-x h-[30px]",
         )}
@@ -82,7 +65,7 @@ export function Header({ children }: HeaderProps) {
       </div>
       <div
         className={tw(
-          "relative border-b border-solid border-transparent box-content flex h-[0px] items-center justify-between overflow-hidden",
+          "relative box-content flex justify-between items-center border-transparent border-b border-solid h-[0px] overflow-hidden",
           visibility && "h-[50px]",
           animation && "transition-[height]",
         )}

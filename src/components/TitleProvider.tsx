@@ -1,15 +1,15 @@
 import React from "react";
 import { tw, mergeObject } from "@/utils";
-import { position } from "@/app";
 import { MarkDown } from "./MarkDown";
 import { handelShadowColor, useColorMerge, useCopyState } from "@/hooks";
 import { getTitle, getPosition, getX, getY, setPosition } from "@/reducers/Global/title.slice";
+import { Biqpod } from "@/types";
 export function TitleProvider() {
   const title = getTitle();
   const position = getPosition();
   const x = getX();
   const y = getY();
-  const transPosition = useCopyState<position | null>(null);
+  const transPosition = useCopyState<Biqpod.Types.Axis | null>(null);
   React.useEffect(() => {
     transPosition.set(null);
     const timer = setTimeout(() => {
@@ -29,7 +29,7 @@ export function TitleProvider() {
         }
       }}
       className={tw(
-        `fixed z-[1000000000000000000000] pointer-events-none opacity-0 transition-opacity delay-300 duration-500 p-4`,
+        `z-[1000000000000000000000] fixed opacity-0 p-4 transition-opacity duration-500 delay-300 pointer-events-none`,
         transPosition.get && "opacity-100",
         x == "left" && "-translate-x-full",
         x == "center" && "-translate-x-1/2",
@@ -43,8 +43,8 @@ export function TitleProvider() {
             top: "-2000px",
           },
           transPosition.get && {
-            left: `${transPosition.get[0]}px`,
-            top: `${transPosition.get[1]}px`,
+            left: `${transPosition.get.x}px`,
+            top: `${transPosition.get.y}px`,
           },
         ),
       }}

@@ -1,6 +1,7 @@
-import { BlurOverlay, Scroll, FastList, Line, MarkDown, Feild, CircleLoading } from "@/components";
-import { useColorMerge, enumTemp, getSlotData, useSettingValue, slotHooks, useCopyState, fieldHooks, useMemoDelay, useAsyncMemo, setTemp } from "@/hooks";
-import { delay, include, setFocused, tw } from "@/utils";
+import { BlurOverlay, FastList, Line, MarkDown, CircleLoading, Feild, Translate } from "@/components";
+import { useColorMerge, enumTemp, getSlotData, useSettingValue, slotHooks, useCopyState, fieldHooks, useMemoDelay } from "@/hooks";
+import { SettingConfig } from "@/types";
+import { include, mergeObject, tw } from "@/utils";
 import React from "react";
 export const EnumLayout = () => {
   const colorMerge = useColorMerge();
@@ -8,13 +9,19 @@ export const EnumLayout = () => {
   const enumList = enumTemp.getTemp<{ value: string; content?: string; desc?: string }[]>("list");
   const value = fieldHooks.getOneFeild("find-item-from-enum", "value");
   const [isLoading, animatedValue] = useMemoDelay(() => value, [value], 700);
+  const positions = enumTemp.getTemp<Omit<DOMRect, "toJSON">>("positions");
+  const elementRef = React.createRef<HTMLDivElement>();
+  const config = enumTemp.getTemp<SettingConfig["enum"]>("config");
   const filterd = React.useMemo(() => {
+    if (!config?.search || !animatedValue) {
+      return enumList || [];
+    }
     return (
       enumList?.filter(({ desc, content }) => {
         return include([content, desc].join(" "), String(animatedValue));
       }) || []
     );
-  }, [enumList, animatedValue]);
+  }, [enumList, animatedValue, config?.search]);
   const focused = getSlotData(filterd, "enum-list", "focused");
   const submited = getSlotData(filterd, "enum-list", "submited");
   const isAnimated = useSettingValue("preferences/animation.boolean");
@@ -26,11 +33,28 @@ export const EnumLayout = () => {
     }
   }, [submited, id]);
   React.useEffect(() => {
-    setTemp("enumIsLoading", isLoading);
+    enumTemp.setTemp("isLoading", isLoading);
   }, [isLoading]);
-  const elementRef = React.createRef<HTMLDivElement>();
+  const innersState = useCopyState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+  React.useEffect(() => {
+    const callback = () => {
+      innersState.set({
+        width: innerWidth,
+        height: innerHeight,
+      });
+    };
+    callback();
+    window.addEventListener("resize", callback);
+    return () => {
+      window.removeEventListener("resize", callback);
+    };
+  }, []);
   return (
     <BlurOverlay
+      className="select-none scale-100"
       hidden={!id}
       onClick={({ target }) => {
         if (!elementRef.current?.contains(target as HTMLElement)) {
@@ -38,84 +62,98 @@ export const EnumLayout = () => {
         }
       }}
     >
-      {enumList && (
-        <div
-          ref={elementRef}
-          className="flex flex-col border border-transparent border-solid rounded-md w-[60vw] max-md:w-3/4 h-[400px] max-md:h-3/4 overflow-hidden"
-          style={{
-            ...colorMerge("secondary.background", {
-              borderColor: "borders",
-            }),
-          }}
-        >
+      <div
+        ref={elementRef}
+        className={tw("absolute flex flex-col border border-transparent border-solid rounded-md max-md:w-[60vw] overflow-hidden")}
+        style={{
+          ...colorMerge("secondary.background", {
+            borderColor: "borders",
+          }),
+          ...mergeObject(
+            positions &&
+              innersState.get.width >= 600 && {
+                left: positions.left,
+                right: positions.right,
+                width: positions.right - positions.left,
+              },
+            positions &&
+              innersState.get.width >= 600 && {
+                top: positions.bottom,
+                maxHeight: innersState.get.height - positions.bottom - 60,
+              },
+          ),
+        }}
+      >
+        {config?.search && (
           <div>
             <div className="p-3">
-              <Feild inputName="find-item-from-enum" />
+              <Feild placeholder="Type To Search" inputName="find-item-from-enum" />
             </div>
             <Line />
           </div>
-          <Scroll>
-            {!isLoading && (
-              <FastList
-                minSize={40}
-                maxSize={200}
-                data={filterd || []}
-                slotId="enum-list"
-                focusId="enum-list"
-                itemSize={40}
-                countLastItems={-1}
-                component={({ data, style, status, handel }) => {
-                  const colorMerge = useColorMerge();
-                  const choised = enumTemp.getTemp<string>("choised");
-                  const hover = useCopyState(false);
-                  return (
-                    <div
-                      onMouseEnter={(e) => hover.set(true)}
-                      onMouseLeave={(e) => hover.set(false)}
-                      style={{
-                        ...style,
-                        ...colorMerge(
-                          choised == data.value && {
-                            color: "primary",
-                          },
-                          hover.get && "gray.opacity",
-                          status.isFocused && "primary",
-                          status.isFocused && {
-                            color: "primary.content",
-                          },
-                        ),
-                      }}
-                      onClick={() => {
-                        handel.focus();
-                        handel.submit();
-                      }}
-                      className={tw("cursor-pointer text-lg p-1 max-md:p-2 flex items-center justify-center", choised == data.value && "font-bold")}
-                    >
-                      <span>{data.content || data.value}</span>
-                    </div>
-                  );
-                }}
-              />
-            )}
-            {isLoading && (
-              <div className="flex justify-center items-center p-6 h-full">
-                <CircleLoading />
-              </div>
-            )}
-          </Scroll>
-          <div className={tw("h-[0px]", isAnimated && "transition-[height] duration-200", focused?.desc && "h-[100px]")}>
-            <Line />
-            <div
-              className="flex justify-center items-center p-4 h-full text-center"
-              style={{
-                ...colorMerge("primary.background"),
-              }}
-            >
-              <MarkDown value={focused?.desc || ""} />
-            </div>
+        )}
+        {!isLoading && (
+          <FastList
+            data={filterd}
+            slotId="enum-list"
+            focusId="enum-list"
+            itemSize={30}
+            maxHeight={innersState.get.height / 2}
+            render={({ data, style, status, handel }) => {
+              const colorMerge = useColorMerge();
+              const choised = enumTemp.getTemp<string>("choised");
+              const hover = useCopyState(false);
+              return (
+                <div
+                  onMouseEnter={() => hover.set(true)}
+                  onMouseLeave={() => hover.set(false)}
+                  style={{
+                    ...style,
+                    ...colorMerge(
+                      choised == data.value && {
+                        color: "primary",
+                      },
+                      hover.get && "gray.opacity",
+                      status.isFocused && "primary",
+                      status.isFocused && {
+                        color: "primary.content",
+                      },
+                    ),
+                  }}
+                  onClick={() => {
+                    handel.focus();
+                    handel.submit();
+                  }}
+                  className={tw("flex justify-center items-center max-md:p-1 cursor-pointer", choised == data.value && "font-bold")}
+                >
+                  <span>{data.content || data.value}</span>
+                </div>
+              );
+            }}
+          />
+        )}
+        {isLoading && (
+          <div className="flex justify-center items-center p-6 h-full">
+            <CircleLoading />
+          </div>
+        )}
+        {!isLoading && !filterd.length && (
+          <div className="p-2 text-center text-xl">
+            <Translate content="no options found" />
+          </div>
+        )}
+        <div className={tw("h-[0px]", isAnimated && "transition-[height] duration-200", focused?.desc && "h-[100px]")}>
+          <Line />
+          <div
+            className="flex justify-center items-center p-4 h-full text-center"
+            style={{
+              ...colorMerge("primary.background"),
+            }}
+          >
+            <MarkDown value={focused?.desc || ""} />
           </div>
         </div>
-      )}
+      </div>
     </BlurOverlay>
   );
 };

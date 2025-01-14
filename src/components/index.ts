@@ -1,3 +1,4 @@
+export * from "@/layouts/InnerWindow";
 export * from "./Anchor";
 export * from "./AsyncComponent";
 export * from "./Button";
@@ -27,8 +28,8 @@ export * from "./Fields/RangeField";
 export * from "./Fields/RecorderField";
 export * from "./Fields/RegexpField";
 export * from "./Fields/StringField";
+export * from "./FileInfo";
 export * from "./Focus";
-export * from "./Hours";
 export * from "./Icon";
 export * from "./Icons";
 export * from "./Image";

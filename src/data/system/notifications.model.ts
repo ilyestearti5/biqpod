@@ -1,31 +1,9 @@
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-import { settingHooks } from "@/reducers/Settings/settings.model";
+import { settingHooks } from "@/data/system/settings.model";
 import { nanoid } from "@reduxjs/toolkit";
-import notifications from "@/apis/notifications";
-const { data } = notifications;
-import { CommandIds } from "./command.model";
 import { defaultObject, delay } from "@/utils/index";
-export type NotificationIds = keyof typeof data;
-export interface NotificationType {
-  id: string;
-  title: string;
-  type?: "info" | "warning" | "error" | "success";
-  desc?: string;
-  removable?: boolean;
-  status?: "loading" | "idle";
-  showDesc?: boolean;
-  buttons?: {
-    label: string;
-    command:
-      | CommandIds
-      | string
-      | {
-          action: string;
-          arg: any;
-        };
-  }[];
-}
+import { Biqpod, TableDefConfig } from "@/types";
+export type NotificationType = Biqpod.System.Notification;
 const initConfig: TableDefConfig<NotificationType, "id", "notifications"> = {
   id: "id",
   name: "notifications",
@@ -40,7 +18,6 @@ const initConfig: TableDefConfig<NotificationType, "id", "notifications"> = {
       buttons: [],
     };
   },
-  data,
 };
 export const { hooks: notifayHooks, init: initNotifays, select: selectNotifays, slice: notifaySlice, entity: notifayEntity } = defineTable(initConfig);
 export function openNotifays() {

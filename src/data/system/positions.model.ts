@@ -1,12 +1,7 @@
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-import positions from "@/apis/positions";
-const { data } = positions;
-export interface Positions extends Partial<Omit<DOMRect, "toJSON">> {
-  positionId: string;
-}
-// Init Client Config
-const initPositionsConfig: TableDefConfig<Positions, "positionId", "positions"> = {
+import { Biqpod, TableDefConfig } from "@/types";
+export // Init Client Config
+const initPositionsConfig: TableDefConfig<Biqpod.System.Positions, "positionId", "positions"> = {
   name: "positions",
   id: "positionId",
   default: {
@@ -20,7 +15,6 @@ const initPositionsConfig: TableDefConfig<Positions, "positionId", "positions"> 
     height: 0,
   },
 };
-export type PositionsIds = keyof typeof data;
 // create view model
 export const { entity: positionsEntity, slice: positionsSlice, hooks: positionsHooks, entitySelect: positionsEntitySelect, init: initPositions } = defineTable(initPositionsConfig);
 // init all views

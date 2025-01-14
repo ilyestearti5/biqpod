@@ -1,25 +1,12 @@
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
+
 import { EntityId, nanoid } from "@reduxjs/toolkit";
 import views from "@/apis/views";
 import React from "react";
+import { Biqpod, TableDefConfig } from "@/types";
 const { data } = views;
 export type ViewIds = keyof typeof data;
-export interface View {
-  viewId: string;
-  label: string;
-  focused: string | null;
-  tabs: {
-    [label: string]: {
-      icon?: {
-        type: "solid" | "normal" | "brad";
-        value: string;
-      };
-      news?: View["tabs"][string]["icon"];
-      label?: string;
-    };
-  };
-}
+export type View = Biqpod.System.View;
 const initConfig: TableDefConfig<View, "viewId", "views"> = {
   name: "views",
   id: "viewId",

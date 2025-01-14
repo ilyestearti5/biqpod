@@ -1,8 +1,8 @@
 import React from "react";
 import { initNewTree, TreeType } from "@/data/system/tree.model";
 import { treeHooks } from "@/hooks";
-import { TreeProps } from "@/types/global";
 import { EmptyComponent } from "@/components/EmptyComponent";
+import { TreeProps } from "@/types";
 export function Tree<T>({ treeId, tree = [], component, level = 0, position = "", parent }: TreeProps<T>) {
   const Component = React.useMemo(() => component, []);
   const treeConfig = treeHooks.getOne(treeId) as TreeType | null;

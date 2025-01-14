@@ -1,6 +1,6 @@
 import React from "react";
 import { Shortcut, tw } from "@/utils";
-import { useColorMerge } from "@/hooks";
+import { Field, useColorMerge } from "@/hooks";
 import { KeyPanding } from "@/components/KeyPanding";
 import { Db } from "@/utils";
 import { setTemp } from "@/reducers/Object/object.slice";
@@ -8,13 +8,12 @@ import { useAction } from "@/data/system/actions.model";
 import { randomItem } from "@/utils/index";
 import { EmptyComponent } from "./EmptyComponent";
 import { useAllKeys, useCopyState } from "@/hooks";
+import { nanoid } from "@reduxjs/toolkit";
+import { Nothing } from "@/types";
+export type TextAreaHeighlightRenderProps = string | ((text: string) => JSX.Element | string);
 export interface TextAreaProps extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
   propositions?: string[];
-  selection?: {
-    direction: HTMLTextAreaElement["selectionDirection"];
-    end: HTMLTextAreaElement["selectionEnd"];
-    start: HTMLTextAreaElement["selectionStart"];
-  };
+  selection?: Field["selection"];
   onSelectionChange?: (selection?: TextAreaProps["selection"]) => void;
   onValueChange?: (value: string) => any;
   tabSize?: number;
@@ -22,6 +21,7 @@ export interface TextAreaProps extends React.DetailedHTMLProps<React.TextareaHTM
   multiLines?: boolean;
   acceptKeys?: string[];
   pattern?: string | RegExp;
+  heighlight?: { reg: RegExp | string; name?: string; render?: TextAreaHeighlightRenderProps }[];
 }
 /*
  ******************************************************************************************************************************************************
@@ -49,6 +49,7 @@ export function TextArea({
   onValueChange,
   onFocus,
   onBlur,
+  heighlight = [],
   propositions,
   selection,
   style,
@@ -59,22 +60,22 @@ export function TextArea({
   pattern,
   ...props
 }: TextAreaProps) {
-  const elementRef = React.createRef<HTMLTextAreaElement>(),
-    allKeys = useAllKeys(),
-    autoCompleteInput = React.useMemo(() => {
-      return Db.join({ commandId: "input.completeWord" }, allKeys, "commandId->command");
-    }, [allKeys]),
-    colorMerge = useColorMerge(),
-    ref = React.createRef<HTMLDivElement>(),
-    scroll = useCopyState(0),
-    lastWord = React.useMemo(() => {
-      return props.value?.toString().match(/[^ ]*$/gi)?.[0];
-    }, [props.value]),
-    proposition = React.useMemo(() => {
-      const result = propositions?.filter((word) => lastWord && word.length != lastWord?.length && word.startsWith(lastWord)) || [];
-      return randomItem(result).value;
-    }, [propositions, lastWord]),
-    focused = useCopyState(false);
+  const elementRef = React.createRef<HTMLTextAreaElement>();
+  const allKeys = useAllKeys();
+  const autoCompleteInput = React.useMemo(() => {
+    return Db.join({ commandId: "input.completeWord" }, allKeys, "commandId->command");
+  }, [allKeys]);
+  const colorMerge = useColorMerge();
+  const firstRef = React.createRef<HTMLDivElement>();
+  const scroll = useCopyState(0);
+  const lastWord = React.useMemo(() => {
+    return props.value?.toString().match(/[^ ]*$/gi)?.[0];
+  }, [props.value]);
+  const proposition = React.useMemo(() => {
+    const result = propositions?.filter((word) => lastWord && word.length != lastWord?.length && word.startsWith(lastWord)) || [];
+    return randomItem(result).value;
+  }, [propositions, lastWord]);
+  const focused = useCopyState(false);
   /*
    ******************************************************************************************************************************************************
    *                                                                                                                                                    *
@@ -91,9 +92,51 @@ export function TextArea({
    *                                                                                                                                                    *
    ******************************************************************************************************************************************************
    */
+  const ss = React.useMemo(() => {
+    return heighlight.map((props) => {
+      const exp = props.reg instanceof RegExp ? props.reg : new RegExp(props.reg);
+      return {
+        ...props,
+        exp,
+      };
+    });
+  }, [heighlight]);
+  const heighlighted = React.useMemo(() => {
+    const v = props.value?.toString() || "";
+    let lastIndex = 0;
+    const array: (JSX.Element | string)[] = [];
+    while (true) {
+      if (!v) {
+        break;
+      }
+      const choised = ss.find(({ exp }) => v.slice(lastIndex).match(exp));
+      if (!choised) {
+        break;
+      }
+      const { render = (t) => t, exp } = choised;
+      const matched = v.slice(lastIndex).match(exp)!;
+      const prev = v.slice(0, lastIndex);
+      const currentIndex = prev.length + matched.index!;
+      const pref = v.slice(lastIndex, currentIndex);
+      const newPosition = currentIndex + matched[0].length;
+      const selected = v.slice(currentIndex, newPosition);
+      lastIndex = newPosition;
+      const Record = ({ a }: { a: TextAreaHeighlightRenderProps | Nothing }) => {
+        if (typeof a === "function") {
+          return a(selected);
+        }
+        const founded = ss.find((s) => s.name === a);
+        return Record({
+          a: founded?.name,
+        });
+      };
+      array.push(<EmptyComponent>{pref}</EmptyComponent>, <Record a={render} key={nanoid()} />);
+    }
+    return [...array, v.slice(lastIndex)];
+  }, [ss, props.value]);
   React.useEffect(() => {
-    if (ref.current) {
-      ref.current.scrollTop = scroll.get;
+    if (firstRef.current) {
+      firstRef.current.scrollTop = scroll.get;
     }
   }, [scroll.get]);
   React.useEffect(() => {
@@ -244,7 +287,7 @@ export function TextArea({
             caretColor: "text.color",
           }),
         }}
-        className={tw(className, `font-[inherit] text-[inherit]`)}
+        className={tw(className, `font-[inherit] text-transparent`)}
         spellCheck={false}
         onSelect={(e) => {
           handelSelectionChange(e);
@@ -266,9 +309,28 @@ export function TextArea({
           onValueChange?.(e.currentTarget.value);
         }}
       />
-      <div ref={ref} className={tw(className, `absolute inset-0 pointer-events-none overflow-y-auto overflow-x-hidden`)}>
+      {/* <div ref={firstRef} className={tw(className, `absolute inset-0 pointer-events-none overflow-y-auto overflow-x-hidden`)}>
         <pre className="font-[inherit] text-wrap">
           <span className="text-transparent">{props.value}</span>
+          {typeof lastWord == "string" && proposition && (
+            <EmptyComponent>
+              <span
+                style={{
+                  ...colorMerge({
+                    color: "autoCompleteInput",
+                  }),
+                }}
+              >
+                {proposition.replace(lastWord, "")}
+              </span>
+              {Boolean(autoCompleteInput.length) && <KeyPanding shortcut={autoCompleteInput.map(({ value }) => value!)} />}
+            </EmptyComponent>
+          )}
+        </pre>
+      </div> */}
+      <div ref={firstRef} className={tw(className, `absolute inset-0 pointer-events-none overflow-y-auto overflow-x-hidden`)}>
+        <pre className="font-[inherit] text-wrap">
+          {heighlighted}
           {typeof lastWord == "string" && proposition && (
             <EmptyComponent>
               <span

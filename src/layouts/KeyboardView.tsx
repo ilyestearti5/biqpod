@@ -4,12 +4,12 @@ import { TitleView } from "@/components/TitleView";
 import { useSettingValue, handelShadowColor, useColorMerge } from "@/hooks";
 import { mergeObject, tw } from "@/utils";
 import { useModifier } from "@/reducers/Global/keyboard.slice";
-import { settingHooks } from "@/reducers/Settings/settings.model";
-import { ReactElement, position } from "@/types/global";
-import { faGripVertical, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { settingHooks } from "@/data/system/settings.model";
 import React from "react";
 import { fieldHooks, initNewFeilds, useCopyState, useEffectDelay } from "@/hooks";
 import { CircleTip, Translate } from "@/components";
+import { Biqpod, ReactElement } from "@/types";
+import { allIcons } from "@/apis";
 export interface KeyboardButtonProps extends ReactElement<HTMLSpanElement> {
   isActive?: boolean;
 }
@@ -17,7 +17,7 @@ export const KeyboardButton = ({ isActive, className, ...props }: KeyboardButton
   const colorMerge = useColorMerge();
   return (
     <span
-      className={tw(`min-w-[100px] h-[35px] gap-2 rounded-md inline-flex items-center justify-center border border-solid border-transparent`)}
+      className={tw(`inline-flex justify-center items-center gap-2 border border-transparent border-solid rounded-md min-w-[100px] h-[35px]`)}
       style={{
         ...colorMerge(
           "secondary.background",
@@ -110,7 +110,10 @@ export const KeyboardView = () => {
   React.useEffect(() => {
     altKey.set(altGlobalState);
   }, [altGlobalState]);
-  const clickedPosition = useCopyState<position>([-100, -100]);
+  const clickedPosition = useCopyState<Biqpod.Types.Axis>({
+    x: 0,
+    y: 0,
+  });
   const startAnimation = useCopyState(false);
   useEffectDelay(
     () => {
@@ -121,7 +124,7 @@ export const KeyboardView = () => {
   );
   initNewFeilds(["keyboard-view"]);
   const value = fieldHooks.useOneFeild("keyboard-view", "value");
-  const position = useCopyState<position>([0, innerHeight - 300]);
+  const position = useCopyState<Biqpod.Types.Axis>({ x: 0, y: innerHeight - 300 });
   const keyboardViewVisibility = useSettingValue("visibility/keyboard.boolean");
   return (
     <div
@@ -142,8 +145,8 @@ export const KeyboardView = () => {
         }),
         ...mergeObject(
           position.get && {
-            left: `${position.get[0]}px`,
-            top: `${position.get[1]}px`,
+            left: `${position.get.x}px`,
+            top: `${position.get.y}px`,
           },
         ),
       }}
@@ -153,7 +156,10 @@ export const KeyboardView = () => {
           <Tip
             onPointerDown={() => {
               const mouseMoveCall = (e: MouseEvent) => {
-                position.set([e.pageX, e.pageY]);
+                position.set({
+                  x: e.pageX,
+                  y: e.pageY,
+                });
               };
               document.addEventListener("mousemove", mouseMoveCall);
               const callback = () => {
@@ -162,7 +168,7 @@ export const KeyboardView = () => {
               };
               document.addEventListener("pointerup", callback);
             }}
-            icon={faGripVertical}
+            icon={allIcons.solid.faGripVertical}
             className="cursor-grab"
           />
         </div>
@@ -196,7 +202,7 @@ export const KeyboardView = () => {
             onClick={() => {
               settingHooks.setOneFeild("visibility/keyboard.boolean", "value", false);
             }}
-            icon={faXmark}
+            icon={allIcons.solid.faXmark}
           />
         </TitleView>
       </div>
@@ -243,7 +249,10 @@ export const KeyboardView = () => {
             const x = e.pageX;
             const y = e.pageY;
             const { left, top } = e.currentTarget.getBoundingClientRect();
-            clickedPosition.set([x - left, y - top]);
+            clickedPosition.set({
+              x: x - left,
+              y: y - top,
+            });
             startAnimation.set(true);
           }}
         >
@@ -257,8 +266,8 @@ export const KeyboardView = () => {
                 ...colorMerge("gray.opacity"),
                 ...mergeObject(
                   clickedPosition.get && {
-                    left: `${clickedPosition.get[0]}px`,
-                    top: `${clickedPosition.get[1]}px`,
+                    left: `${clickedPosition.get.x}px`,
+                    top: `${clickedPosition.get.y}px`,
                   },
                 ),
               }}

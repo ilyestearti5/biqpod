@@ -6,12 +6,16 @@ export const IframeLayout = () => {
   const src = iframeTemp.getTemp<string>("src");
   const elementRef = React.createRef<HTMLIFrameElement>();
   React.useEffect(() => {
-    if (elementRef.current) {
-      elementRef.current.onclose = () => {
+    const callback = (e: MessageEvent<{ operation: string }>) => {
+      if (e.data?.operation == "close-frame") {
         closeFrame();
-      };
-    }
-  }, [elementRef.current]);
+      }
+    };
+    window.addEventListener("message", callback);
+    return () => {
+      window.removeEventListener("message", callback);
+    };
+  }, []);
   return (
     <BlurOverlay hidden={!id}>
       {src && id && (

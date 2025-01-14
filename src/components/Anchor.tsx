@@ -16,6 +16,7 @@ export function Anchor({ className, style, ...props }: AnchorProps) {
             color: "primary",
           },
         ),
+        ...style,
       }}
       {...props}
     />

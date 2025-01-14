@@ -1,12 +1,15 @@
 import React from "react";
 import { Focus } from "@/components/Focus";
 import { mergeObject, tw, isSorted } from "@/utils";
-import { ReactElement } from "@/types/global";
 import { useSettingValue, useCopyState, handelShadowColor, useColorMerge, escape, initNewList, slotHooks } from "@/hooks";
 import { ChangableComponent } from "./PositionView";
+import { ReactElement } from "@/types";
 export interface FastListItemProps<T> extends ReactElement {
   status: {
-    [key in `is${"Selected" | "Focused" | "Skiped" | "Submited"}`]: boolean;
+    isSelected: boolean;
+    isFocused: boolean;
+    isSkiped: boolean;
+    isSubmited: boolean;
   };
   data: T;
   index: number;
@@ -21,10 +24,9 @@ export interface FastListProps<T> {
   focusId: string;
   slotId: string;
   itemSize: number;
-  maxSize?: number;
-  minSize?: number;
+  maxHeight?: number;
   data: T[];
-  component: (props: FastListItemProps<T>) => JSX.Element;
+  render: (props: FastListItemProps<T>) => JSX.Element;
   handelSkip?: (props: { data: T; index: number }) => boolean;
   countLastItems?: number;
   overflow?: Partial<{
@@ -33,8 +35,21 @@ export interface FastListProps<T> {
     left: number;
     right: number;
   }>;
+  scrollWidth?: number;
 }
-export function FastList<T>({ focusId, itemSize, slotId, component, handelSkip, data, countLastItems = 3, overflow: { top = 0, bottom = 0 } = { top: 0, bottom: 0 }, ...props }: FastListProps<T>) {
+export function FastList<T>({
+  focusId,
+  itemSize,
+  scrollWidth = 15,
+  slotId,
+  render: Item,
+  handelSkip,
+  data,
+  maxHeight: max,
+  countLastItems = 3,
+  overflow: { top = 0, bottom = 0 } = { top: 0, bottom: 0 },
+  ...props
+}: FastListProps<T>) {
   // all config of slot list (length , submited , focused , selected , ...)
   const slotConfig = slotHooks.getOne(slotId);
   const scroll = useCopyState(0);
@@ -106,79 +121,114 @@ export function FastList<T>({ focusId, itemSize, slotId, component, handelSkip, 
     return (scroll.get * 100) / maxHeightWithLastItems;
   }, [maxHeightWithLastItems, scroll.get]);
   // render element list
-  const isScrollAnimation = useSettingValue("preferences/scrollAnimation.boolean.boolean");
+  const isScrollAnimation = useSettingValue("preferences/scrollAnimaWtion.boolean.boolean");
   const scrollBarHoverd = useCopyState(false);
   const changableComponentViewConfig = useCopyState<null | DOMRect>(null);
-  const Item = React.useMemo(() => component, []);
+  const scrollBarThumbElement = React.createRef<HTMLDivElement>();
   const colorMerge = useColorMerge();
-  const changePositionCallback = (clientY: number) => {
-    const configuration = changableComponentViewConfig.get;
-    if (configuration) {
-      const y = clientY - configuration.top - (scrollBarRefElement.current?.clientHeight || 0) / 2;
-      let scrollValue = (y / configuration.height) * maxHeightWithLastItems;
-      const s = maxHeightWithLastItems - configuration.height;
-      if (scrollValue < 0) {
-        scrollValue = 0;
-      } else if (scrollValue > s) {
-        scrollValue = s;
+  const changePositionCallback = React.useCallback(
+    (clientY: number) => {
+      const configuration = changableComponentViewConfig.get;
+      if (configuration) {
+        const y = clientY - configuration.top - (scrollBarThumbElement.current?.clientHeight || 0) / 2;
+        let scrollValue = (y / configuration.height) * maxHeightWithLastItems;
+        const s = maxHeightWithLastItems - configuration.height;
+        if (scrollValue < 0) {
+          scrollValue = 0;
+        } else if (scrollValue > s) {
+          scrollValue = s;
+        }
+        scroll.set(scrollValue);
       }
-      scroll.set(scrollValue);
-    }
-  };
-
-  const scrollBarRefElement = React.createRef<HTMLDivElement>();
+    },
+    [changableComponentViewConfig.get, scrollBarThumbElement, maxHeightWithLastItems],
+  );
   const scrollVisibility = React.useMemo(() => {
     return heightPercantage <= 100;
   }, [heightPercantage]);
   const elementRef = React.createRef<HTMLDivElement>();
-
-  const firstTouch = useCopyState<number | null>(null);
-
+  const eleRef = useCopyState<HTMLElement | null>(null);
+  React.useEffect(() => {
+    const scrollBarThumb = eleRef.get;
+    if (scrollBarThumb) {
+      const handleTouchMove = (e: TouchEvent) => {
+        scrollingUsingBar.set(true);
+        e.preventDefault(); // Now allowed
+        const firstTouch = e.touches.item(0);
+        if (!firstTouch) {
+          return;
+        }
+        changePositionCallback(firstTouch.clientY);
+      };
+      scrollBarThumb.addEventListener("touchmove", handleTouchMove, { passive: false });
+      // Cleanup on unmount
+      return () => {
+        scrollBarThumb.removeEventListener("touchmove", handleTouchMove);
+      };
+    }
+  }, [eleRef.get, changePositionCallback]);
+  // React.useEffect(() => {
+  //   const scrollBarThumb = scrollBarElement.current;
+  //   if (scrollBarThumb) {
+  //     const handleTouchMove = (e: TouchEvent) => {
+  //       e.preventDefault(); // Now allowed
+  //       changePositionCallback(e.touches[0].clientY);
+  //     };
+  //     scrollBarThumb.addEventListener("touchmove", handleTouchMove, { passive: false });
+  //     // Cleanup on unmount
+  //     return () => {
+  //       scrollBarThumb.removeEventListener("touchmove", handleTouchMove);
+  //     };
+  //   }
+  // }, [scrollBarElement, changePositionCallback]);
+  React.useEffect(() => {
+    if (eleRef.get) {
+      const callback = (e: WheelEvent) => {
+        if (heightPercantage < 100) {
+          e.preventDefault(); // Prevent the default behavior
+          e.stopPropagation(); // Stop the event from propagating to parent elements
+          let speed = false;
+          if (speedKey == "alt") {
+            speed = e.altKey;
+          } else if (speedKey == "control") {
+            speed = e.ctrlKey;
+          } else if (speedKey == "shift") {
+            speed = e.shiftKey;
+          }
+          scrollingUsingBar.set(true);
+          scroll.set((s) => {
+            s += e.deltaY * (speed ? 0.4 : 0.17);
+            if (s < 0) {
+              return 0;
+            }
+            return Math.min(s, maxHeightWithLastItems - height.get);
+          });
+        }
+      };
+      eleRef.get.addEventListener("wheel", callback);
+      return () => {
+        eleRef.get?.removeEventListener("wheel", callback);
+      };
+    }
+  }, [eleRef.get, maxHeightWithLastItems, height.get]);
   return (
-    <Focus {...props} focusId={focusId} className="relative w-full h-full select-none" ignoreOutline={typeof focused == "number"} id={slotId}>
+    <Focus
+      {...props}
+      focusId={focusId}
+      className="relative w-full h-full select-none"
+      style={{
+        ...mergeObject(max && data.length * itemSize > max && { height: "50vh" }, max && data.length * itemSize < max && { height: data.length * itemSize }),
+      }}
+      ignoreOutline={typeof focused == "number"}
+      id={slotId}
+    >
       <ChangableComponent
         onContentChange={(props) => {
           height.set(props.height);
           changableComponentViewConfig.set(props);
         }}
         className="relative h-full overflow-hidden"
-        onTouchStart={(e) => {
-          firstTouch.set(e.touches.item(0).clientY);
-        }}
-        // onTouchMove={(e) => {
-        //   if (firstTouch.get === null) {
-        //     return;
-        //   }
-        //   const y = changableComponentViewConfig.get?.y;
-        //   if (y === undefined) {
-        //     return;
-        //   }
-        //   const clientY = e.touches.item(0).clientY;
-
-        // }}
-        onTouchEnd={() => {
-          firstTouch.set(null);
-        }}
-        onWheel={(e) => {
-          if (heightPercantage < 100) {
-            let speed = false;
-            if (speedKey == "alt") {
-              speed = e.altKey;
-            } else if (speedKey == "control") {
-              speed = e.ctrlKey;
-            } else if (speedKey == "shift") {
-              speed = e.shiftKey;
-            }
-            scrollingUsingBar.set(true);
-            scroll.set((s) => {
-              s += e.deltaY * (speed ? 0.6 : 0.1);
-              if (s < 0) {
-                return 0;
-              }
-              return Math.min(s, (data.length + countLastItems) * itemSize - height.get);
-            });
-          }
-        }}
+        onElement={eleRef.set}
       >
         <div
           ref={elementRef}
@@ -196,14 +246,10 @@ export function FastList<T>({ focusId, itemSize, slotId, component, handelSkip, 
                 isFocused: index == slotConfig?.focused,
                 isSelected: Boolean(slotConfig?.selected?.[index]),
                 isSubmited: index == slotConfig?.submited,
-                isSkiped: Boolean(
-                  handelSkip
-                    ? handelSkip({
-                        data: item,
-                        index,
-                      })
-                    : false,
-                ),
+                isSkiped: !!handelSkip?.({
+                  data: item,
+                  index,
+                }),
               };
               const style = {
                 height: itemSize,
@@ -244,22 +290,40 @@ export function FastList<T>({ focusId, itemSize, slotId, component, handelSkip, 
         <div
           hidden={!scrollVisibility}
           aria-label="scroll-bar"
+          onPointerDown={({}) => {
+            scrollingUsingBar.set(true);
+            const position = scrollBarThumbElement.current?.getBoundingClientRect();
+            const callback = (e: MouseEvent) => {
+              if (position?.height) {
+                changePositionCallback(e.clientY - position.height / 2);
+              }
+            };
+            document.addEventListener("mousemove", callback, { passive: true });
+            const onMouseUpCallback = () => {
+              document.removeEventListener("mousemove", callback);
+              document.removeEventListener("mouseup", onMouseUpCallback);
+            };
+            document.addEventListener("mouseup", onMouseUpCallback, { passive: true });
+          }}
+          onMouseDown={(e) => {
+            changePositionCallback(e.clientY);
+          }}
           onMouseEnter={() => {
             scrollBarHoverd.set(true);
           }}
           onMouseLeave={() => {
             scrollBarHoverd.set(false);
           }}
-          onPointerDown={(e) => {
-            scrollingUsingBar.set(true);
-            changePositionCallback(e.clientY);
+          style={{
+            width: scrollWidth,
+            ...colorMerge("gray.opacity"),
           }}
-          className={tw(`absolute right-0 w-[20px] h-full inset-y-0 transition-[width] duration-300`)}
+          className={tw(`right-0 absolute inset-y-0 h-full transition-[width] duration-300`)}
         >
           <div
             aria-label="scroll-bar-thumb"
-            className={`w-full transition-[top] duration-100 inset-x-0 absolute`}
-            ref={scrollBarRefElement}
+            className={`inset-x-0 absolute pointer-events-none scroll-bar-thumb`}
+            ref={scrollBarThumbElement}
             style={{
               ...colorMerge("gray.opacity.2"),
               ...mergeObject({
@@ -267,25 +331,9 @@ export function FastList<T>({ focusId, itemSize, slotId, component, handelSkip, 
                 top: `${topScroll}%`,
               }),
             }}
-            onMouseDown={() => {
-              scrollingUsingBar.set(true);
-              const callback = (e: MouseEvent) => {
-                changePositionCallback(e.clientY);
-              };
-              document.addEventListener("mousemove", callback);
-              const onMouseUpCallback = () => {
-                document.removeEventListener("mousemove", callback);
-                document.removeEventListener("mouseup", onMouseUpCallback);
-              };
-              document.addEventListener("mouseup", onMouseUpCallback);
-            }}
-            onTouchMove={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              changePositionCallback(e.touches[0].clientY);
-            }}
           />
         </div>
+        {/* Scroll Shadow */}
         <div
           data-scrolled={scroll.get >= 10}
           className="-top-[20px] absolute inset-x-0 h-[20px]"

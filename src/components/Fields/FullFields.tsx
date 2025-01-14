@@ -1,6 +1,6 @@
 import React from "react";
 import { StringFeild } from "./StringField";
-import { SettingValueType, SettingConfig, Setting, useCopyState, useSettingValue } from "@/hooks";
+import { Setting, useCopyState, useSettingValue } from "@/hooks";
 import { tw } from "@/utils";
 import { RegexpFeild } from "./RegexpField";
 import { RecorderFeild } from "./RecorderField";
@@ -16,34 +16,39 @@ import { DateFeild } from "./DateField";
 import { BooleanFeild } from "./BooleanField";
 import { ArrayFeild } from "./ArrayField";
 import { allIcons } from "@/apis";
-import { State } from "@/types/global";
 import { CircleTip } from "../CircleTip";
-import { IconProps, Icon } from "../Icon";
+import { Icon, IconProps } from "../Icon";
 import { JoinComponentBy } from "../JoinComponentBy";
 import { Line } from "../Line";
+import { ClickedView } from "../ClickedView";
+import { nanoid } from "@reduxjs/toolkit";
+import { Biqpod, SettingConfig, SettingValueType, State } from "@/types";
 export interface FullFieldRecordNextCallbackParams {
   stop(): void;
-  currentIndex: number;
+  indexes: Partial<Record<number, boolean>>;
   state: FullFieldProps["state"]["get"];
   currentValue: FullFieldRecordNextCallbackParams["state"][string];
 }
 export interface FullFieldProps {
-  list: Record<
-    string,
-    {
-      label: string;
-      type: keyof SettingValueType;
-      config: SettingConfig[keyof SettingValueType];
-      onNext?(prop: FullFieldRecordNextCallbackParams): any;
-      icon?: IconProps["icon"];
-    }
-  >;
-  state: State<Record<string, Setting<keyof SettingValueType>["value"]>>;
+  config: Partial<{
+    list: Record<
+      string,
+      {
+        label: string;
+        type: keyof SettingValueType;
+        config: SettingConfig[keyof SettingValueType];
+        onNext?(prop: FullFieldRecordNextCallbackParams): any;
+        icon?: IconProps["icon"];
+      }
+    >;
+    multiple: boolean;
+  }>;
+  state: State<Record<string, Setting["value"]>>;
   id: string;
 }
 export interface FullFieldRecordProps<T extends keyof SettingValueType> {
-  onChange: React.Dispatch<React.SetStateAction<Setting<T>["value"]>>;
-  value: Setting<T>["value"];
+  onChange: React.Dispatch<React.SetStateAction<Biqpod.System.Setting.Type<T>["value"]>>;
+  value: Biqpod.System.Setting.Type<T>["value"];
   id: string;
   config: SettingConfig[T];
   type: T;
@@ -73,68 +78,89 @@ export function FullFieldRecord<T extends keyof SettingValueType>({ value, onCha
     </div>
   );
 }
-export const FullField = ({ list, id: parentId, state }: FullFieldProps) => {
-  const preparedList = Object.entries(list).map(([id, value]) => ({ id, ...value }));
-  const currentIndex = useCopyState(0);
+export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
+  const preparedList = Object.entries(config?.list || []).map(([id, value]) => ({ id, ...value }));
+  const indexes = useCopyState<FullFieldRecordNextCallbackParams["indexes"]>({});
   React.useEffect(() => {
-    currentIndex.set(0);
+    indexes.set({});
   }, []);
   const animated = useSettingValue("preferences/animation.boolean");
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <JoinComponentBy
         list={preparedList.map((data, index) => {
-          const { label, icon, type, id, config, onNext } = data;
+          const { label, icon, type, id, config: secondryConfig, onNext } = data;
           const value = state.get[id] as any;
+          const elementId = `full-field-${parentId}-${nanoid()}`;
           return (
-            <div className="w-full" key={id}>
-              <div className="flex justify-between items-center p-2">
-                <div className="flex items-center gap-1">
-                  {icon && <Icon icon={icon} />}
-                  <label htmlFor={`${id}-${index}`} className="capitalize">
-                    {label} :
-                  </label>
-                </div>
-                {currentIndex.get == index && (
+            <div className="w-full cursor-pointer" key={id}>
+              <ClickedView className="rounded-xl" tabIndex={-1}>
+                <div
+                  onClick={(e) => {
+                    if (document.getElementById("#" + elementId)?.contains(e.target as HTMLElement)) return;
+                    indexes.set((s) => {
+                      const o = config?.multiple ? { ...s } : {};
+                      o[index] = !o[index];
+                      return o;
+                    });
+                  }}
+                  className="flex justify-between items-center px-2 w-full h-[50px]"
+                >
                   <div className="flex items-center gap-1">
-                    {index > 0 && (
-                      <CircleTip
-                        onClick={() => {
-                          currentIndex.set(index - 1);
-                        }}
-                        icon={allIcons.solid.faChevronUp}
-                      />
-                    )}
-                    {index + 1 < preparedList.length && (
-                      <CircleTip
-                        onClick={() => {
-                          let stop = false;
-                          const props: FullFieldRecordNextCallbackParams = {
-                            currentIndex: currentIndex.get,
-                            state: state.get,
-                            stop() {
-                              stop = true;
-                            },
-                            currentValue: value,
-                          };
-                          onNext?.(props);
-                          if (stop) {
-                            return;
-                          }
-                          currentIndex.set(index + 1);
-                        }}
-                        icon={allIcons.solid.faChevronDown}
-                      />
-                    )}
+                    {icon && <Icon icon={icon} />}
+                    <label htmlFor={`${id}-${index}`} className="capitalize cursor-pointer">
+                      {label} :
+                    </label>
                   </div>
-                )}
-              </div>
-              <div className={tw("h-[0px] flex justify-center overflow-hidden", animated && "transition-[height]", index == currentIndex.get && "h-[150px]")}>
+                  {indexes.get[index] && (
+                    <div id={elementId} className="flex items-center gap-1">
+                      {index > 0 && (
+                        <CircleTip
+                          onClick={() => {
+                            indexes.set((s) => {
+                              const o = config?.multiple ? { ...s } : {};
+                              o[index - 1] = !o[index - 1];
+                              return o;
+                            });
+                          }}
+                          icon={allIcons.solid.faChevronUp}
+                        />
+                      )}
+                      {index + 1 < preparedList.length && (
+                        <CircleTip
+                          onClick={() => {
+                            let stop = false;
+                            const props: FullFieldRecordNextCallbackParams = {
+                              indexes: indexes.get,
+                              state: state.get,
+                              stop() {
+                                stop = true;
+                              },
+                              currentValue: value,
+                            };
+                            onNext?.(props);
+                            if (stop) {
+                              return;
+                            }
+                            indexes.set((s) => {
+                              const o = config?.multiple ? { ...s } : {};
+                              o[index + 1] = !o[index + 1];
+                              return o;
+                            });
+                          }}
+                          icon={allIcons.solid.faChevronDown}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </ClickedView>
+              <div className={tw("flex justify-center h-[0px] overflow-hidden", animated && "transition-[height]", indexes.get[index] && "h-[150px]")}>
                 <FullFieldRecord
                   key={index}
                   type={type}
                   onChange={(result) => {
-                    let newValue = typeof result == "function" ? result(value) : result;
+                    const newValue = typeof result == "function" ? result(value) : result;
                     state.set((prev) => {
                       return {
                         ...prev,
@@ -143,7 +169,7 @@ export const FullField = ({ list, id: parentId, state }: FullFieldProps) => {
                     });
                   }}
                   id={`list-${parentId}-${id}`}
-                  config={config}
+                  config={secondryConfig}
                   value={value}
                 />
               </div>

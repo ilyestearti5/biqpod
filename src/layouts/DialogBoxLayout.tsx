@@ -1,12 +1,9 @@
-import dialogOpenSrc from "assets/audios/dialog-open.wav";
+import dialogOpenSrc from "assets/audios/dialog-open.mp3";
 import React from "react";
 import { BlurOverlay } from "@/components/Overlays";
-import { SeparatedViewsLine } from "@/components/SeparatedComponents";
 import { EmptyComponent } from "@/components/EmptyComponent";
 import { useColorMerge, useSettingValue } from "@/hooks";
-import { faChevronDown, faChevronUp, faInfoCircle, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 import { Image } from "@/components/Image";
 import { BooleanFeild } from "@/components/Fields/BooleanField";
 import { dialogTemps } from "@/reducers/Object/allTemps";
@@ -18,10 +15,11 @@ import { Scroll } from "@/components/Scroll";
 import { useCopyState, useAsyncEffect } from "@/hooks";
 import { Button } from "@/components/Button";
 import { Tip } from "@/components/Tip";
-import { DialogProps } from "@/types/global";
 import { List } from "@/components/List";
 import { tw } from "@/utils";
 import { Card, Line } from "@/components";
+import { allIcons } from "@/apis";
+import { DialogProps } from "@/types";
 export const DialogBoxLayout = () => {
   const config = dialogTemps.getTemp<DialogProps>("params");
   const confirmId = dialogTemps.getTemp<string>("id");
@@ -35,7 +33,8 @@ export const DialogBoxLayout = () => {
   }, [config]);
   React.useEffect(() => {
     slotHooks.setOneFeild("dialog-list", "submited", null);
-  }, [confirmId]);
+    slotHooks.setOneFeild("dialog-list", "focused", config?.defaultId);
+  }, [confirmId, config]);
   React.useEffect(() => {
     slotHooks.setOneFeild("dialog-list", "focused", config?.defaultId || 0);
   }, [config]);
@@ -65,7 +64,7 @@ export const DialogBoxLayout = () => {
   const animated = useSettingValue("preferences/animation.boolean");
   return (
     <BlurOverlay hidden={!confirmId}>
-      <Card className="rounded-xl lg:w-1/2 max-lg:w-2/3">
+      <Card className="max-md:w-3/4 max-lg:w-2/3">
         {config?.title && (
           <EmptyComponent>
             <div className="p-2">
@@ -79,7 +78,7 @@ export const DialogBoxLayout = () => {
             <div className="flex gap-5 p-2 w-full cursor-pointer">
               {!config.icon && (
                 <EmptyComponent>
-                  {config.type == "question" && <FontAwesomeIcon icon={faQuestionCircle} className="text-4xl" />}
+                  {config.type == "question" && <FontAwesomeIcon icon={allIcons.solid.faQuestionCircle} className="text-4xl" />}
                   {config.type == "info" && (
                     <FontAwesomeIcon
                       style={{
@@ -87,7 +86,7 @@ export const DialogBoxLayout = () => {
                           color: "notifay.info",
                         }),
                       }}
-                      icon={faInfoCircle}
+                      icon={allIcons.solid.faInfoCircle}
                       className="text-4xl"
                     />
                   )}
@@ -98,7 +97,7 @@ export const DialogBoxLayout = () => {
                           color: "notifay.warning",
                         }),
                       }}
-                      icon={faWarning}
+                      icon={allIcons.solid.faWarning}
                       className="text-4xl"
                     />
                   )}
@@ -111,16 +110,16 @@ export const DialogBoxLayout = () => {
                 }}
                 className="flex justify-between items-center w-full"
               >
-                <div>
-                  <span>{config.message}</span>
+                <div className="truncate">
+                  <MarkDown value={config.message} />
                 </div>
-                {config.detail && <Tip className="ml-2" icon={showMore.get ? faChevronUp : faChevronDown} />}
+                {config.detail && <Tip className="ml-2" icon={showMore.get ? allIcons.solid.faChevronUp : allIcons.solid.faChevronDown} />}
               </div>
             </div>
             <Line />
           </EmptyComponent>
         )}
-        <Scroll className={tw("h-[0vh] ", showMore.get && config?.detail && "h-[30vh]", animated && "transition-[height]")}>
+        <Scroll className={tw("h-[0vh]", showMore.get && config?.detail && "h-[30vh]", animated && "transition-[height]")}>
           {config?.detail && (
             <div className="p-2">
               <MarkDown value={config.detail} />

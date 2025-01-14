@@ -1,11 +1,10 @@
-import { ReactElement } from "@/types/global";
 import React from "react";
 import { Line } from "./Line";
 import { useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
-import { Nothing } from "@/types/global";
 import { EmptyComponent } from "./EmptyComponent";
 import { JoinComponentBy } from "./JoinComponentBy";
+import { Nothing, ReactElement } from "@/types";
 export interface SeparatedViewsLineProps extends ReactElement {
   list: (JSX.Element | Nothing)[];
 }
@@ -15,7 +14,7 @@ export const SeparatedViewsLine = React.forwardRef<HTMLDivElement, SeparatedView
     <div
       {...props}
       ref={ref}
-      className={tw(`border border-solid border-transparent rounded-lg flex flex-col`, className)}
+      className={tw(`flex flex-col border border-transparent border-solid rounded-lg`, className)}
       style={{
         ...colorMerge("secondary.background", {
           borderColor: "borders",

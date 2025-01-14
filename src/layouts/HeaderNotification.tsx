@@ -50,17 +50,7 @@ export function HeaderNotification() {
                     />
                   </div>
                 </div>
-                <div
-                  className={tw(
-                    `
-                  h-[0px]
-                  p-3
-                  flex
-                  flex-col
-                `,
-                    item.expanded && "h-[200px]",
-                  )}
-                >
+                <div className={tw(`flex flex-col p-3 h-[0px]`, item.expanded && "h-[200px]")}>
                   <Scroll>{item.desc || ""}</Scroll>
                 </div>
               </div>

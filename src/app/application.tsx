@@ -2,7 +2,8 @@ import settings from "@/apis/settings";
 import "@/scss/index.scss";
 import React from "react";
 import { store } from "@/store";
-import { Setting, settingHooks } from "@/reducers/Settings/settings.model";
+import { ClientCloud, getMainCloud } from "@/apis";
+import { Setting, settingHooks } from "@/data/system/settings.model";
 import { Provider } from "react-redux";
 import { initSystem } from "@/components/initSystem";
 import { initConfigurations } from "@/components/initing";
@@ -11,9 +12,8 @@ import { execAction } from "@/data/system/actions.model";
 import { EmptyComponent } from "@/components/EmptyComponent";
 import { defaultObject, delay, mapAsync } from "@/utils";
 import { createRoot } from "react-dom/client";
-import { ClientCloud, getLocalDB, getMainCloud } from "@/apis";
 import { Button, Card, CircleLoading, Translate } from "@/components";
-import { addCommand, Color, colorHooks, getTemp, initUser, Key, Lang, langHooks, setTemp, SettingValueType, useIdleStatus } from "@/hooks";
+import { addCommand, Color, colorHooks, getTemp, initUser, Key, Lang, langHooks, setTemp, useIdleStatus } from "@/hooks";
 const { data } = settings;
 export const defineGlobal = (name: string, config: any) => {
   window[name] = config;
@@ -30,7 +30,7 @@ export interface StartApplicationProps {
     | void
     | {
         colors?: Color[];
-        settings?: Setting<keyof SettingValueType>[];
+        settings?: Setting[];
         commands?: Cmd[];
         translations?: Lang[];
       }
@@ -69,21 +69,19 @@ export const Application = ({ props }: ApplicationProps) => {
       window.cloud = ClientCloud;
       window.execAction = execAction;
       window.execCommand = execCommand;
-      window.localDB = getLocalDB();
       window.store = store;
       return () => {
         delete window.auth;
         delete window.cloud;
         delete window.execAction;
         delete window.execCommand;
-        delete window.localDB;
         delete window.store;
       };
     }
   }, [isDev]);
   const { status } = useIdleStatus(async () => {
     await delay(props.timeLoading);
-    setTemp("env.mode", props.isDev ? "sandbox" : "live");
+    setTemp("env.isDev", props.isDev);
     let config = props.onPrepare?.();
     if (config instanceof Promise) {
       config = await config;

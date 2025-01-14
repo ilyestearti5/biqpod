@@ -1,5 +1,5 @@
 import React from "react";
-import { Setting, settingHooks } from "@/reducers/Settings/settings.model";
+import { settingHooks } from "@/data/system/settings.model";
 import { tw } from "@/utils";
 import { useCopyState } from "@/hooks";
 import { ArrayFeild } from "@/components/Fields/ArrayField";
@@ -14,11 +14,12 @@ import { RecorderFeild } from "@/components/Fields/RecorderField";
 import { ImageFeild } from "@/components/Fields/ImageField";
 import { useColorMerge } from "@/hooks";
 import { DateFeild, ObjectFeild, PinField, RegexpFeild } from "@/components";
+import { Biqpod } from "@/types";
 export interface SettingUpdatingProps {
   settingId: string;
 }
 export function SettingUpdating({ settingId }: SettingUpdatingProps) {
-  const setting = settingHooks.getOne(settingId) as Setting<any> | undefined;
+  const setting = settingHooks.getOne(settingId) as Biqpod.System.Setting.Type<any> | undefined;
   const value = React.useMemo(() => setting?.value, [setting]);
   const config = React.useMemo(() => setting?.config, [setting]);
   const state = useCopyState(setting?.value);

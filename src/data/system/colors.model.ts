@@ -1,17 +1,10 @@
-import { TableDefConfig } from "@/types/global";
-import { EntityId } from "@reduxjs/toolkit";
 import { defineTable } from "@/data/pkg/table.def";
 import colors from "@/apis/color";
+import { Biqpod, TableDefConfig } from "@/types";
 const { data } = colors;
 export type ColorIds = keyof typeof data;
 // Each Record Of One Color
-export interface Color {
-  colorId: string;
-  dark?: string;
-  light?: string;
-  default?: string;
-  propositions?: string[];
-}
+export type Color = Biqpod.System.Color;
 const initConfig: TableDefConfig<Color, "colorId", "color"> = {
   id: "colorId",
   name: "color",

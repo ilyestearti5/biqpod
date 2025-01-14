@@ -3,12 +3,11 @@ import { useCopyState } from "@/hooks";
 import { useColorMerge } from "@/hooks";
 import { Tip } from "@/components/Tip";
 import { Shortcut, tw } from "@/utils";
-import { SettingConfig, SettingValueType } from "@/reducers/Settings/SettingConfig";
 import { format } from "date-fns";
-import { FeildGeneralProps } from "@/types/global";
 import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { Input } from "../Input";
 import { useTranslate } from "../Translate";
+import { FeildGeneralProps, SettingConfig, SettingValueType } from "@/types";
 export const dateToStringForInput = (date: Date, to: SettingConfig["date"]["format"] = "datetime-local") => {
   if (to == "time") {
     return format(date, "HH:mm");
@@ -46,14 +45,7 @@ export function DateFeild({ state, config = {}, id }: DateFeildProps) {
   }, [config.format]);
   return (
     <div
-      className={tw(`
-        border
-        border-solid
-        border-transparent
-        rounded-[4px]
-        flex
-        px-1
-      `)}
+      className={tw(`flex px-1 border border-transparent border-solid rounded-[4px]`)}
       style={{
         ...styleView,
         ...borderStyle,

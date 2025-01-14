@@ -1,21 +1,21 @@
 import { viewSlice } from "@/data/system/views.model";
 import { treeSlice } from "@/data/system/tree.model";
-import { titleSlice } from "./reducers/Global/title.slice";
-import { taostsSlice } from "./data/system/toasts.model";
+import { titleSlice } from "@/reducers/Global/title.slice";
+import { taostsSlice } from "@/data/system/toasts.model";
 import { slotSlice } from "@/data/system/slot.slice";
-import { settingSlice } from "@/reducers/Settings/settings.model";
+import { settingSlice } from "@/data/system/settings.model";
 import { positionsSlice } from "@/data/system/positions.model";
 import { objectSlice } from "@/reducers/Object/object.slice";
 import { notifaySlice } from "@/data/system/notifications.model";
 import { logSlice } from "@/data/system/logs.model";
-import { langsSlice } from "./data/system/lang.model";
+import { langsSlice } from "@/data/system/lang.model";
 import { keySlice } from "@/data/system/keys.model";
 import { keyboardSlice } from "@/reducers/Global/keyboard.slice";
 import { fieldSlice } from "@/data/system/field.model";
 import { configureStore } from "@reduxjs/toolkit";
 import { commandsSlice } from "@/data/system/command.model";
 import { colorSlice } from "@/data/system/colors.model";
-import { cashSlice } from "./data/system/cash.model";
+import { cashSlice } from "@/data/system/cash.model";
 import { actionSlice } from "@/data/system/actions.model";
 export const store = configureStore({
   reducer: {

@@ -3,7 +3,7 @@ import { setFocused } from "@/utils";
 import { useCopyState } from "@/hooks";
 import { execAction, useAction } from "@/data/system/actions.model";
 import { faPen, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { Feild as FeildProps, fieldHooks } from "@/data/system/field.model";
+import { Field as FeildProps, fieldHooks } from "@/data/system/field.model";
 import { useColorMerge } from "@/hooks";
 import { Feild } from "./Fields/Field";
 import { CircleTip } from "@/components/CircleTip";
@@ -23,41 +23,33 @@ export function UpdateData({ inputName, defaultContent, value, setValue, visibil
   const focusAction = `focus-input-update-${inputName}`;
   const escapeAction = `escape-input-update-${inputName}`;
   //
-  useAction(
-    focusAction,
-    async () => {
-      setVisibility(true);
-      fieldHooks.setOneFeild(inputName, "value", value || "");
-      await new Delay().start(100);
-      setFocused(inputName);
-      (document.getElementById(inputName) as HTMLInputElement | null)?.select();
-    },
-    [value, setVisibility],
-  );
+  useAction(focusAction, async () => {
+    setVisibility(true);
+    fieldHooks.setOneFeild(inputName, "value", value || "");
+    await new Delay().start(100);
+    setFocused(inputName);
+    (document.getElementById(inputName) as HTMLInputElement | null)?.select();
+  }, [value, setVisibility]);
   const inputContent = fieldHooks.getOneFeild(inputName, "value");
-  useAction(
-    escapeAction,
-    () => {
-      if (inputContent == undefined) {
-        return;
+  useAction(escapeAction, () => {
+    if (inputContent == undefined) {
+      return;
+    }
+    const allMatched = Object.keys(controls || {}).every((key) => {
+      try {
+        const exp = new RegExp(key);
+        return !!inputContent.match(exp);
+      } catch {
+        return true;
       }
-      const allMatched = Object.keys(controls || {}).every((key) => {
-        try {
-          const exp = new RegExp(key);
-          return !!inputContent.match(exp);
-        } catch {
-          return true;
-        }
-      });
-      if (!allMatched) {
-        setFocused(inputName);
-        return;
-      }
-      setVisibility(false);
-      setValue(inputContent);
-    },
-    [inputContent, controls],
-  );
+    });
+    if (!allMatched) {
+      setFocused(inputName);
+      return;
+    }
+    setVisibility(false);
+    setValue(inputContent);
+  }, [inputContent, controls]);
   const colorMerge = useColorMerge();
   return (
     <div className="p-2 group">

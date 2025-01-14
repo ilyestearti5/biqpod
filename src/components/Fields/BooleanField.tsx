@@ -1,17 +1,14 @@
 import { useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
-import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { FeildGeneralProps } from "@/types/global";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
 import { useCopyState } from "@/hooks";
 import { Icon } from "../Icon";
 import { allIcons } from "@/apis";
-export type BooleanFeildProps = FeildGeneralProps<boolean | null, SettingConfig["boolean"]>;
+import { FullFieldGeneralProps } from "@/types";
+export type BooleanFeildProps = FullFieldGeneralProps<"boolean">;
 export function BooleanFeild({ state, config = {}, id }: BooleanFeildProps) {
   const isActive = React.useMemo(() => {
-    return typeof state.get == "boolean" ? state.get : false;
+    return !!state.get;
   }, [state.get]);
   React.useEffect(() => {
     return () => {
@@ -22,7 +19,7 @@ export function BooleanFeild({ state, config = {}, id }: BooleanFeildProps) {
   const focused = useCopyState(false);
   // desc: This is a boolean field component that can be used to toggle between true and false values.
   return (
-    <span className="inline-flex items-center gap-1 overflow-hidden">
+    <span className="inline-flex items-center gap-1">
       {config.style == "checkbox" ? (
         <button
           onClick={() => {
@@ -44,33 +41,9 @@ export function BooleanFeild({ state, config = {}, id }: BooleanFeildProps) {
               focused.get && { outlineColor: "primary" },
             ),
           }}
-          className={tw(`
-            inline-flex
-            w-[20px]
-            h-[20px]
-            items-center
-            justify-center
-            rounded-md
-            border-solid
-            border
-            border-transparent
-            outline-1
-            -outline-offset-1
-            outline-transparent
-          `)}
+          className={tw(`inline-flex justify-center items-center border border-transparent border-solid rounded-md w-[20px] h-[20px] overflow-hidden -outline-offset-1 outline-1 outline-transparent`)}
         >
-          <Icon
-            iconClassName={tw(
-              `
-              transform
-              transition-transform
-              duration-300
-              scale-0
-            `,
-              isActive && "scale-100",
-            )}
-            icon={faCheck}
-          />
+          <Icon iconClassName={tw(`transform transition-transform duration-300 scale-0`, isActive && "scale-100")} icon={allIcons.solid.faCheck} />
         </button>
       ) : (
         <button
@@ -81,17 +54,7 @@ export function BooleanFeild({ state, config = {}, id }: BooleanFeildProps) {
             state.set((s) => !s);
           }}
           type="button"
-          className={tw(`
-            inline-block
-            w-[40px]
-            h-[20px]
-            relative
-            rounded-full
-            shadow-lg
-            border-solid
-            border
-            border-transparent
-          `)}
+          className={tw(`inline-block relative shadow-lg border border-transparent border-solid rounded-full w-[40px] h-[15px]`)}
           style={{
             ...colorMerge(
               "checkbox.background",
@@ -103,12 +66,12 @@ export function BooleanFeild({ state, config = {}, id }: BooleanFeildProps) {
           }}
         >
           <span
-            className={tw(`absolute left-0 inline-flex items-center justify-center top-1/2 transform -translate-y-1/2 w-[20px] h-[20px] rounded-full duration-300 text-white`, isActive && "left-1/2")}
+            className={tw(`inline-flex top-1/2 left-0 absolute justify-center items-center rounded-full w-[20px] h-[20px] text-white transform -translate-y-1/2 duration-300`, isActive && "left-1/2")}
             style={{
               ...colorMerge(isActive && "checkbox.true", !isActive && "checkbox.false"),
             }}
           >
-            <FontAwesomeIcon icon={isActive ? allIcons.solid.faCheck : allIcons.solid.faXmark} />
+            <Icon icon={isActive ? allIcons.solid.faCheck : allIcons.solid.faXmark} />
           </span>
         </button>
       )}

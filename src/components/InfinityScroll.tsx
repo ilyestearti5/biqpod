@@ -1,8 +1,8 @@
 import React from "react";
 import { useCopyState, useIdleStatus } from "@/hooks";
 import { Scroll } from "./Scroll";
-import { ReactElement } from "@/app";
 import { tw } from "@/utils";
+import { ReactElement } from "@/types";
 export interface A<T, L> {
   state: L;
   data: T[];
@@ -18,7 +18,20 @@ export interface InfinityScrollProps<T, L> extends ReactElement {
   initData?: T[];
   updateWhere?: number | Function;
 }
-export function InfinityScroll<T, L>({ onUpdate, onScroll, onLoading, updateWhere = 10, onDone, onError, className, onDataChange, initData = [], initState, ...props }: InfinityScrollProps<T, L>) {
+export function InfinityScroll<T, L>({
+  onUpdate,
+  onScroll,
+  render,
+  onLoading,
+  updateWhere = 10,
+  onDone,
+  onError,
+  className,
+  onDataChange,
+  initData = [],
+  initState,
+  ...props
+}: InfinityScrollProps<T, L>) {
   const prevState = useCopyState<L | undefined>(initState);
   const data = useCopyState<T[]>(initData);
   const { status } = useIdleStatus(async () => {
@@ -29,7 +42,7 @@ export function InfinityScroll<T, L>({ onUpdate, onScroll, onLoading, updateWher
       },
       data: data.get,
     });
-    let { data: newData, state } = result instanceof Promise ? await result : result;
+    const { data: newData, state } = result instanceof Promise ? await result : result;
     if (!newData.length) {
       onDone?.();
     }
@@ -56,7 +69,7 @@ export function InfinityScroll<T, L>({ onUpdate, onScroll, onLoading, updateWher
       {...props}
     >
       {data.get.map((record, index) => {
-        const element = props.render(record, index);
+        const element = render(record, index);
         return <div key={index}>{element}</div>;
       })}
       {status.get == "loading" && onLoading?.()}

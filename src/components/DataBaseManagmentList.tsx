@@ -1,5 +1,5 @@
 import React from "react";
-import { useColorMerge } from "@/hooks";
+import { useColorMerge, useDeviceType } from "@/hooks";
 import { fieldHooks } from "@/data/system/field.model";
 import { execCommand } from "@/data/system/command.model";
 import { include, setFocused, tw } from "@/utils";
@@ -32,6 +32,9 @@ export interface DataBaseManagmentListProps {
     }
   >;
 }
+
+const itemSize = 30;
+
 export function DataBaseManagmentList({ data }: DataBaseManagmentListProps) {
   // desc:
   const searchCommandType = getTemp<string>("commandId");
@@ -68,9 +71,10 @@ export function DataBaseManagmentList({ data }: DataBaseManagmentListProps) {
     slotHooks.setOneFeild("cmds/list", "submited", null);
   }, [submitedItem, info]);
   const colorMerge = useColorMerge();
+  const { isMobile } = useDeviceType();
   return (
     <div
-      className="relative py-1 h-[50vh]"
+      className="relative py-1 max-md:h-full"
       onClick={(e) => {
         e.currentTarget.contains(e.target as HTMLElement) && setFocused("findCommand");
       }}
@@ -88,12 +92,14 @@ export function DataBaseManagmentList({ data }: DataBaseManagmentListProps) {
         </div>
       )}
       <FastList
+        maxHeight={isMobile ? innerHeight : innerHeight / 2}
         data={filterdList}
-        itemSize={30}
+        itemSize={itemSize}
         focusId="cmds/list"
         slotId="cmds/list"
         countLastItems={-1}
-        component={({ data, status, handel, style }) => {
+        scrollWidth={12}
+        render={({ data, status, handel, style }) => {
           const hover = useCopyState(false);
 
           const elementRef = React.createRef<HTMLSpanElement>();
@@ -114,19 +120,7 @@ export function DataBaseManagmentList({ data }: DataBaseManagmentListProps) {
               onClick={(e) => {
                 !elementRef.current?.contains(e.target as HTMLElement) && handel.submit();
               }}
-              className={tw(`
-                flex
-                border
-                cursor-pointer
-                border-transparent
-                border-solid
-                items-center
-                justify-between
-                mx-2
-                px-3
-                py-1
-                rounded-md
-              `)}
+              className={tw(`flex justify-between items-center mx-2 px-3 py-1 border border-transparent border-solid rounded-md cursor-pointer`)}
             >
               <div className="flex justify-between items-center gap-2 truncate">
                 {data.checked && <Icon icon={faCheck} />}

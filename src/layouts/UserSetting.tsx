@@ -1,17 +1,17 @@
+import React from "react";
 import { List } from "@/components/List";
 import { Tip } from "@/components/Tip";
 import { faCodeFork, faList, faRotateBack } from "@fortawesome/free-solid-svg-icons";
 import { ViewPage } from "@/components/ViewPage";
-import React from "react";
 import { viewHooks } from "@/data/system/views.model";
 import { Line } from "@/components/Line";
 import { SettingsList } from "./SettingsList";
 import { SettingsTree } from "./SettingsTree";
 import { Focus } from "@/components/Focus";
-import { openDialog, settingEntitySelect, settingHooks, useChangedSetting, useColorMerge } from "@/hooks";
+import { openDialog, settingHooks, useChangedSetting, useColorMerge } from "@/hooks";
 import { getSlotData, slotHooks } from "@/data/system/slot.slice";
 import { TitleView } from "@/components/TitleView";
-import { mergeArray, mergeObject } from "@/utils";
+import { mergeArray } from "@/utils";
 export function UserSetting() {
   const changedSettings = useChangedSetting();
   const layoutTools = React.useMemo(() => {
@@ -21,15 +21,15 @@ export function UserSetting() {
         async click() {
           const { response } = await openDialog({
             message: "Are You Sure About Reset All Configurations",
-            defaultId: 1,
+            defaultId: 0,
             title: "Reset All Config",
-            buttons: ["No", "Yes"],
+            buttons: ["Yes", "No"],
             type: "warning",
           });
-          if (response) {
+          if (!response) {
             settingHooks.upsert(
               allSettingsExeptPasswordSettings.map((setting) => {
-                let config = { ...setting };
+                const config = { ...setting };
                 if (config.def != undefined) {
                   config.value = config.def;
                 }

@@ -1,12 +1,7 @@
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
+import { Biqpod, TableDefConfig } from "@/types";
 import { nanoid } from "@reduxjs/toolkit";
-export interface ToastType {
-  id?: string;
-  message: string | number;
-  type?: "info" | "warning" | "error" | "success";
-  time?: number;
-}
+export type ToastType = Biqpod.System.Toast;
 const initConfig: TableDefConfig<ToastType, "id", "toasts"> = {
   id: "id",
   name: "toasts",

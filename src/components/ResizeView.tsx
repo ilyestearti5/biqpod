@@ -2,9 +2,9 @@ import React from "react";
 import { useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
 import { useCopyState, useMemoDelay } from "@/hooks";
-import { ReactElement } from "@/types/global";
 import { getTempFromStore, setTemp } from "@/reducers/Object/object.slice";
 import { useSettingValue } from "@/hooks";
+import { ReactElement } from "@/types";
 export interface ResizeViewProps extends ReactElement {
   position?: "top" | "left" | "right" | "bottom"; // position of resize bar
   max?: number | ((change: number) => number); // max change or height of element resized (accept function)
@@ -80,20 +80,18 @@ export function ResizeView({ temp, animited, style, children, max = 0, min = 600
     return start.get ? "start" : "end";
   }, [start.get]);
   return (
-    <div className="relative h-full">
+    <div
+      style={{
+        [pos]: !hidden ? `${state.get}px` : "0px",
+        ...style,
+      }}
+      {...props}
+      className={tw("relative overflow-hidden", className, isAnimited && status == "end" && `transition-[width]`)}
+      ref={elementRef}
+    >
+      {children}
       <div
-        style={{
-          [pos]: !hidden ? `${state.get}px` : "0px",
-          ...style,
-        }}
-        {...props}
-        className={tw("overflow-hidden", className, isAnimited && status == "end" && `transition-[width]`)}
-        ref={elementRef}
-      >
-        {children}
-      </div>
-      <div
-        className={tw(`resize-bar absolute transition-all opacity-0 cursor-e-resize z-[1000000] hover:opacity-100`, position)}
+        className={tw(`z-[1000000] absolute opacity-0 hover:opacity-100 transition-all cursor-e-resize resize-bar`, position)}
         onPointerDown={(e) => {
           const { currentTarget } = e;
           start.set(currentTarget.getBoundingClientRect());

@@ -1,15 +1,10 @@
 import React from "react";
-import { Feild as FeildType, fieldHooks } from "@/data/system/field.model";
+import { Field as FeildType, fieldHooks } from "@/data/system/field.model";
 import { TextArea, TextAreaProps } from "../TextArea";
 import { tw } from "@/utils";
-import { useColorMerge } from "@/hooks";
-import { con } from "@/utils/index";
-import { JoinComponentBy } from "../JoinComponentBy";
-import { Line } from "@/components/Line";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faWarning } from "@fortawesome/free-solid-svg-icons";
-import { MarkDown } from "../MarkDown";
+import { setTemp, useColorMerge } from "@/hooks";
 import { initNewFeild, useCopyState, useMemoDelay } from "@/hooks";
+import { ChangableComponent } from "../PositionView";
 export interface FeildProps extends TextAreaProps {
   inputName: string;
   selectWhenFocusIn?: boolean;
@@ -63,62 +58,29 @@ export function Feild({
   React.useEffect(() => {
     fieldHooks.setOneFeild(inputName, "controls", controls || {});
   }, [controls, inputName]);
-  const controlsArray = React.useMemo(() => {
-    return Object.entries(controls || {})
-      .map(([expString, result]) => {
-        try {
-          const out = value?.match(new RegExp(expString, "ig"));
-          const type = out ? "succ" : "err";
-          if (!result[type]) {
-            return undefined;
-          }
-          return {
-            type,
-            content: result[type],
-          };
-        } catch (e) {
-          con.warn("expression not correct", e);
-          return undefined;
-        }
-      })
-      .filter(Boolean)
-      .map((config) => config!);
-  }, [value, controls]);
-  /*
-   ******************************************************************************************************************************************************
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   *                                                                                                                                                    *
-   ******************************************************************************************************************************************************
-   */
+  const position = useCopyState<Omit<DOMRect, "toJSON"> | null>(null);
+
+  React.useEffect(() => {
+    if (focused.get) {
+      setTemp("input.focused", inputName);
+      setTemp("input.position", position.get);
+    } else {
+      setTemp("input.focused", null);
+      setTemp("input.position", null);
+    }
+  }, [focused.get, position]);
+
   return (
-    <div className="relative flex items-center w-full h-full">
+    <ChangableComponent
+      onContentChange={({ x, y, left, right, bottom, top, width, height }) => {
+        position.set({ x, y, left, right, bottom, top, width, height });
+      }}
+      className="relative flex items-center w-full h-full"
+    >
       <TextArea
         placeholder={`${placeholder || ""}${focused.get ? "..." : ""}`}
         propositions={propositions}
-        className={tw(
-          `
-            p-2
-            border
-            border-solid
-            border-transparent
-            font-[inherit]
-            resize-none
-            rounded-sm
-            w-full
-            text-xs
-          `,
-          className,
-        )}
+        className={tw(`p-2 border border-transparent border-solid rounded-sm w-full font-[inherit] text-xs resize-none`, className)}
         onFocus={(e) => {
           if (selectWhenFocusIn) {
             e.currentTarget.select();
@@ -150,22 +112,10 @@ export function Feild({
         id={inputName}
         {...props}
       />
-      {focused.get && Boolean(controlsArray.length) && (
+      {/* {focused.get && Boolean(controlsArray.length) && (
         <div
           className={tw(
-            `
-              z-[100000000000000000000000000000000000000]
-              rounded-md
-              absolute
-              right-0
-              border
-              border-solid
-              border-transparent
-              text-xs
-              my-1
-              max-w-full
-              w-fit
-            `,
+            `right-0 z-[100000000000000000000000000000000000000] absolute my-1 border border-transparent border-solid rounded-md w-fit max-w-full text-xs`,
             controlsPosition == "top" ? "bottom-full" : "top-full",
           )}
           style={{
@@ -199,7 +149,7 @@ export function Feild({
             joinComponent={<Line />}
           />
         </div>
-      )}
-    </div>
+      )} */}
+    </ChangableComponent>
   );
 }

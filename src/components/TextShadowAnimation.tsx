@@ -3,7 +3,7 @@ export interface TextShadowAnimationProps {
   time?: number;
 }
 
-export const TextShadowAnimation = ({ content = " ", time = 1000 }: TextShadowAnimationProps) => {
+export const TextShadowAnimation = ({ content = " " }: TextShadowAnimationProps) => {
   return (
     <span>
       <span>{content}</span>

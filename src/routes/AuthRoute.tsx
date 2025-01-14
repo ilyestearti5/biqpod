@@ -1,11 +1,12 @@
 import { getMainCloud } from "@/apis/server.config";
 import { CircleLoading, EmptyComponent } from "@/components";
-import { useUser, useAsyncEffect, UserDB } from "@/hooks";
+import { useUser, useAsyncEffect } from "@/hooks";
+import { Biqpod } from "@/types";
 import { delay } from "@/utils";
 import React from "react";
 export interface AuthRouteProps {
-  onAuthSuccess?: (user: UserDB) => void;
-  successComponent?: JSX.Element | ((props: { user: UserDB }) => JSX.Element);
+  onAuthSuccess?: (user: Biqpod.Account.User) => void;
+  successComponent?: JSX.Element | ((props: { user: Biqpod.Account.User }) => JSX.Element);
 }
 export const AuthRoute = ({ onAuthSuccess, successComponent: Component = <EmptyComponent /> }: AuthRouteProps) => {
   const searchParams = new URLSearchParams(location.search);

@@ -1,9 +1,9 @@
 import React from "react";
 import { useModifier } from "@/reducers/Global/keyboard.slice";
-import { settingHooks } from "@/reducers/Settings/settings.model";
+import { settingHooks } from "@/data/system/settings.model";
 import { isLike } from "@/utils/index";
 import { tw } from "@/utils";
-import { usePublicSettingsFilter, showSetting, useCopyState } from "@/hooks";
+import { usePublicSettingsFilter, showSetting, useCopyState, openDialog } from "@/hooks";
 import { fieldHooks } from "@/data/system/field.model";
 import { useColorMerge } from "@/hooks";
 import { Tip } from "@/components/Tip";
@@ -11,6 +11,7 @@ import { faArrowTurnDown, faGear } from "@fortawesome/free-solid-svg-icons";
 import { useAction } from "@/data/system/actions.model";
 import { TitleView } from "@/components/TitleView";
 import { FastList } from "../components/FastList";
+import { Translate } from "@/components";
 export function SettingsList() {
   const settings = usePublicSettingsFilter();
   return (
@@ -23,8 +24,9 @@ export function SettingsList() {
         top: 4,
         bottom: 4,
       }}
+      scrollWidth={10}
       countLastItems={-1}
-      component={({ data: setting, index, style, status, handel, id }) => {
+      render={({ data: setting, index, style, status, handel, id }) => {
         const isControl = useModifier("Control");
         const hover = useCopyState(false);
         const canReset = React.useMemo(() => {
@@ -49,19 +51,7 @@ export function SettingsList() {
             id={id}
             onMouseEnter={() => hover.set(true)}
             onMouseLeave={() => hover.set(false)}
-            className={tw(
-              `
-                flex
-                items-center
-                justify-between
-                h-[70px]
-                p-4
-                cursor-default
-                border
-                border-solid
-                border-transparent
-              `,
-            )}
+            className={tw(`flex justify-between items-center gap-3 px-4 border border-transparent border-solid cursor-default`)}
             style={{
               ...colorMerge(
                 index % 2 && "primary.background",
@@ -90,16 +80,9 @@ export function SettingsList() {
                 }}
               />
             )}
-            <h1
-              className={tw(`
-                flex
-                gap-1
-                items-center
-                overflow-hidden
-              `)}
-            >
+            <div className={tw(`flex items-center gap-1 w-full`)}>
               <span
-                className={tw("text-xl capitalize truncate", isControl && "hover:underline cursor-pointer")}
+                className={tw("text-nowrap md:text-xl capitalize", isControl && "hover:underline cursor-pointer")}
                 onClick={() => {
                   isControl && setting.name != undefined && fieldHooks.setOneFeild("findConfigurations", "value", setting.name);
                 }}
@@ -110,49 +93,53 @@ export function SettingsList() {
                       color: "gray.opacity.2",
                     })}
                   >
-                    name not provided
+                    <Translate content="name not provided" />
                   </span>
                 )}
               </span>
-            </h1>
-            <span
-              className={tw("inline-flex gap-1 items-center text-xs italic font-extralight truncate")}
+            </div>
+            <div
+              className={tw("text-right gap-1 w-full font-extralight text-xs truncate italic", isControl && "hover:underline cursor-pointer")}
+              style={colorMerge(
+                isControl &&
+                  hover.get && {
+                    color: "primary",
+                  },
+              )}
               onClick={() => {
                 isControl && fieldHooks.setOneFeild("findConfigurations", "value", `@id ${setting.settingId}`);
               }}
             >
-              <span
-                className={tw(isControl && "hover:underline cursor-pointer")}
-                style={colorMerge(
-                  isControl &&
-                    hover.get && {
-                      color: "primary",
-                    },
-                )}
-              >
-                @<span className="font-normal">{setting.settingId}</span>
-              </span>
-              <div className={tw(`flex opacity-0 transition-[opacity] duration-500`, gearVisible && "opacity-100")}>
-                {canReset && (
-                  <TitleView title="reset">
-                    <Tip
-                      icon={faArrowTurnDown}
-                      onClick={() => {
-                        settingHooks.setOneFeild(setting.settingId, "value", setting.def!);
-                      }}
-                    />
-                  </TitleView>
-                )}
-                <TitleView title={"configurate"}>
+              @{setting.settingId}
+            </div>
+            <div className={tw(`flex w-fit transition-transform scale-0`, gearVisible && "scale-100")}>
+              {canReset && (
+                <TitleView title="reset">
                   <Tip
-                    onClick={() => {
-                      showSetting(setting.settingId);
+                    icon={faArrowTurnDown}
+                    onClick={async () => {
+                      const { response } = await openDialog({
+                        title: "reset",
+                        message: "are you sure you want to reset this setting?",
+                        type: "warning",
+                        buttons: ["yes", "no"],
+                        defaultId: 0,
+                      });
+                      if (response) return;
+                      settingHooks.setOneFeild(setting.settingId, "value", setting.def!);
                     }}
-                    icon={faGear}
                   />
                 </TitleView>
-              </div>
-            </span>
+              )}
+              <TitleView title={"configurate"}>
+                <Tip
+                  onClick={() => {
+                    showSetting(setting.settingId);
+                  }}
+                  icon={faGear}
+                />
+              </TitleView>
+            </div>
           </div>
         );
       }}

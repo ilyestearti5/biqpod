@@ -1,11 +1,12 @@
 import React from "react";
 import { useColorMerge } from "@/hooks";
 import { useCopyState, slotHooks } from "@/hooks";
-import { FunctionComponentListItem } from "@/types/global";
+
 import { tw, isVisible, scrollToElement } from "@/utils";
 import { EmptyComponent } from "./EmptyComponent";
 import { FocusProps, Focus } from "./Focus";
 import { Scroll } from "./Scroll";
+import { FunctionComponentListItem } from "@/types";
 export interface SlotProps<T> extends FocusProps {
   slotId: string;
   data: T[];
@@ -49,7 +50,7 @@ export function Slot<T>({ data, slotId, focusId = slotId, component: compo, chil
               }}
             >
               <div className="col">
-                <div className={tw("w-[100px] flex items-center justify-end", !showTips && "invisible")} />
+                <div className={tw("flex justify-end items-center w-[100px]", !showTips && "invisible")} />
               </div>
               {compo?.map((key) => {
                 return <div className="col">{`${item[key]}`}</div>;
@@ -77,7 +78,7 @@ export function Slot<T>({ data, slotId, focusId = slotId, component: compo, chil
     !isVisible(ele) && scrollToElement(ele, dir.get == "backward" ? 0 : -1);
   }, [focus.get, dir.get]);
   return (
-    <Focus className={tw("flex flex-col overflow-hidden h-full w-full", className)} focusId={focusId} {...props}>
+    <Focus className={tw("flex flex-col w-full h-full overflow-hidden", className)} focusId={focusId} {...props}>
       <Scroll className={tw(type == "vertical" && "flex")}>
         <EmptyComponent>
           {data.map((item, index) => {

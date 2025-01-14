@@ -5,9 +5,38 @@ import * as bradIcons from "@fortawesome/free-brands-svg-icons";
 import * as regIcons from "@fortawesome/free-regular-svg-icons";
 import * as solidIcons from "@fortawesome/free-solid-svg-icons";
 import * as dateFns from "date-fns";
-import { cases, Exact, IncludeParam, Nothing } from "../types/global";
-import { KeysType } from "@/types/global";
-import { TreeProps } from "@/types/global";
+import { Biqpod, IncludeParam, Nothing, TreeProps } from "@/types";
+export function explainStructure(data: any) {
+  function getType(value: any) {
+    if (value === null) return "null";
+    if (Array.isArray(value)) return "array";
+    return typeof value;
+  }
+  function describe(value: any, path = "root"): string {
+    const type = getType(value);
+    switch (type) {
+      case "null":
+        return `${path}: null`;
+      case "undefined":
+        return `${path}: undefined`;
+      case "boolean":
+        return `${path}: boolean (${value})`;
+      case "number":
+        return `${path}: number (${value})`;
+      case "string":
+        return `${path}: string ("${value}")`;
+      case "array":
+        return `${path}: array [${value.map((item: any, index: number) => describe(item, `${path}[${index}]`)).join("\n")}]`;
+      case "object":
+        return `${path}: object {${Object.entries(value)
+          .map(([key, val]) => `${key}: ${describe(val, `${path}.${key}`)}`)
+          .join("\n")}}`;
+      default:
+        return `${path}: ${type} (${value})`;
+    }
+  }
+  return describe(data);
+}
 /**
  * Returns only the words from a string.
  * @param string - The string to get the words from.
@@ -19,11 +48,12 @@ import { TreeProps } from "@/types/global";
  * console.log(result); // "Hello world"
  * ```
  */
-export const getWordsOnly = (string: string) =>
-  string
+export function getWordsOnly(string: string) {
+  return string
     .replace(/[^a-zA-Z0-9:]+/gi, "")
     .replaceAll(/ +/gi, " ")
     .trim();
+}
 /**
  * Returns if the string includes the find string.
  * @param string - The string to search.
@@ -36,11 +66,11 @@ export const getWordsOnly = (string: string) =>
  * console.log(result); // true
  * ```
  */
-export const include = (string?: IncludeParam, find?: IncludeParam) => {
+export function include(string?: IncludeParam, find?: IncludeParam) {
   const stringOnly = getWordsOnly(String(string));
   const findOnly = getWordsOnly(String(find)).toLowerCase();
   return fuzzySearch(findOnly, stringOnly);
-};
+}
 /**
  * Returnes range of numbers.
  * @param from - The start of the range.
@@ -58,7 +88,7 @@ export const include = (string?: IncludeParam, find?: IncludeParam) => {
  * console.log(result); // [1, 3, 5, 7, 9]
  * ```
  */
-export const range = (from = 0, to = 1, steps = 1) => {
+export function range(from = 0, to = 1, steps = 1) {
   if (!steps) {
     throw "cannot be give steps value 0 (infinite loop hapens)";
   }
@@ -70,7 +100,7 @@ export const range = (from = 0, to = 1, steps = 1) => {
     res.push(i);
   }
   return res;
-};
+}
 /**
  * Returns a random number between two numbers.
  * @param min - The minimum number.
@@ -82,7 +112,9 @@ export const range = (from = 0, to = 1, steps = 1) => {
  * console.log(result); // 5.123456789
  * ```
  */
-export const between = (min = 0, max = 10) => Math.random() * (max - min) + min;
+export function between(min = 0, max = 10) {
+  return Math.random() * (max - min) + min;
+}
 /**
  * Returns a random integer between two numbers.
  * @param min - The minimum number.
@@ -94,7 +126,9 @@ export const between = (min = 0, max = 10) => Math.random() * (max - min) + min;
  * console.log(result); // 5
  * ```
  */
-export const betweenInt = (min = 0, max = 10) => Math.floor(between(min, max));
+export function betweenInt(min = 0, max = 10) {
+  return Math.floor(between(min, max));
+}
 /**
  * Returnes if the numbers are sorted.
  * @param nums - The numbers to check.
@@ -110,7 +144,7 @@ export const betweenInt = (min = 0, max = 10) => Math.floor(between(min, max));
  * console.log(result); // false
  * ```
  */
-export const isSorted = (...nums: number[]) => {
+export function isSorted(...nums: number[]) {
   let n1 = nums[0];
   for (let i = 1; i < nums.length; i++) {
     if (n1 > nums[i]) {
@@ -119,7 +153,7 @@ export const isSorted = (...nums: number[]) => {
     n1 = nums[i];
   }
   return true;
-};
+}
 /**
  * Returns the camel case of a string.
  * @param string - The string to convert to camel case.
@@ -297,13 +331,13 @@ export async function delay(timeout = 0) {
  * console.log(result); // { index: 2, value: 3 }
  * ```
  */
-export const randomItem = <T>(array: T[]) => {
+export function randomItem<T>(array: T[]) {
   const index = betweenInt(0, array.length);
   return {
     index,
     value: array.at(index),
   };
-};
+}
 /**
  * Randomizes an array.
  * @param array - The array to randomize.
@@ -315,7 +349,7 @@ export const randomItem = <T>(array: T[]) => {
  * console.log(result); // [3, 1, 5, 2, 4]
  * ```
  */
-export const randomizeArray = <T>(array: T[]) => {
+export function randomizeArray<T>(array: T[]) {
   const shadowCopyArray = [...array];
   const result: T[] = [];
   while (shadowCopyArray.length) {
@@ -326,7 +360,7 @@ export const randomizeArray = <T>(array: T[]) => {
     }
   }
   return result;
-};
+}
 /**
  * Filters an array into two separate arrays based on a callback function.
  * @param array - The array to filter.
@@ -372,7 +406,7 @@ export function defaultObject<T extends object>(object: T, defaultValue: Partial
     const item = object[prop];
     const d = defaultValue[prop];
     if (typeof item == "object" && !Array.isArray(item)) {
-      rs[prop] = defaultObject(item as any, d as any) as any;
+      rs[prop] = defaultObject(item as any, d as any);
     } else {
       rs[prop] = item == undefined ? d : (item as any);
     }
@@ -398,7 +432,7 @@ export function defaultObject<T extends object>(object: T, defaultValue: Partial
  * console.log(result); // "helloWorld"
  * ```
  */
-export function transformCase<T extends string>(string: T, from: cases = "camel", to: cases = "normal") {
+export function transformCase<T extends string>(string: T, from: Biqpod.Types.Cases = "camel", to: Biqpod.Types.Cases = "normal") {
   if (typeof string != "string") {
     return string;
   }
@@ -427,7 +461,7 @@ export function transformCase<T extends string>(string: T, from: cases = "camel"
  * @returns The keys of the object.
  */
 export function values<T extends object>(input: T) {
-  return Object.values(input) as Exact<Required<T>[keyof T]>[];
+  return Object.values(input) as Biqpod.Types.Exact<Required<T>[keyof T]>[];
 }
 /**
  * Maps an array asynchronously.
@@ -470,14 +504,14 @@ export async function mapAsync<T, R>(array: T[], callback: (item: T, index: numb
  * console.log(result); // { a: "a1", b: "b2", c: "c3" }
  * ```
  */
-export const renameValues = <T extends Record<string | number, any>, R>(object: T, replaceTo: <C extends keyof T>(value: T[C], key: C) => R) => {
+export function renameValues<T extends Record<string | number, any>, R>(object: T, replaceTo: <C extends keyof T>(value: T[C], key: C) => R) {
   const result = {} as Record<keyof T, R>;
   for (const key in object) {
     const value = object[key];
     result[key] = replaceTo(value, key);
   }
   return result;
-};
+}
 export const con = {
   inf(...data: any[]) {
     import.meta.env.DEV && console.log(`%c[INFO] ${dateFns.format(new Date(), "HH:mm:ss")}`, "color: #38F", ...data);
@@ -521,9 +555,9 @@ export function getSeparateSearchInput(string: string, using = "@") {
  * console.log(result); // "01/01/2022 00:00:00"
  * ```
  */
-export const saveDate = (date = new Date()) => {
+export function saveDate(date = new Date()) {
   return dateFns.format(date, "MM/dd/yyyy HH:mm:ss", {});
-};
+}
 /**
  * Returns a formated string from an object.
  * @param object - The object to format.
@@ -537,17 +571,17 @@ export const saveDate = (date = new Date()) => {
  * console.log(result); // "a: 1;b: 2;c: 3"
  * ```
  */
-export const formatObject = <T extends object>(object: T, format = "K=V", joinBy = ",") => {
+export function formatObject<T extends object>(object: T, format = "K=V", joinBy = ",") {
   return Object.entries(object)
     .map(([key, value]) => {
       return format.replaceAll("K", key).replaceAll("V", value);
     })
     .join(joinBy);
-};
+}
 /**
  * Returns if the
  */
-export const fuzzySearch = function (query: string, string: string) {
+export function fuzzySearch(query: string, string: string) {
   const haystack = string.toLowerCase();
   let i = 0,
     n = -1,
@@ -559,7 +593,7 @@ export const fuzzySearch = function (query: string, string: string) {
     }
   }
   return true;
-};
+}
 /**
  * Returns If The Dates Are Sorted.
  * @param dates - The dates to check.
@@ -590,24 +624,8 @@ export function isSortedDate(dates: (Date | string | number)[]) {
  * console.log(result); // 15
  * ```
  */
-export const someArray = (...array: (Nothing | number)[]) => {
+export function someArray(...array: (Nothing | number)[]) {
   return array.reduce<number>((prv, current) => prv + (typeof current == "number" ? current : 0), 0);
-};
-/**
- * Make a list of the values that are my list structor
- * @param list - The list to check.
- * @param as - The list to check.
- * @returns The list of the values that are in the list.
- * @example
- * ```ts
- * const list = [1, 2, 3, 4, 5];
- * const as = [1, 3, 5, 7, 9];
- * const result = ori(list, as);
- * console.log(result); // [1, 3, 5]
- * ```
- */
-export function ori(list: (string | number)[], as: (string | number)[]) {
-  return as.filter((value) => list.includes(value));
 }
 export function mergeObject<T extends object | undefined = React.CSSProperties>(...args: (Nothing | T)[]) {
   let result = {} as T;
@@ -663,20 +681,20 @@ export function getFocus() {
   const element = document.activeElement as HTMLElement | null;
   return element?.id || null;
 }
-export const isVisible = (element: HTMLElement | null): boolean => {
+export function isVisible(element: HTMLElement | null): boolean {
   if (!element) return false;
   const { parentElement } = element;
   if (!parentElement) return true;
   const { left: eL, right: eR, top: eT, bottom: eB } = element.getBoundingClientRect();
   const { left: pL, right: pR, top: pT, bottom: pB } = parentElement.getBoundingClientRect();
   return pT <= eT && eB <= pB && pL <= eL && eR <= pR;
-};
-export const tw = (...string: ClassNameValue[]) => {
+}
+export function tw(...string: ClassNameValue[]) {
   return twMerge(...string)
     .replaceAll("\n", " ")
     .replaceAll("\t", " ")
     .replaceAll(/ {2,}/gi, " ");
-};
+}
 export class Shortcut {
   public propertys: {
     control?: boolean;
@@ -723,7 +741,7 @@ export class Shortcut {
     };
   }
   static toString(props: Shortcut["propertys"]) {
-    const metaKeys = ["control", "shift", "alt"] as KeysType;
+    const metaKeys: Biqpod.Types.KeysType = ["control", "shift", "alt"];
     let result = metaKeys
       .map((meta) => {
         return props[meta] ? `${meta}` : props[meta] == undefined ? `${meta}?` : "";
@@ -863,7 +881,9 @@ export class Db {
     }
   }
 }
-export const prefixId = (a: string | number, b: number | string) => `slot_${a}_${b}`;
+export function prefixId(a: string | number, b: number | string) {
+  return `slot_${a}_${b}`;
+}
 export function toLinear<T>(tree: TreeProps<T>["tree"], level = 0) {
   const result: { data: T; level: number }[] = [];
   tree?.map(({ data, innerTree }) => {
@@ -904,20 +924,41 @@ export interface PromiseIntervalProps {
  * });
  * ```
  */
-export const promiseInterval = async (callback: (props: PromiseIntervalProps) => Promise<any>, onError?: (error: Error) => void, iterations = 1) => {
+export function promiseInterval(callback: (props: PromiseIntervalProps) => Promise<any>, onError?: (error: Error) => void): () => void {
   let stopPromise = false;
   const stop = () => {
     stopPromise = true;
   };
-  try {
-    await callback({ stop });
-  } catch (e: any) {
-    onError?.(e);
+  async function ruc(iterations = 1) {
+    try {
+      await callback({ stop });
+    } catch (e: any) {
+      onError?.(e);
+    }
+    if (stopPromise) {
+      return;
+    }
+    ruc(iterations + 1);
   }
-  if (stopPromise) {
-    return {
-      iterations,
-    };
+  ruc();
+  return () => {
+    stop();
+  };
+}
+export async function unpackPromise<T>(fn: () => Promise<T> | T) {
+  const result = fn();
+  return result instanceof Promise ? await result : result;
+}
+export interface MapAndFilterOptions<T, R> {
+  filter: (item: T, index: number) => boolean;
+  map: (item: T, index: number) => R;
+}
+export function mapAndFilter<T, R = T>(array: T[], options: MapAndFilterOptions<T, R>) {
+  const result: R[] = [];
+  for (let i = 0; i < array.length; i++) {
+    if (options.filter(array[i], i)) {
+      result.push(options.map(array[i], i));
+    }
   }
-  await promiseInterval(callback, onError, iterations + 1);
-};
+  return result;
+}

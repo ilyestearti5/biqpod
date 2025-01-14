@@ -1,22 +1,21 @@
 import React from "react";
 import { initNewList, SlotType } from "@/data/system/slot.slice";
-import { slotHooks } from "@/hooks";
-import { FunctionComponentListItem } from "@/types/global";
+import { slotHooks, store } from "@/hooks";
 import { prefixId, isVisible, scrollToElement } from "@/utils";
 import { EmptyComponent } from "./EmptyComponent";
+import { FunctionComponentListItem } from "@/types";
 export interface ListProps<T> {
   slotId: string;
   data: T[];
   component: FunctionComponentListItem<T>;
   skipFn?: (item: T, index: number) => boolean;
 }
-export function List<T>({ slotId, component, data, skipFn }: ListProps<T>) {
+export function List<T>({ slotId, component: Component, data, skipFn }: ListProps<T>) {
   const focus = slotHooks.getOneFeild(slotId, "focused");
   const submit = slotHooks.getOneFeild(slotId, "submited");
   const select = slotHooks.getOneFeild(slotId, "selected");
   const dir = slotHooks.getOneFeild(slotId, "direction");
   initNewList(slotId, data);
-  const Component = React.useMemo(() => component, []);
   React.useEffect(() => {
     if (typeof focus != "number") {
       return;
@@ -69,8 +68,17 @@ export function List<T>({ slotId, component, data, skipFn }: ListProps<T>) {
                 fn?.(e);
               };
             }}
-            handelSelect={(_fn) => {
-              return (_e) => {};
+            handelSelect={(fn) => {
+              return (e) => {
+                const slot = store.getState().slot.entities[slotId];
+                if (slot) {
+                  slotHooks.setOneFeild(slotId, "selected", {
+                    ...slot.selected,
+                    [index]: true,
+                  });
+                  fn?.(e);
+                }
+              };
             }}
             tabIndex={status.isFocused ? 1 : -1}
             item={item}

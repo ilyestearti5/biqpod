@@ -1,11 +1,12 @@
+@use "tailwindcss/base";
+@use "tailwindcss/components";
+@use "tailwindcss/utilities";
+@use "tailwindcss/variants";
 // google font's
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Karla:wght@800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playwrite+AU+SA:wght@100..400&display=swap");
 // tailwind configuration
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-@import "tailwindcss/variants";
 // append tailwind configurations
 .window {
   @apply fixed inset-0 overflow-hidden;
@@ -21,16 +22,16 @@
     @apply inset-x-0 h-[3px] cursor-n-resize;
   }
   &.left {
-    @apply rounded-ss-lg rounded-es-lg right-full;
+    @apply rounded-ss-lg rounded-es-lg left-0;
   }
   &.right {
-    @apply rounded-ee-lg rounded-se-lg left-full;
+    @apply rounded-ee-lg rounded-se-lg right-0;
   }
   &.top {
-    @apply rounded-ss-lg rounded-se-lg bottom-full;
+    @apply rounded-ss-lg rounded-se-lg top-0;
   }
   &.bottom {
-    @apply rounded-es-lg rounded-ee-lg top-full;
+    @apply rounded-es-lg rounded-ee-lg bottom-0;
   }
   .resize-overview {
     @apply fixed inset-0 z-[10000000000000];
@@ -212,32 +213,28 @@ a:focus {
     @apply relative;
   }
   &_bg {
-    @apply absolute left-1/2 top-1/2 w-full h-[0] block rounded-[50%] pt-[100%] scale-0;
+    @apply absolute left-1/2 top-[90%] w-full h-0 block rounded-[50%] pt-[100%] scale-0;
     margin: -50% 0 0 -50%;
-    transform-origin: 50% 50%;
-    transition: transform 0.21s cubic-bezier(0.5, 1, 0.89, 1);
+    transition: transform 0.8s cubic-bezier(0.5, 1, 0.89, 1);
     @for $i from 1 through 3 {
       &:nth-of-type(#{$i}) {
-        transition-delay: 0.21s * (4 - $i);
+        transition-delay: 0.08s * (4 - $i);
+      }
+    }
+    @mixin active-and-focus {
+      @apply scale-150;
+      transition: transform 0.4s ease-in-out;
+      @for $i from 1 through 3 {
+        &:nth-of-type(#{$i}) {
+          transition-delay: 0.08s * $i;
+        }
       }
     }
     .btn:active & {
-      @apply scale-100;
-      transition: transform 0.4s ease-in-out;
-      @for $i from 1 through 3 {
-        &:nth-of-type(#{$i}) {
-          transition-delay: 0.1s * $i;
-        }
-      }
+      @include active-and-focus;
     }
     .btn:focus & {
-      @apply scale-100;
-      transition: transform 0.4s ease-in-out;
-      @for $i from 1 through 3 {
-        &:nth-of-type(#{$i}) {
-          transition-delay: 0.1s * $i;
-        }
-      }
+      @include active-and-focus;
     }
   }
 }
@@ -360,9 +357,6 @@ a:focus {
 a {
   @apply cursor-pointer;
 }
-canvas {
-  @apply bg-zinc-500;
-}
 .markdown {
   code {
     @apply px-2 rounded-md inline-block text-sm;
@@ -379,5 +373,63 @@ canvas {
     tr {
       @apply even:bg-opacity-10;
     }
+  }
+}
+.cardio-loading-container {
+  --uib-size: 45px;
+  --uib-speed: 1.75s;
+  --uib-bg-opacity: 0.1;
+  height: 31.25px;
+  width: 50px;
+  transform-origin: center;
+  overflow: visible;
+  .car {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation:
+      travel var(--uib-speed) ease-in-out infinite,
+      fade var(--uib-speed) ease-out infinite;
+    will-change: stroke-dasharray, stroke-dashoffset;
+    transition: stroke 0.5s ease;
+  }
+  .track {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: var(--uib-bg-opacity);
+  }
+}
+@keyframes travel {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  75% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  20%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.animate-move-right {
+  animation: animate-move-right 1s infinite;
+}
+@keyframes animate-move-right {
+  from {
+    left: 0%;
+    transform: translateX(-100%);
+  }
+  to {
+    left: 100%;
+    transform: translateX(0);
   }
 }

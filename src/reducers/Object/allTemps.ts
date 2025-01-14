@@ -16,3 +16,5 @@ export const cameraTemp = new Temp("camera");
 export const recaptchaTemp = new Temp("recaptcha");
 export const iframeTemp = new Temp("iframe");
 export const enumTemp = new Temp("enum");
+export const resizeTemp = new Temp("resize");
+export { Temp };

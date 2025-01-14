@@ -4,8 +4,9 @@ import { faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { JoinComponentBy } from "./JoinComponentBy";
 import { faApple } from "@fortawesome/free-brands-svg-icons";
-import { ReactElement } from "@/types/global";
+
 import { Translate } from "./Translate";
+import { ReactElement } from "@/types";
 export interface KeyPandingProps extends ReactElement<HTMLSpanElement> {
   shortcut: string | string[];
 }
@@ -22,19 +23,7 @@ export function SinglePanding({ content }: SinglePandingProps) {
     }),
   };
   return (
-    <div
-      style={styles}
-      className={tw(`
-        rounded-[4px]
-        border-solid
-        border-transparent
-        border-b-4
-        border-x
-        border-t
-        capitalize
-        px-1
-      `)}
-    >
+    <div style={styles} className={tw(`border-x px-1 border-t border-transparent border-b-4 border-solid rounded-[4px] capitalize`)}>
       {/control/gi.test(content) && (isMac ? <FontAwesomeIcon icon={faApple} /> : "ctrl")}
       {/shift/gi.test(content) && (isMac ? <FontAwesomeIcon icon={faAngleUp} /> : "shift")}
       {[/control/gi, /shift/gi].every((s) => !s.test(content)) && content}
@@ -44,19 +33,7 @@ export function SinglePanding({ content }: SinglePandingProps) {
 export function KeyPanding({ shortcut = [], className, ...props }: KeyPandingProps) {
   const list = typeof shortcut == "string" ? [shortcut] : shortcut;
   return (
-    <span
-      {...props}
-      className={tw(
-        `
-        capitalize
-        items-center
-        gap-x-2
-        truncate
-        mx-1
-      `,
-        className,
-      )}
-    >
+    <span {...props} className={tw(`items-center gap-x-2 mx-1 truncate capitalize`, className)}>
       <JoinComponentBy
         list={list.map((short, i) => {
           const ary = short.split("+");

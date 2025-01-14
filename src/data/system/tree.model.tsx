@@ -1,7 +1,7 @@
+import React from "react";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-import React from "react";
+import { Biqpod, TableDefConfig } from "@/types";
 export const initState: TableDefConfig<TreeType, "treeId", "tree"> = {
   id: "treeId",
   name: "tree",
@@ -90,16 +90,7 @@ export const initState: TableDefConfig<TreeType, "treeId", "tree"> = {
   data: {},
 };
 export const { init: initTrees, hooks: treeHooks, slice: treeSlice } = defineTable(initState);
-export interface TreeType {
-  ends: string[];
-  treeId: string;
-  focused?: string | null;
-  submited?: string;
-  selected?: Record<string, boolean>;
-  skiped?: Record<string, boolean>;
-  expanded?: Record<string, boolean>;
-  separator?: string;
-}
+export type TreeType = Biqpod.System.Tree;
 export function initNewTree(treeId: string) {
   const tr = treeHooks.getOne(treeId);
   React.useEffect(() => {

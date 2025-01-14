@@ -1,44 +1,24 @@
 import { getUserFunction } from "@/apis";
 import { CircleLoading, EmptyComponent } from "@/components";
 import { useUser, useAsyncEffect, useCopyState } from "@/hooks";
+import { Biqpod, Nothing } from "@/types";
 import { delay } from "@/utils";
 import React from "react";
+export type PayoutResult = Required<Biqpod.Account.Payout>;
 export interface PayoutRouteProps {
   onPayoutSuccess?: (payout: PayoutResult) => void;
   successComponent?: JSX.Element | ((props: { payout: PayoutResult }) => JSX.Element);
-}
-export type ChargeStatus = "pending" | "paid" | "failed" | "canceled";
-export interface PayoutResult {
-  payoutId: string;
-  amount: number;
-  createdAt: number;
-  payedAt?: number;
-  payer: string;
-  key: string;
-  projectId: string;
-  status: ChargeStatus;
-  type: "subscription" | "transaction" | "payment";
-  subscription?: {
-    label: string;
-    duration: number;
-  };
-  transaction?: {
-    saller?: string;
-  };
 }
 export const PayoutRoute = ({ onPayoutSuccess, successComponent: Component = <EmptyComponent /> }: PayoutRouteProps) => {
   const searchParams = new URLSearchParams(location.search);
   const payoutId = searchParams.get("payout_id");
   const user = useUser();
-  const payoutState = useCopyState<PayoutResult | null>(null);
+  const payoutState = useCopyState<PayoutResult | Nothing>(null);
   const isLoading = useAsyncEffect(async () => {
     await delay(1200);
     if (payoutId && user) {
-      const fn = await getUserFunction<{ payoutId: string }, PayoutResult>("payout-get");
-      if (!fn) {
-        return;
-      }
-      const payout = await fn.callback({
+      const getPayout = await getUserFunction<PayoutResult, { payoutId: string }>("payout-get");
+      const payout = await getPayout?.({
         payoutId,
       });
       payoutState.set(payout);

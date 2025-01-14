@@ -29,7 +29,7 @@ export function ColorsList() {
       slotId="colors-list"
       data={colorList}
       itemSize={50}
-      component={({ data, style, status, index, handel }) => {
+      render={({ data, style, status, index, handel }) => {
         const hover = useCopyState(false);
         const copyed = useCopyState(false);
         const colorMerge = useColorMerge();
@@ -54,16 +54,7 @@ export function ColorsList() {
                 },
               ),
             }}
-            className={tw(`
-              flex
-              justify-between
-              items-center
-              p-3
-              gap-2
-              border
-              border-solid
-              border-transparent
-            `)}
+            className={tw(`flex justify-between items-center gap-2 p-3 border border-transparent border-solid`)}
             onClick={() => {
               handel.focus();
               handel.submit();
@@ -77,15 +68,7 @@ export function ColorsList() {
                 return (
                   <span
                     key={index}
-                    className={tw(`
-                      inline-block
-                      w-[25px]
-                      h-[25px]
-                      rounded-md
-                      border
-                      border-solid
-                      border-transparent
-                    `)}
+                    className={tw(`inline-block border border-transparent border-solid rounded-md w-[25px] h-[25px]`)}
                     style={{
                       backgroundColor,
                       ...colorMerge({
@@ -98,15 +81,7 @@ export function ColorsList() {
               <TitleView title={`**${backgroundColor}**`.toUpperCase()}>
                 <label
                   key={index}
-                  className={tw(`
-                  inline-block
-                  w-[25px]
-                  h-[25px]
-                  rounded-md
-                  border
-                  border-solid
-                  border-transparent
-                `)}
+                  className={tw(`inline-block border border-transparent border-solid rounded-md w-[25px] h-[25px]`)}
                   style={{
                     backgroundColor,
                     borderColor: "white",

@@ -1,15 +1,8 @@
 import { nanoid } from "@reduxjs/toolkit";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-export interface Log {
-  logId?: string;
-  title: string;
-  createdAt?: string;
-  showDesc?: boolean;
-  desc?: string;
-  type?: "INFO" | "SUCC" | "ERR" | "WARN";
-  category?: string;
-}
+import { Biqpod, TableDefConfig } from "@/types";
+
+export type Log = Biqpod.System.Log;
 const initConfig: TableDefConfig<Log, "logId", "logs"> = {
   id: "logId",
   name: "logs",

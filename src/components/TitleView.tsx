@@ -44,7 +44,10 @@ export function TitleView({
       onMouseMove={(e) => {
         if (title) {
           setTitle(title);
-          setPosition([e.clientX, e.clientY]);
+          setPosition({
+            x: e.clientX,
+            y: e.clientY,
+          });
           setX(x);
           setY(y);
         }

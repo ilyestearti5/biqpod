@@ -1,5 +1,5 @@
 import React from "react";
-import { useAsyncEffect, useCopyState, useSettingValue, useGeminiModel } from "@/hooks";
+import { useAsyncEffect, useCopyState, useSettingValue } from "@/hooks";
 import { getTemp } from "@/reducers/Object/object.slice";
 import { EmptyComponent } from "./EmptyComponent";
 import { delay, transformCase } from "@/utils";
@@ -12,7 +12,6 @@ export const useTranslate = (content: TranslateProps["content"], lang?: string):
   const allLangs = langHooks.getEntity();
   const cashing = useCopyState<boolean>(false);
   const systemBase = getTemp<string>("system.base");
-  const genModelText = useGeminiModel({ model: "gemini-pro" });
   // get the choised lang from setting
   const settingLang = useSettingValue("window/lang.enum");
   const choisedLang = React.useMemo(() => lang || settingLang, [lang, settingLang]);
@@ -30,13 +29,14 @@ export const useTranslate = (content: TranslateProps["content"], lang?: string):
   const result = React.useMemo(() => (choisedLang ? allLangs[word]?.[choisedLang] : undefined), [allLangs, word]);
   // generate AI if it is the content no used
   const isLoading = useAsyncEffect(async () => {
-    if (choisedLang && !result && genModelText && choisedLang != "en") {
+    if (choisedLang && !result && choisedLang != "en") {
       await delay(300);
-      const { response } = await genModelText.generateContent(`translate this text to ${choisedLang} :\n\n${content}`);
-      cashing.set(true);
-      langHooks.upsert([{ word, [choisedLang]: response.text() }]);
+      return;
+      // const { text } = await translate(content, { to: choisedLang });
+      // cashing.set(true);
+      // langHooks.upsert([{ word, [choisedLang]: text }]);
     }
-  }, [result, word, choisedLang, content, genModelText]);
+  }, [result, word, choisedLang, content]);
   const correctResult = React.useMemo(() => result || content, [result, content]);
   return [correctResult, isLoading];
 };

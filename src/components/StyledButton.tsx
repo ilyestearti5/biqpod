@@ -1,14 +1,28 @@
-import { useSettingValue, handelShadowColor, useColorMerge } from "@/hooks";
+import { useSettingValue, handelShadowColor, useColorMerge, useCopyState } from "@/hooks";
+import { ClickProps } from "@/types";
 import { tw } from "@/utils";
-import { ClickProps } from "@/types/global";
-export const StyledButton = ({ className, children, ...props }: ClickProps<HTMLButtonElement>) => {
+
+export const StyledButton = ({ className, children, onMouseEnter, onMouseDown, ...props }: ClickProps<HTMLButtonElement>) => {
   const colorMerge = useColorMerge();
   const isAnimated = useSettingValue("preferences/animation.boolean");
+  const isHover = useCopyState(false);
   return (
     <button
       {...props}
+      onMouseEnter={(e) => {
+        isHover.set(true);
+        onMouseEnter?.(e);
+      }}
+      onMouseLeave={(e) => {
+        isHover.set(false);
+        onMouseDown?.(e);
+      }}
       style={{
-        ...colorMerge({}),
+        ...colorMerge(
+          !isHover.get && {
+            color: "primary",
+          },
+        ),
       }}
       className={tw("styled-btn", isAnimated && "transition-transform", className)}
     >

@@ -1,5 +1,6 @@
 import { useColorMerge } from "@/hooks";
-import { ClickProps } from "@/types/global";
+import { ClickProps } from "@/types";
+
 import { tw } from "@/utils";
 
 export type NoteProps = ClickProps<HTMLSpanElement>;

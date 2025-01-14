@@ -1,78 +1,35 @@
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
-import { settingHooks } from "@/reducers/Settings/settings.model";
 import { tw } from "@/utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useColorMerge } from "@/hooks";
-import { useTranslate } from "@/components/Translate";
-import { TitleView } from "@/components/TitleView";
+import { setSettingValue, useColorMerge, useSettingValue } from "@/hooks";
+import { allIcons } from "@/apis";
+import { Icon } from "./Icon";
 export const DarkLightIcon = () => {
-  const isDark = settingHooks.useOneFeild("window/dark.boolean", "value");
+  const isDark = useSettingValue("window/dark.boolean");
   const colorMerge = useColorMerge();
-  const [toLight] = useTranslate("toggle to light");
-  const [toDark] = useTranslate("toggle to dark");
   return (
-    <TitleView
-      title={(isDark.get ? toLight : toDark) ?? undefined}
-      position={{
-        x: "left",
-        y: "bottom",
+    <button
+      onClick={() => {
+        setSettingValue("window/dark.boolean", !isDark);
       }}
-      className="flex items-center"
+      className={tw(`inline-block relative border border-transparent border-solid rounded-full w-[40px] h-[15px]`)}
+      style={{
+        ...colorMerge("primary.background", {
+          borderColor: "borders",
+        }),
+      }}
     >
-      <button
-        tabIndex={-1}
-        className={tw(`
-            relative
-            inline-block
-            h-[20px]
-            w-[40px]
-            rounded-[20px]
-            border
-            border-solid
-            border-transparent
-          `)}
-        onClick={() => {
-          isDark.set(!isDark.get);
-        }}
+      <span
         style={{
-          ...colorMerge({
-            backgroundColor: "primary.background",
+          ...colorMerge("secondary.background", {
             borderColor: "borders",
           }),
         }}
+        className={tw(
+          `inline-flex top-1/2 left-0 absolute justify-center items-center border border-transparent border-solid rounded-full w-[20px] h-[20px] transform transition-[left] -translate-y-1/2 duration-300 scale-110`,
+          isDark && "left-1/2",
+        )}
       >
-        <span
-          className={tw(
-            `
-                transition-[left]
-                duration-200
-                w-[20px]
-                inline-flex
-                items-center
-                justify-center
-                text-xs
-                h-[20px]
-                rounded-full
-                absolute
-                inset-y-0
-                top-1/2
-                -translate-y-1/2
-                border-solid
-                border
-                border-transparent
-                left-0
-              `,
-            isDark.get && "left-1/2",
-          )}
-          style={{
-            ...colorMerge("primary.background", {
-              borderColor: "borders",
-            }),
-          }}
-        >
-          <FontAwesomeIcon icon={isDark.get ? faMoon : faSun} />
-        </span>
-      </button>
-    </TitleView>
+        <Icon iconClassName="text-xs" icon={isDark ? allIcons.solid.faMoon : allIcons.solid.faSun} />
+      </span>
+    </button>
   );
 };

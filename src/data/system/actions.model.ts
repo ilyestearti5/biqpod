@@ -1,19 +1,12 @@
 import React from "react";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { store } from "@/store";
-import { QueryStatus } from "react-query";
 import { onceState } from "@/hooks";
 import { useAsyncEffect } from "@/hooks";
-import { con } from "@/utils";
-export interface Action {
-  actionId: string;
-  status: QueryStatus | "ready";
-  args?: any;
-  output?: any;
-}
+import { Biqpod, Nothing, TableDefConfig } from "@/types";
 // Init Client Config
+export type Action = Biqpod.System.Action;
 export const initActionConfig: TableDefConfig<Action, "actionId", "actions"> = {
   name: "actions",
   id: "actionId",
@@ -65,9 +58,9 @@ export function useAction<T extends string, ARGS = any, S = any>(actionId: T, fn
     }
     const { status } = act;
     if (status == "idle") {
-      const { args } = act;
-      actionHooks.setOneFeild(actionId, "status", "loading");
       try {
+        const { args } = act;
+        actionHooks.setOneFeild(actionId, "status", "loading");
         let result: Promise<S> | S | null = null;
         let s: S | null = null;
         result = fn(args);
@@ -79,7 +72,7 @@ export function useAction<T extends string, ARGS = any, S = any>(actionId: T, fn
         actionHooks.setOneFeild(actionId, "output", s);
         actionHooks.setOneFeild(actionId, "status", "success");
       } catch (e) {
-        con.err(e);
+        console.log(e);
         actionHooks.setOneFeild(actionId, "output", null);
         actionHooks.setOneFeild(actionId, "status", "error");
       }
@@ -104,3 +97,18 @@ export function execAction<ID extends string, A>(actionId: ID, args?: A) {
     });
   });
 }
+export const isLoading = (action?: Nothing | Action | Action["status"]) => checkStatus(action, "loading");
+export const isReady = (action?: Nothing | Action | Action["status"]) => checkStatus(action, "ready");
+export const isSuccess = (action?: Nothing | Action | Action["status"]) => checkStatus(action, "success");
+export const isIdle = (action?: Nothing | Action | Action["status"]) => checkStatus(action, "idle");
+export const isError = (action?: Nothing | Action | Action["status"]) => checkStatus(action, "error");
+export const checkStatus = (action?: Nothing | Action | Action["status"], status: Action["status"] = "success") => {
+  if (typeof action === "string") {
+    return action == status;
+  }
+  if (typeof action === "object") {
+    return action?.status === status;
+  } else {
+    return false;
+  }
+};

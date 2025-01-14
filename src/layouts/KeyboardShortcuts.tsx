@@ -44,7 +44,7 @@ export function KeyboardShortcuts() {
         top: 3,
         bottom: 3,
       }}
-      component={({ data: command, index, status, handel, style }) => {
+      render={({ data: command, index, status, handel, style }) => {
         const { commandId, label = "" } = command;
         const keys = useShortcutsOfCommand(commandId);
         const ref = React.createRef<HTMLDivElement>();
@@ -77,14 +77,7 @@ export function KeyboardShortcuts() {
               ...style,
             }}
           >
-            <div
-              className={tw(`
-                w-[150px]
-                flex
-                justify-end
-                px-2
-              `)}
-            >
+            <div className={tw(`flex justify-end px-2 w-[150px]`)}>
               {(hover.get || status.isFocused || status.isSubmited) && (
                 <div className="flex justify-between items-center">
                   <Tip
@@ -126,7 +119,7 @@ export function KeyboardShortcuts() {
             >
               {label || commandId}
             </div>
-            <div className={tw("col justify-end truncate")}>
+            <div className={tw("justify-end truncate col")}>
               <KeyPanding shortcut={onlyKeys} />
             </div>
           </div>

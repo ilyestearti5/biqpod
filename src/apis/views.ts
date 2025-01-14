@@ -10,12 +10,13 @@ export default {
           },
         },
         keyboardShortcuts: {
+          label: "keyboard",
           icon: {
             value: "faKeyboard",
           },
-          news: {
-            value: "faKeyboard",
-          },
+          // news: {
+          //   value: "faKeyboard",
+          // },
         },
         icons: {
           icon: { value: "faIcons" },

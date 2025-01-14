@@ -1,7 +1,5 @@
-import cash from "@/apis/cash";
 import { defineTable } from "../pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-const { data } = cash;
+import { TableDefConfig } from "@/types";
 export interface Casher {
   linkId: string;
   response?: string;
@@ -10,7 +8,6 @@ export interface Casher {
 const initConfig: TableDefConfig<Casher, "linkId", "cahser"> = {
   id: "linkId",
   name: "cahser",
-  data,
   default() {
     return {
       status: "idle",

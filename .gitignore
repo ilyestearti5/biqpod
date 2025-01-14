@@ -31,3 +31,5 @@ yarn.lock
 /android
 /ios
 /web
+/.firebase
+/dist

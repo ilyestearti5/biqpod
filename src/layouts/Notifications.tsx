@@ -1,5 +1,5 @@
 import React from "react";
-import { useSettingValue, handelShadowColor, openDialog, setSettingValue, settingHooks, useColorMerge } from "@/hooks";
+import { useSettingValue, handelShadowColor, openDialog, setSettingValue, settingHooks, useColorMerge, useCopyState } from "@/hooks";
 import { useAction } from "@/data/system/actions.model";
 import { tw } from "@/utils";
 import { Translate } from "@/components/Translate";
@@ -45,6 +45,7 @@ export function Notifications() {
   const isAnimation = useSettingValue("preferences/animation.boolean");
   const confirmationBefore = useSettingValue("notification/clearAllConfirmation.boolean");
   const notificationsToolsElement = React.createRef<HTMLDivElement>();
+  const fullScreen = useCopyState(false);
   return (
     <div
       onClick={() => {
@@ -53,23 +54,10 @@ export function Notifications() {
         }
       }}
       className={tw(
-        `
-          z-[1000000000000]
-          transition-transform
-          shadow-xl
-          duration-300
-          fixed
-          bottom-[10px]
-          right-[10px]
-          rounded-xl
-          w-[400px]
-          max-md:w-[calc(100%-20px)]
-          border
-          border-solid
-          border-transparent
-          overflow-hidden
-      `,
-        !visibility && "translate-x-[calc(100%)]",
+        `right-[10px] bottom-[10px] z-[1000000000000] fixed border border-transparent border-solid rounded-xl w-1/2 transition-[transform,border-radius,right,bottom,width,height] duration-300 overflow-hidden`,
+        !fullScreen.get && "max-md:w-[calc(100%-20px)]",
+        !fullScreen.get && !visibility && "translate-x-[100%]",
+        fullScreen.get && "w-full h-full rounded-[0px] bottom-[0px] right-[0px]",
       )}
       style={{
         ...colorMerge({
@@ -78,8 +66,8 @@ export function Notifications() {
           boxShadow: handelShadowColor([
             {
               colorId: "shadow.color",
-              blur: 3,
-              size: 2,
+              blur: 20,
+              size: 10,
               x: 0,
               y: 0,
             },
@@ -115,15 +103,21 @@ export function Notifications() {
             <Translate content="notifications" />
           </h3>
           <div ref={notificationsToolsElement} className="inline-flex">
+            <CircleTip
+              icon={allIcons.solid.faWindowRestore}
+              onClick={() => {
+                fullScreen.set((s) => !s);
+              }}
+            />
             {!!notifaysIds.length && (
               <CircleTip
                 onClick={async () => {
                   let response = 0;
                   if (confirmationBefore) {
                     const props = await openDialog({
-                      title: "Clear All Notifications",
+                      title: "Clear All",
                       message: "Do You Want To Clear All Notifications",
-                      checkboxLabel: "Don't Ask Me Again",
+                      checkboxLabel: "Always",
                       buttons: ["Yes", "No"],
                       defaultId: 0,
                     });
@@ -142,6 +136,7 @@ export function Notifications() {
             )}
             <CircleTip
               onClick={() => {
+                fullScreen.set(false);
                 settingHooks.setOneFeild(notificationVisibility, "value", false);
               }}
               icon={allIcons.solid.faChevronRight}
@@ -153,7 +148,12 @@ export function Notifications() {
       <Focus
         focusId="notifications"
         ignoreOutline={!!focusedNotifay}
-        className={tw(`flex flex-col overflow-hidden max-h-[80vh] rounded-ee-xl rounded-es-xl`, isAnimation && "duration-300 transition-[max-height]", !notes && "max-h-[0vh]")}
+        className={tw(
+          `flex flex-col rounded-ee-xl rounded-es-xl max-h-[80vh] overflow-hidden`,
+          isAnimation && "duration-300 transition-[max-height]",
+          fullScreen.get && "max-h-[100vh]",
+          !notes && "max-h-[0vh]",
+        )}
       >
         <Scroll>
           <NotifaysSlot />

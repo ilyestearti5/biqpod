@@ -1,8 +1,9 @@
 import React from "react";
 import { useCopyState, useColorMerge, handelShadowColor, useSettingValue } from "@/hooks";
-import { ClickProps } from "@/types/global";
+
 import { tw } from "@/utils";
 import { Icon } from "./Icon";
+import { ClickProps } from "@/types";
 export interface TabProps extends ClickProps<HTMLSpanElement> {
   isActive?: boolean;
 }
@@ -25,11 +26,6 @@ export function Tab({ children, icon, className, iconClassName, isActive, style,
       }}
       style={{
         ...colorMerge(
-          "secondary.background",
-          isActive && "primary",
-          isActive && {
-            color: "primary.content",
-          },
           {
             borderColor: "borders",
           },
@@ -44,10 +40,19 @@ export function Tab({ children, icon, className, iconClassName, isActive, style,
               },
             ]),
           },
+          "secondary.background",
+          isActive && "primary",
+          isActive && {
+            color: "primary.content",
+          },
         ),
         ...style,
       }}
-      className={tw(`select-none flex items-center justify-center p-2 rounded-[15%] cursor-pointer active:scale-95`, isAnimation && "transition-[background,color,transform]", className)}
+      className={tw(
+        `flex justify-center items-center p-2 border border-transparent border-solid rounded-[15%] cursor-pointer select-none active:scale-95`,
+        isAnimation && "transition-transform",
+        className,
+      )}
       {...props}
     >
       <Icon iconClassName={iconClassName} icon={icon} />

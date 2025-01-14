@@ -1,10 +1,6 @@
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-export type AllLangs = "ar" | "fr" | "en" | "es" | "de" | "it" | "ja" | "ko" | "pt" | "ru" | "zh";
-
-export interface Lang extends Record<string, string> {
-  word: string;
-}
+import { Biqpod, TableDefConfig } from "@/types";
+export type Lang = Biqpod.System.Lang;
 export const initConfig: TableDefConfig<Lang, "word", "langs"> = {
   id: "word",
   name: "langs",

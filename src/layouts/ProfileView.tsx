@@ -1,21 +1,124 @@
 import { viewTemps } from "@/reducers/Object/allTemps";
 import { setTemp, getTemp } from "@/reducers/Object/object.slice";
 import { Password } from "@/components/Fields/PasswordField";
-import { openDialog, openMenu } from "@/functions/app/web/web-utils";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
-import { faRotate, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { execAction, useAction } from "@/data/system/actions.model";
+import { openDialog, openMenu } from "@/functions/web-utils";
+import { execAction, isLoading, isSuccess, useAction } from "@/data/system/actions.model";
 import { delay, mergeArray, setFocused, tw } from "@/utils";
-import { checkFormByFeilds, fieldHooks, useUser, showToast, useColorMerge, useCopyState } from "@/hooks";
+import { checkFormByFeilds, fieldHooks, useUser, showToast, useColorMerge, useCopyState, handelShadowColor } from "@/hooks";
 import { Anchor, AsyncComponent, BlurOverlay, Button, Card, CircleLoading, CircleTip, EmptyComponent, Feild, Icon, Line, MultiScreenPage, Scroll, Translate } from "@/components";
 import { allIcons, getMainCloud } from "@/apis";
+import googleSrc from "@/assets/google.png";
+import facebookSrc from "@/assets/facebook.png";
+import githubSrc from "@/assets/github.png";
+import microsoftSrc from "@/assets/microsoft.png";
+import React from "react";
+import { Biqpod } from "@/types";
 export const emailRegExp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,} *$";
 export interface ProfileContentProps {
   children?: any;
 }
+export const StaticContent = () => {
+  const colorMerge = useColorMerge();
+  return (
+    <EmptyComponent>
+      <p className="mb-4 capitalize">
+        <Translate content="biq pod for payment proccess and charge by what evry you want" />
+      </p>
+      <div className="flex items-center space-x-4">
+        <div
+          className="flex justify-center items-center border border-transparent border-solid rounded-full w-12 h-12"
+          style={{
+            ...colorMerge("primary.background", {
+              borderColor: "borders",
+              boxShadow: handelShadowColor([
+                {
+                  colorId: "shadow.color",
+                  blur: 50,
+                  size: 5,
+                },
+              ]),
+            }),
+          }}
+        >
+          <span className="text-xl">📦</span>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-medium text-lg capitalize">
+            <Translate content="history" />
+          </h3>
+          <p
+            style={{
+              ...colorMerge({
+                color: "gray.opacity.2",
+              }),
+            }}
+            className="text-sm capitalize"
+          >
+            <Translate content="see all historys" />
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center space-x-4">
+        <div
+          className="flex justify-center items-center border border-transparent border-solid rounded-full w-12 h-12"
+          style={{
+            ...colorMerge("primary.background", {
+              borderColor: "borders",
+              boxShadow: handelShadowColor([
+                {
+                  colorId: "shadow.color",
+                  blur: 50,
+                  size: 5,
+                },
+              ]),
+            }),
+          }}
+        >
+          <span className="text-xl">💵</span>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-medium text-lg capitalize">
+            <Translate content="payouts" />
+          </h3>
+          <p
+            className="text-sm capitalize"
+            style={{
+              ...colorMerge({
+                color: "gray.opacity.2",
+              }),
+            }}
+          >
+            <Translate content="power save pays" />
+          </p>
+        </div>
+      </div>
+    </EmptyComponent>
+  );
+};
 export interface ProfileViewProps extends ProfileContentProps {}
 export interface FixedProfileViewProps extends ProfileViewProps {}
+interface SignMethod {
+  provider: Biqpod.Cloud.Auth.Providers;
+  image?: string;
+}
+const signInProviders: SignMethod[] = [
+  {
+    provider: "google",
+    image: googleSrc,
+  },
+  {
+    provider: "facebook",
+    image: facebookSrc,
+  },
+  {
+    provider: "github",
+    image: githubSrc,
+  },
+  {
+    provider: "microsoft",
+    image: microsoftSrc,
+  },
+];
 export const SignupPage = () => {
   const colorMerge = useColorMerge();
   const email = fieldHooks.getOneFeild("signupUseremail", "value");
@@ -27,27 +130,40 @@ export const SignupPage = () => {
       if (!email) {
         showToast("Email is required", "error");
         setFocused("signupUseremail");
-        return;
+        throw "Email is required";
       }
       if (!checkFormByFeilds(["signupUseremail"]).isValide) {
         showToast("Please fill the email correctly!", "error");
         setFocused("signupUseremail");
-        return;
+        throw "Please fill the email correctly!";
       }
       if (!passwordState.get) {
         showToast("Password must be at least 6 characters", "error");
         setFocused("user-password");
-        return;
+        throw "Password must be at least 6 characters";
       }
       if (passwordState.get !== passwordConfirmState.get) {
         showToast("Password and confirm password must be the same!", "error");
         setFocused("user-password-confirm");
-        return;
+        throw "Password and confirm password must be the same!";
       }
-      await getMainCloud().app.auth.createUserWithEmailAndPassword(email, passwordState.get);
+      try {
+        await getMainCloud().app.auth.createUserWithEmailAndPassword(email, passwordState.get);
+      } catch (e: any) {
+        if (e.code === "auth/email-already-in-use") showToast("Email Is Used", "error");
+        else showToast(e.messag, "error");
+        throw e;
+      }
     },
     [email, passwordState.get, passwordConfirmState.get],
   );
+  const signUpIsLoading = isLoading(signupAction);
+  const signUpSuccess = isSuccess(signupAction);
+  React.useEffect(() => {
+    if (signUpSuccess) {
+      showToast("Account Created Successfully", "success");
+    }
+  }, [signUpSuccess]);
   return (
     <Scroll className="flex max-sm:flex-col items-center h-full">
       <div className="p-8 w-1/2 max-sm:w-full">
@@ -68,9 +184,9 @@ export const SignupPage = () => {
                   succ: "Valid email",
                 },
               }}
-              placeholder="@exmple.com"
+              placeholder="@exmple.somthing"
               inputName="signupUseremail"
-              propositions={email && !email.includes("@") ? [email + "@gmail.com"] : []}
+              propositions={email && !email.match(emailRegExp) ? ["gmail.com", "yahoo.com", "icloud.com"].map((mailComps) => email + "@" + mailComps) : []}
             />
           </div>
           <div className="mb-4">
@@ -85,7 +201,7 @@ export const SignupPage = () => {
             </label>
             <Password placeholder="********" id="user-password-confirm" state={passwordConfirmState} />
           </div>
-          <Button icon={signupAction?.status == "loading" ? faRotate : undefined} iconClassName={tw("animate-spin")} type="submit" className="py-2 rounded-md">
+          <Button icon={signUpIsLoading ? allIcons.solid.faRotate : undefined} iconClassName={tw("animate-spin")} type="submit" className="py-2 rounded-md">
             <Translate content="signup" />
           </Button>
         </form>
@@ -97,7 +213,7 @@ export const SignupPage = () => {
               }),
             }}
           >
-            <Translate content="already have an account?" />
+            <Translate content="already have one?" />
           </span>{" "}
           <Anchor
             onClick={(e) => {
@@ -120,51 +236,9 @@ export const SignupPage = () => {
               }),
             }}
           >
-            <Translate content="sigin into water fetch" />
+            <Translate content="sigin into Biq Pod" />
           </h2>
-          <p className="mb-4 capitalize">
-            <Translate content="water fetch is a platform give's the possiblity for doing more thing by dahbia card" />
-          </p>
-          <div className="flex items-center space-x-4">
-            <div className="flex justify-center items-center bg-white shadow-md rounded-full w-12 h-12">
-              <span className="text-xl">📦</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-lg capitalize">
-                <Translate content="history" />
-              </h3>
-              <p
-                style={{
-                  ...colorMerge({
-                    color: "gray.opacity.2",
-                  }),
-                }}
-                className="text-sm capitalize"
-              >
-                <Translate content="see all historys" />
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex justify-center items-center bg-white shadow-md rounded-full w-12 h-12">
-              <span className="text-xl">💵</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-lg capitalize">
-                <Translate content="payouts" />
-              </h3>
-              <p
-                className="text-sm capitalize"
-                style={{
-                  ...colorMerge({
-                    color: "gray.opacity.2",
-                  }),
-                }}
-              >
-                <Translate content="power save pays" />
-              </p>
-            </div>
-          </div>
+          <StaticContent />
         </div>
       </div>
     </Scroll>
@@ -189,20 +263,19 @@ export const LoginPage = () => {
     },
     [email, passwordState.get],
   );
-  const signInWithPopupFacebookAction = useAction(
-    "sign-in-facebook",
+  const choisenProvider = useCopyState<null | Biqpod.Cloud.Auth.Providers>(null);
+  const signAction = useAction(
+    "sign-in-provider",
     async () => {
-      await getMainCloud().app.auth.signIn("facebook");
+      if (!choisenProvider.get) {
+        throw "Provider Not Found";
+      }
+      await getMainCloud().app.auth.signIn(choisenProvider.get);
     },
-    [],
+    [choisenProvider.get],
   );
-  const signInWithPopupGoogleAction = useAction(
-    "sign-in-google",
-    async () => {
-      await getMainCloud().app.auth.signIn("google");
-    },
-    [],
-  );
+  const signInActionLoading = isLoading(signAction);
+  const providerHovered = useCopyState<null | Biqpod.Cloud.Auth.Providers>(null);
   return (
     <Scroll className="flex max-sm:flex-col items-center">
       <div className="p-8 w-1/2 max-sm:w-full">
@@ -248,23 +321,37 @@ export const LoginPage = () => {
             <Translate content="login" />
           </Button>
         </form>
-        <div className="flex justify-evenly items-center my-3">
-          <CircleTip
-            iconClassName={tw(signInWithPopupGoogleAction?.status == "loading" && "animate-spin")}
-            icon={signInWithPopupGoogleAction?.status == "loading" ? faRotate : faGoogle}
-            onClick={async () => {
-              // Google Sign In
-              await execAction("sign-in-google");
-            }}
-          />
-          <CircleTip
-            iconClassName={tw(signInWithPopupFacebookAction?.status == "loading" && "animate-spin")}
-            icon={signInWithPopupFacebookAction?.status == "loading" ? faRotate : faFacebook}
-            onClick={async () => {
-              // Facebook Sign In
-              await execAction("sign-in-facebook");
-            }}
-          />
+        <div className="flex justify-evenly items-center gap-3 my-3">
+          {signInProviders.map(({ provider, image }) => {
+            const loading = signInActionLoading && choisenProvider.get === provider;
+            const isHovered = providerHovered.get === provider;
+            return (
+              <div
+                className="p-2 rounded-xl cursor-pointer"
+                style={{
+                  ...colorMerge(isHovered && "gray.opacity"),
+                }}
+                key={provider}
+              >
+                <div
+                  onMouseEnter={() => {
+                    providerHovered.set(provider);
+                  }}
+                  onMouseLeave={() => {
+                    providerHovered.set(null);
+                  }}
+                  className={tw("flex justify-center items-center w-[50px] h-[50px]", image && "rounded-none")}
+                  onClick={async () => {
+                    choisenProvider.set(provider);
+                    await execAction("sign-in-provider");
+                  }}
+                >
+                  {!loading && <img className="w-full h-full object-cover" src={image} />}
+                  {loading && <Icon icon={allIcons.solid.faSpinner} iconClassName="text-3xl animate-spin" />}
+                </div>
+              </div>
+            );
+          })}
         </div>
         <p className="text-center text-sm">
           <span
@@ -298,51 +385,9 @@ export const LoginPage = () => {
               }),
             }}
           >
-            <Translate content="login into water fetch" />
+            <Translate content="login into Biq Pod" />
           </h2>
-          <p className="mb-4 capitalize">
-            <Translate content="water fetch is a platform give's the possiblity for doing more thing by dahbia card" />
-          </p>
-          <div className="flex items-center space-x-4">
-            <div className="flex justify-center items-center bg-white shadow-md rounded-full w-12 h-12">
-              <span className="text-xl">📦</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-lg capitalize">
-                <Translate content="history" />
-              </h3>
-              <p
-                className="text-sm"
-                style={{
-                  ...colorMerge({
-                    color: "gray.opacity.2",
-                  }),
-                }}
-              >
-                <Translate content="see all historys" />
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex justify-center items-center bg-white shadow-md rounded-full w-12 h-12">
-              <span className="text-xl">💵</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-lg capitalize">
-                <Translate content="payouts" />
-              </h3>
-              <p
-                className="text-sm capitalize"
-                style={{
-                  ...colorMerge({
-                    color: "gray.opacity.2",
-                  }),
-                }}
-              >
-                <Translate content="power save pays" />
-              </p>
-            </div>
-          </div>
+          <StaticContent />
         </div>
       </div>
     </Scroll>
@@ -360,19 +405,22 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
     <div className="flex flex-col h-full overflow-hidden">
       <div className="p-2">
         <div className="flex max-sm:flex-col items-center gap-3">
-          <div className={tw("relative rounded-full w-[100px] h-[100px] max-sm:w-[60px] max-sm:h-[60px] overflow-hidden")}>
+          <div className={tw("relative rounded-full w-[100px] max-sm:w-[60px] h-[100px] max-sm:h-[60px] overflow-hidden")}>
             {user?.photo && <img src={user?.photo?.toString()} className="w-full h-full object-cover" />}
-            {!user?.photo && <Icon icon={faUser} />}
+            {!user?.photo && <Icon icon={allIcons.solid.faUser} />}
           </div>
           <div className="max-sm:flex max-sm:flex-col max-sm:justify-cente">
             <h1 className="text-2xl">{user?.nickname || "No Name"}</h1>
-            <p>{user?.email}</p>
-            {user && (
-              <div className="flex items-center">
-                <span className="capitalize">
-                  <Translate content="phone number" />
-                </span>{" "}
-                : {user?.phone || " - "}
+            {user?.email && (
+              <div className="flex items-center gap-2">
+                <Icon icon={allIcons.solid.faEnvelope} />
+                {user.email}
+              </div>
+            )}
+            {user?.phone && (
+              <div className="flex items-center gap-2">
+                <Icon icon={allIcons.solid.faPhone} />
+                {user.phone}
               </div>
             )}
             <Button
@@ -382,18 +430,21 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
                   y: clientY,
                   menu: mergeArray<Partial<Electron.MenuItem>>(
                     ...[
-                      { label: "Profile", pathname: "personal" },
+                      { label: "Profile", pathname: "personal", defaultIcon: allIcons.solid.faUser },
                       {
                         label: "Billing",
                         pathname: "billing",
+                        defaultIcon: allIcons.solid.faCreditCard,
                       },
                       {
                         label: "Security",
                         pathname: "security",
+                        defaultIcon: allIcons.solid.faLock,
                       },
-                    ].map(({ label, pathname }) => {
+                    ].map(({ label, pathname, defaultIcon }) => {
                       return {
                         label,
+                        defaultIcon,
                         click() {
                           const a = document.createElement("a");
                           const url = (isDev ? "http://localhost:2000" : "https://water-fetch-account.web.app") + "/profile/" + pathname;
@@ -403,15 +454,6 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
                         },
                       };
                     }),
-                    {
-                      type: "separator",
-                    },
-                    {
-                      async click() {
-                        setTemp("menu.id", null);
-                      },
-                      label: "Close",
-                    },
                   ),
                 });
               }}
@@ -432,9 +474,10 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
       <Line />
       <Scroll className="relative">{children}</Scroll>
       <Line />
-      <div className="flex justify-end gap-2 p-2">
+      <div className="flex justify-between gap-2 p-2">
+        <div className="max-md:hidden" />
         <Button
-          className="max-sm:w-full sm:w-1/4 capitalize"
+          className="max-md:w-full md:w-1/4 capitalize"
           style={{
             ...colorMerge("error"),
           }}
@@ -442,14 +485,13 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
             const { response } = await openDialog({
               title: "Logout",
               message: "Are you sure you want to logout?",
-              buttons: ["No", "Yes"],
-              defaultId: 1,
+              buttons: ["Yes", "No"],
+              defaultId: 0,
             });
             if (response) {
-              await getMainCloud().app.auth.signOut();
-            } else {
-              showToast("Ignore Logout", "error");
+              return;
             }
+            await getMainCloud().app.auth.signOut();
           }}
         >
           <Translate content="logout" />
@@ -463,6 +505,7 @@ export const ProfileView = ({ children }: ProfileViewProps) => {
   return (
     <div className="relative flex flex-col w-full h-full overflow-hidden">
       <AsyncComponent
+        deps={[user]}
         render={async () => {
           await delay(1000);
           return (
@@ -481,14 +524,19 @@ export const FixedProfileView = ({ children }: FixedProfileViewProps) => {
   const profileView = viewTemps.getTemp<boolean>("profile-view");
   return (
     <BlurOverlay hidden={!profileView}>
-      <Card className="max-md:rounded-none w-5/6 max-md:w-full h-5/6 max-md:h-full">
+      <Card
+        style={{
+          backgroundColor: "transparent",
+        }}
+        className="backdrop-blur-xl max-md:rounded-none w-5/6 max-md:w-full h-5/6 max-md:h-full overflow-hidden"
+      >
         <div className="flex justify-between items-center p-3">
-          <h1 className="text-3xl">
-            <Translate content="Your Profile" />
+          <h1 className="text-3xl capitalize">
+            <Translate content="account" />
           </h1>
           <div className="flex items-center">
             <CircleTip
-              icon={faXmark}
+              icon={allIcons.solid.faXmark}
               onClick={() => {
                 viewTemps.setTemp("profile-view", false);
               }}
@@ -496,9 +544,7 @@ export const FixedProfileView = ({ children }: FixedProfileViewProps) => {
           </div>
         </div>
         <Line />
-        <Scroll>
-          <ProfileView children={children} />
-        </Scroll>
+        <ProfileView children={children} />
       </Card>
     </BlurOverlay>
   );

@@ -13,6 +13,6 @@ export function AsyncComponent({ render, error = <EmptyComponent />, deps = [], 
     } catch {
       return error;
     }
-  }, [render, error, loading, ...deps]);
+  }, deps);
   return <EmptyComponent>{result ?? loading}</EmptyComponent>;
 }

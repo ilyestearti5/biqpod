@@ -1,4 +1,5 @@
-import { ReactElement } from "@/types/global";
+import { ReactElement } from "@/types";
+
 export interface EmptyComponentProps {
   children?: ReactElement["children"];
 }

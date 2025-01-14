@@ -1,12 +1,12 @@
 import React, { useMemo, useCallback } from "react";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
-import { FeildGeneralProps, Nothing } from "@/types/global";
+
 import { JoinComponentBy } from "../JoinComponentBy";
 import { EmptyComponent } from "../EmptyComponent";
-import { setFocused, tw } from "@/utils";
+import { setFocused, Shortcut, tw } from "@/utils";
 import { handelShadowColor, useColorMerge, useCopyState } from "@/hooks";
+import { FullFieldGeneralProps } from "@/types";
 // Define the props for SquareComponent
-export type PinFieldProps = FeildGeneralProps<string | undefined, SettingConfig["pin"]>;
+export type PinFieldProps = FullFieldGeneralProps<"pin">;
 // SquareComponent with React.memo and custom comparison function for performance
 export const PinField = React.memo(
   ({ id, config, state }: PinFieldProps) => {
@@ -20,13 +20,13 @@ export const PinField = React.memo(
     const handleInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, ""); // Allow only digits
-        state.set(value || undefined);
+        state.set(value || null);
       },
       [state],
     );
     const handlePaste = useCallback(async () => {
       const text = (await navigator.clipboard.readText()).replace(/[^0-9]/g, "");
-      state.set(text || undefined);
+      state.set(text || null);
     }, [state.set]);
     const maxLength = React.useMemo(() => {
       return config?.match
@@ -39,6 +39,13 @@ export const PinField = React.memo(
         <input
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
+          onKeyDown={(e) => {
+            const short = new Shortcut("arrowdown|arrowright|arrowup|arrowleft");
+            if (short.test(e)) {
+              e.preventDefault();
+              return;
+            }
+          }}
           type="text"
           inputMode="numeric"
           onChange={handleInputChange}
@@ -54,7 +61,15 @@ export const PinField = React.memo(
               const segments = Array.from(num);
               const length = matchers.slice(0, i).reduce((prev, curr) => prev + curr.length, 0);
               return (
-                <div className="flex" key={i}>
+                <div
+                  className="flex rounded-lg"
+                  style={{
+                    ...colorMerge({
+                      boxShadow: handelShadowColor([{ colorId: "shadow.color", blur: 4, size: 0, x: 0, y: 5 }]),
+                    }),
+                  }}
+                  key={i}
+                >
                   {segments.map((_, j) => {
                     const squareNumber = length + j;
                     // Compute styles once per render
@@ -65,27 +80,40 @@ export const PinField = React.memo(
                       <div
                         key={j}
                         className={tw(
-                          "border-solid border-transparent text-lg border-y border-r flex items-center justify-center",
+                          "flex justify-center items-center border-y border-transparent border-r border-solid text-lg",
                           j === 0 && "rounded-ss-lg rounded-es-lg border-l",
                           j + 1 === segments.length && "rounded-se-lg rounded-ee-lg",
                           isCursor && "border-l",
+                          focused.get && stringDone && j + 1 !== segments.length && "border-r-0",
                         )}
                         style={{
-                          ...colorMerge({ borderColor: "borders" }, focused.get && isCursor && { borderColor: "primary" }, focused.get && stringDone && { borderColor: "primary" }, {
-                            boxShadow: handelShadowColor([{ colorId: "shadow.color", blur: 4, size: 0, x: 0, y: 5 }]),
-                          }),
+                          ...colorMerge({ borderColor: "borders" }, focused.get && isCursor && { borderColor: "primary" }, focused.get && stringDone && { borderColor: "primary" }),
                           width,
                           height: width,
                         }}
                       >
-                        {stateInString?.[squareNumber] || (isCursor ? "|" : "")}
+                        {stateInString?.[squareNumber] ||
+                          (isCursor
+                            ? focused.get && (
+                                <span
+                                  className="animate-pulse"
+                                  style={{
+                                    ...colorMerge({
+                                      color: "primary",
+                                    }),
+                                  }}
+                                >
+                                  {config?.cursor || "|"}
+                                </span>
+                              )
+                            : "")}
                       </div>
                     );
                   })}
                 </div>
               );
             })}
-            joinComponent={<EmptyComponent>-</EmptyComponent>}
+            joinComponent={<EmptyComponent>{config?.separator || "-"}</EmptyComponent>}
           />
         </div>
       </div>

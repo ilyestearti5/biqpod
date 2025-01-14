@@ -1,15 +1,16 @@
 import "highlight.js/styles/xcode.css";
 import { BooleanFeild } from "./Fields/BooleanField";
-import { handelShadowColor, useColorMerge, useSettingValue } from "@/hooks";
+import { handelShadowColor, useColorMerge } from "@/hooks";
 import { Line } from "./Line";
 import { nanoid } from "@reduxjs/toolkit";
 import { tw } from "@/utils";
+import { isDesktop } from "@/app";
 import { useCopyState } from "@/hooks";
 import Component from "markdown-to-jsx";
 import highlight from "highlight.js/lib/common";
 import React from "react";
 export interface MarkDownProps {
-  value?: string;
+  value?: string | string[];
 }
 export function MarkDown({ value = "" }: MarkDownProps) {
   const colorMerge = useColorMerge();
@@ -112,6 +113,12 @@ export function MarkDown({ value = "" }: MarkDownProps) {
                       color: "primary",
                     }),
                   }}
+                  onClick={(e) => {
+                    if (isDesktop) {
+                      e.preventDefault();
+                      require("electron").shell.openExternal(content.href);
+                    }
+                  }}
                 >
                   {content.children}
                 </a>
@@ -120,14 +127,7 @@ export function MarkDown({ value = "" }: MarkDownProps) {
             table(content) {
               return (
                 <div
-                  className={tw(`
-                    w-full
-                    overflow-hidden
-                    border
-                    border-solid
-                    border-transparent
-                    my-2
-                  `)}
+                  className={tw(`my-2 border border-transparent border-solid w-full overflow-hidden`)}
                   style={{
                     ...colorMerge("gray.opacity", {
                       borderColor: "gray.opacity.2",
@@ -148,7 +148,7 @@ export function MarkDown({ value = "" }: MarkDownProps) {
                   ele = ele.previousElementSibling;
                 }
                 return i;
-              }, [ref.current]);
+              }, [ref]);
               return (
                 <div
                   ref={ref}
@@ -177,7 +177,7 @@ export function MarkDown({ value = "" }: MarkDownProps) {
           namedCodesToUnicode: { le: "\u2264" },
         }}
       >
-        {value}
+        {typeof value == "string" ? value : value.join("\n")}
       </Component>
     </div>
   );

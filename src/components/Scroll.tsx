@@ -1,8 +1,8 @@
 import { handelShadowColor, useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
 import { useCopyState } from "@/hooks";
-import { ReactElement } from "@/types/global";
 import React from "react";
+import { ReactElement } from "@/types";
 export interface ScrollProps extends ReactElement {
   type?: "list" | "normal";
 }
@@ -16,7 +16,7 @@ export const Scroll = React.forwardRef(({ children, onScroll, className, type = 
   const colorMerge = useColorMerge();
   return (
     <div {...props} ref={ref} className="scroll-view">
-      <div aria-label="scrolled-view" className={tw("overflow-y-auto h-full w-full", className)} ref={refElement} onScroll={handelScroll}>
+      <div aria-label="scrolled-view" className={tw("w-full h-full overflow-y-auto", className)} ref={refElement} onScroll={handelScroll}>
         {children}
       </div>
       <div

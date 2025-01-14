@@ -15,13 +15,14 @@ import { JoinComponentBy } from "@/components/JoinComponentBy";
 import { Key, keyHooks } from "@/data/system/keys.model";
 import { Db } from "@/utils";
 import { nanoid } from "@reduxjs/toolkit";
-import { faCopy, faHandPointDown, faHandPointUp } from "@fortawesome/free-regular-svg-icons";
 import { TitleView } from "@/components/TitleView";
 import { Translate } from "@/components/Translate";
 import { Anchor } from "@/components/Anchor";
 import { Tip } from "@/components/Tip";
 import { useCopyState } from "@/hooks";
 import { Input } from "@/components/Input";
+import { allIcons } from "@/apis";
+import { CircleTip } from "@/components";
 const direction = {
   commandId: "keyboard.commandId",
   position: "keyboard.editingPosition",
@@ -61,18 +62,7 @@ const KeyPandingLine = ({ keyPanding }: KeyPandingLineProps) => {
     <div
       onMouseEnter={() => hover.set(true)}
       onMouseLeave={() => hover.set(false)}
-      className={tw(`
-        flex
-        group
-        items-center
-        justify-center
-        gap-x-1
-        cursor-pointer
-        w-full
-        px-2
-        group
-        relative
-      `)}
+      className={tw(`relative flex justify-center items-center gap-x-1 px-2 w-full cursor-pointer group group`)}
       style={{
         ...colorMerge(hover.get && "gray.opacity"),
       }}
@@ -80,17 +70,7 @@ const KeyPandingLine = ({ keyPanding }: KeyPandingLineProps) => {
       <div>
         <div className="flex justify-end w-[150px]">
           <div
-            className={tw(`
-              tools
-              flex
-              items-center
-              gap-1
-              invisible
-              group-hover:visible
-              border-r
-              border-solid
-              border-transparent
-            `)}
+            className={tw(`group-hover:visible flex items-center gap-1 border-transparent border-r border-solid invisible tools`)}
             style={{
               ...colorMerge({
                 borderColor: "borders",
@@ -108,7 +88,7 @@ const KeyPandingLine = ({ keyPanding }: KeyPandingLineProps) => {
             </TitleView>
             <TitleView title="copy when value">
               <Tip
-                icon={faCopy}
+                icon={allIcons.regular.faCopy}
                 onClick={async () => {
                   when && (await navigator.clipboard.writeText(when));
                 }}
@@ -136,15 +116,25 @@ const KeyPandingLine = ({ keyPanding }: KeyPandingLineProps) => {
                 onClick={() => {
                   keyPanding.keyId && keyHooks.setOneFeild(keyPanding.keyId, "type", keyPanding.type == "up" ? "down" : "up");
                 }}
-                icon={keyPanding.type == "up" ? faHandPointUp : faHandPointDown}
+                icon={keyPanding.type == "up" ? allIcons.regular.faHandPointUp : allIcons.regular.faHandPointDown}
               />
             </TitleView>
           </div>
         </div>
       </div>
       <div className="px-2">{value && <KeyPanding shortcut={value} />}</div>
-      <div className="text-xs col">
-        {!state.get && (when || " - ")}
+      <div className="font-bold font-mono text-xs col">
+        {!state.get && (
+          <span
+            className="select-none"
+            onDoubleClick={() => {
+              state.set(true);
+              when && whenState.set(when);
+            }}
+          >
+            {when || " - "}
+          </span>
+        )}
         {state.get && (
           <Input
             style={{
@@ -241,16 +231,7 @@ export function UpdateKeyboardShortcut() {
             borderColor: "borders",
           }),
         }}
-        className={tw(
-          `
-            rounded-lg
-            border
-            border-solid
-            border-transparent
-            min-w-[500px]
-            w-[60vw]
-          `,
-        )}
+        className={tw(`border border-transparent border-solid rounded-lg w-[60vw] min-w-[500px]`)}
         tabIndex={cmd ? 1 : -1}
         id="edit-keyPanding"
         onKeyDown={(e) => {
@@ -283,23 +264,19 @@ export function UpdateKeyboardShortcut() {
           currentKeyPanding.set(short);
         }}
       >
-        <div className="relative flex justify-center items-center gap-3 p-2">
-          {cmd?.commandId && <KeyboardTitle commandId={cmd.commandId} />}
-          <Tip
-            className={tw(`
-              absolute
-              right-2
-              top-1/2
-              transform
-              -translate-y-1/2
-            `)}
-            onClick={async () => {
-              setTemp(direction.commandId, null);
-              setTemp(direction.position, null);
-              setFocused("findConfigurations");
-            }}
-            icon={faXmark}
-          />
+        <div className="relative flex justify-between p-2 itrms-center">
+          <div className="flex justify-center items-center gap-3">{cmd?.commandId && <KeyboardTitle commandId={cmd.commandId} />}</div>
+          <TitleView>
+            <CircleTip
+              className={tw(`top-1/2 right-2 absolute transform -translate-y-1/2`)}
+              onClick={async () => {
+                setTemp(direction.commandId, null);
+                setTemp(direction.position, null);
+                setFocused("findConfigurations");
+              }}
+              icon={faXmark}
+            />
+          </TitleView>
         </div>
         <Line />
         <div className="flex flex-col flex-wrap items-center">

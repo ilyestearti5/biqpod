@@ -1,32 +1,45 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "composite": true,
     "declaration": true,
     "declarationMap": false,
-    "noEmit": true,
-    "outDir": "./ui", // Ensure this matches where you want the types to go
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
+    "lib": ["ESNext", "ES2021", "DOM"],
+    "module": "ESNext",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "resolveJsonModule": true,
-    "baseUrl": "./",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./ui", // Ensure this matches where you want the types to go
     "paths": {
-      "@/*": ["src/*"],
-      "api/*": ["src/apis/*"],
-      "assets/*": ["src/assets/*"],
-      "components/*": ["src/components/*"],
-      "database/*": ["src/data/db/*"],
-      "hooks/*": ["src/hooks/*"],
-      "main/*": ["./*"],
-      "models/*": ["src/data/*"],
-      "utils/*": ["src/utils/*"]
-    }
+      "@/*": ["*"],
+      "api/*": ["apis/*"],
+      "assets/*": ["assets/*"],
+      "components/*": ["components/*"],
+      "database/*": ["data/db/*"],
+      "hooks/*": ["hooks/*"],
+      "models/*": ["data/*"],
+      "utils/*": ["utils/*"]
+    },
+    // allow Json
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true
   },
-  "include": ["./src"],
-  "references": []
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

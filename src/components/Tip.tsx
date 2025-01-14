@@ -3,7 +3,7 @@ import { tw } from "@/utils";
 import { useCopyState } from "@/hooks";
 import React from "react";
 import { Icon } from "./Icon";
-import { ClickProps } from "@/types/global";
+import { ClickProps } from "@/types";
 export type TipProps = ClickProps<HTMLSpanElement>;
 export function Tip({
   icon,
@@ -63,17 +63,7 @@ export function Tip({
         onMouseLeave?.(e);
       }}
       className={tw(
-        `
-          rounded-md
-          p-1
-          inline-flex
-          items-center
-          justify-center
-          -outline-offset-1
-          outline-1
-          outline-transparent
-          cursor-pointer
-        `,
+        `inline-flex justify-center items-center p-1 rounded-md cursor-pointer -outline-offset-1 outline-1 outline-transparent`,
         props["aria-disabled"] && `pointer-events-none`,
         className,
       )}

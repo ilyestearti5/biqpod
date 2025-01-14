@@ -3,9 +3,8 @@ import { useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
 import { useCopyState } from "@/hooks";
 import { Button } from "@/components/Button";
-import { FeildGeneralProps } from "@/types/global";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
 import { Input } from "../Input";
+import { FeildGeneralProps, SettingConfig } from "@/types";
 export type RegexpFeildProps = FeildGeneralProps<string | undefined, SettingConfig["regexp"]>;
 // render RegExp Feild Prop
 function RegexpFeild({ state, id }: RegexpFeildProps) {
@@ -51,15 +50,7 @@ function RegexpFeild({ state, id }: RegexpFeildProps) {
       </div>
       {errRegexp && (
         <div
-          className={tw(`
-            mt-2
-            p-1
-            text-xs
-            border
-            border-solid
-            border-transparent
-            w-fit
-          `)}
+          className={tw(`mt-2 p-1 border border-transparent border-solid w-fit text-xs`)}
           style={{
             ...colorMerge("error", {
               color: "error.content",

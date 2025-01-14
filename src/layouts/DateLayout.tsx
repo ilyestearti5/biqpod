@@ -1,6 +1,7 @@
 import { allIcons } from "@/apis";
-import { BlurOverlay, Card, CircleTip, Line, Button, Translate, Tabs, MultiScreenPage, EmptyComponent, Input } from "@/components";
+import { BlurOverlay, Card, CircleTip, Line, Button, Translate, Tabs, MultiScreenPage, EmptyComponent } from "@/components";
 import { useCopyState, useColorMerge, ColorIds, useTemp, getTemp, setTemp } from "@/hooks";
+import { Nothing } from "@/types";
 import { isSorted, range, tw } from "@/utils";
 import React from "react";
 export const DateLayout = () => {
@@ -10,7 +11,7 @@ export const DateLayout = () => {
   React.useEffect(() => {
     if (timeId.get) {
       if (initTime) {
-        let dateTime = new Date(initTime);
+        const dateTime = new Date(initTime);
         selectedTime.set({
           hour: dateTime.getHours(),
           minute: dateTime.getMinutes(),
@@ -49,19 +50,20 @@ export const DateLayout = () => {
   const radius = mode.get === "hours" ? 120 : 120; // Outer circle radius for hours/minutes
   // Calculate the position of the hand pointing to the selected hour or minute
   const colorMerge = useColorMerge();
-  const dayState = useCopyState("am");
-  const afterState = useCopyState("0");
+  const dayState = useCopyState<Nothing | string>("am");
+  const afterState = useCopyState<Nothing | string>("0");
   const handPosition = React.useMemo<{
     x: number;
     y: number;
     colorId: ColorIds;
   } | null>(() => {
+    if (!afterState.get || !dayState.get) return null;
     const selectedValue = mode.get === "hours" ? selectedTime.get.hour : selectedTime.get.minute;
     if (selectedValue === null) return null;
     const angle = (selectedValue / totalItems) * 2 * Math.PI;
     const x = radius + radius * Math.cos(angle - Math.PI / 2);
     const y = radius + radius * Math.sin(angle - Math.PI / 2);
-    let props: Record<string, [number, number]> =
+    const props: Record<string, [number, number]> =
       mode.get == "minutes"
         ? {
             "0": [0, 19],
@@ -131,15 +133,19 @@ export const DateLayout = () => {
             {/* Display hours/minutes in a circular layout */}
             {timeArray.map((value, index) => {
               const { x, y } = getPosition(index, totalItems, 120); // Adjust outer radius
-              let isSomthing = (mode.get === "hours" && selectedTime.get.hour === +dayState.get + value) || (mode.get === "minutes" && selectedTime.get.minute === +afterState.get + value);
+
+              const dayS = dayState.get || "0";
+              const afterS = afterState.get || "0";
+
+              const isSomthing = (mode.get === "hours" && selectedTime.get.hour === +dayS + value) || (mode.get === "minutes" && selectedTime.get.minute === +afterS + value);
               return (
                 <g
                   key={value}
                   onClick={() => {
                     if (mode.get == "minutes") {
-                      handleSelectTime(+afterState.get + value);
+                      handleSelectTime(+afterS + value);
                     } else {
-                      handleSelectTime(+dayState.get + value);
+                      handleSelectTime(+dayS + value);
                     }
                   }}
                   className="cursor-pointer"
@@ -177,8 +183,8 @@ export const DateLayout = () => {
                     }}
                     className="select-none"
                   >
-                    {mode.get == "minutes" && value + +afterState.get}
-                    {mode.get == "hours" && value + +dayState.get}
+                    {mode.get == "minutes" && value + +(afterState.get || "0")}
+                    {mode.get == "hours" && value + +(dayState.get || "0")}
                   </text>
                 </g>
               );
@@ -287,7 +293,7 @@ export const DateLayout = () => {
           <Button
             className="capitalize"
             onClick={() => {
-              let time = new Date();
+              const time = new Date();
               typeof selectedTime.get?.hour == "number" && time.setHours(selectedTime.get.hour);
               typeof selectedTime.get?.minute == "number" && time.setMinutes(selectedTime.get.minute);
               setTemp("date-layout-time.canceled", false);

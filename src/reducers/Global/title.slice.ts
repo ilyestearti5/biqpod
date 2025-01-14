@@ -2,9 +2,10 @@ import { store } from "@/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { isLike } from "@/utils/index";
+import { Biqpod } from "@/types";
 export interface TitleInitState {
   content: string | number | null | undefined;
-  position: null | [number, number];
+  position: null | Biqpod.Types.Axis;
   x: "left" | "right" | "center";
   y: "top" | "bottom" | "center";
 }

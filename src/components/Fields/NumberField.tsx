@@ -1,12 +1,12 @@
 import React from "react";
 import { Button } from "@/components/Button";
 import { execAction, useAction } from "@/data/system/actions.model";
-import { setFocused, tw } from "@/utils";
-import { FeildGeneralProps } from "@/types/global";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
+import { mergeObject, setFocused, tw } from "@/utils";
+
 import { Translate } from "../Translate";
 import { useColorMerge, useCopyState } from "@/hooks";
 import { Input } from "../Input";
+import { FeildGeneralProps, SettingConfig } from "@/types";
 export type NumberFeildProps = FeildGeneralProps<number | undefined | null, SettingConfig["number"]>;
 export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
   React.useEffect(() => {
@@ -25,7 +25,7 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
     if (elementRef.current) {
       elementRef.current.value = state.get?.toString() || "";
     }
-  }, [state.get, elementRef.current]);
+  }, [state.get, elementRef]);
   React.useEffect(() => {
     if (!+value.get) {
       const ele = document.getElementById(id) as HTMLInputElement | null;
@@ -44,7 +44,7 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
         }
       }
     },
-    [value.get, id, elementRef.current],
+    [value.get, id, elementRef],
   );
   useAction(
     "number.cancelChangeState",
@@ -77,16 +77,7 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
   }, [config.autoChange, state.get, value.get]);
   const colorMerge = useColorMerge();
   return (
-    <div
-      className={tw(`
-        relative
-        rounded-md
-        flex
-        items-center
-        gap-1
-        w-full
-      `)}
-    >
+    <div className={tw(`relative flex items-center gap-1 rounded-md w-full`)}>
       <div className="flex items-center w-full">
         <Input
           ref={elementRef}
@@ -99,7 +90,14 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
           onBlur={() => {
             focused.set(false);
           }}
-          className={tw(config.size == "small" ? "p-1" : "p-2", config.center && "text-center")}
+          style={{
+            ...mergeObject(
+              config.size && {
+                fontSize: config.size,
+              },
+            ),
+          }}
+          className={tw("p-1", config.center && "text-center")}
           type="text"
           inputMode="numeric"
           id={id}
@@ -112,7 +110,17 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
               e.stopPropagation();
               if (e) execAction("number.changeState", id);
             }
+            if (e.key.toLowerCase() === "arrowdown") {
+              elementRef.current?.select();
+              state.set((s) => (s || 0) - 1);
+              value.set(state.get?.toString() || "");
+            } else if (e.key.toLowerCase() === "arrowup") {
+              elementRef.current?.select();
+              state.set((s) => (s || 0) + 1);
+              value.set(state.get?.toString() || "");
+            }
           }}
+          value={value.get}
           onValueChange={value.set}
         />
       </div>

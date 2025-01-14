@@ -1,11 +1,16 @@
 import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
-import path from "node:path";
+import dts, { PluginOptions } from "vite-plugin-dts";
+import path from "path";
 import pkg from "./package.json";
 import react from "@vitejs/plugin-react";
 export default defineConfig(({ command }) => {
   const args = process.argv.slice(2);
   const platform = args[2];
+  const options: PluginOptions = {
+    tsconfigPath: "./tsconfig.json",
+    rollupTypes: true,
+    insertTypesEntry: true,
+  };
   const alias = {
     "@": path.resolve("./src"),
     components: path.resolve("./src/components"),
@@ -25,37 +30,29 @@ export default defineConfig(({ command }) => {
     app: path.resolve(__dirname, "src/app/index.ts"),
     apis: path.resolve(__dirname, "src/apis/index.ts"),
     routes: path.resolve(__dirname, "src/routes/index.ts"),
+    types: path.resolve(__dirname, "src/types/index.ts"),
   };
   if (command == "serve") {
     return {
       plugins: [react()],
       define: {
-        global: "globalThis", // This will point global to the globalThis object in the browser
+        global: "globalThis",
       },
       resolve: {
         alias,
       },
       server: {
-        // make it can access from any device in the same network
         host: true,
         port: 4545,
       },
     };
   }
-  if (platform == "lib") {
+  if (platform.startsWith("lib")) {
     return {
       define: {
-        global: "globalThis", // This will point global to the globalThis object in the browser
+        global: "globalThis",
       },
-      plugins: [
-        react(),
-        dts({
-          tsconfigPath: "./tsconfig.json", // Path to your tsconfig
-          rollupTypes: true, // Bundle all .d.ts files into one
-          insertTypesEntry: true, // Create a single index.d.ts file,
-          outDir: "./ui",
-        }),
-      ],
+      plugins: [react(), dts(options)],
       resolve: {
         alias,
       },
@@ -80,7 +77,7 @@ export default defineConfig(({ command }) => {
   } else if (platform == "web") {
     return {
       define: {
-        global: "globalThis", // This will point global to the globalThis object in the browser
+        global: "globalThis",
       },
       plugins: [react()],
       resolve: {

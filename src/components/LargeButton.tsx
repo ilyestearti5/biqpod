@@ -1,7 +1,8 @@
 import { useCopyState, useColorMerge, handelGradientColor } from "@/hooks";
-import { ClickProps } from "@/types/global";
+
 import { tw } from "@/utils";
 import { Icon } from "./Icon";
+import { ClickProps } from "@/types";
 export type LargeButtonProps = ClickProps<HTMLButtonElement>;
 export function LargeButton({
   "aria-selected": selected,
@@ -60,39 +61,14 @@ export function LargeButton({
         ),
         ...style,
       }}
-      className={tw(
-        `
-        outline-transparent
-        -outline-offset-1
-        outline-1
-        p-3
-        w-full
-        flex
-        items-center
-        gap-4
-        relative
-        overflow-hidden
-      `,
-        className,
-      )}
+      className={tw(`relative flex items-center gap-4 p-3 w-full overflow-hidden -outline-offset-1 outline-1 outline-transparent`, className)}
     >
       <Icon iconClassName={iconClassName} icon={icon} />
       {children}
       <div
         className={tw(
-          `
-          absolute
-          -top-[100px]
-          h-[400px]
-          pointer-events-none
-          transition-[left]
-          duration-1000
-          -left-1/4
-          w-1/4
-          transform
-          -rotate-45
-        `,
-          hoverState.get && `left-full`,
+          `-top-[100%] -left-1/2 absolute opacity-0 w-1/3 h-[300%] transform transition-[left,opacity] duration-1000 pointer-events-none -rotate-45`,
+          hoverState.get && `left-full opacity-100`,
         )}
         style={{
           ...colorMerge({

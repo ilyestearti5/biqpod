@@ -1,7 +1,7 @@
 import React from "react";
 import { useColorMerge, useCopyState, handelShadowColor } from "@/hooks";
-import { ReactElement } from "@/types/global";
 import { mergeObject, tw, range } from "@/utils";
+import { ReactElement } from "@/types";
 export interface ClickedViewProps extends ReactElement {}
 export const ClickedView = ({ children, className, style, onPointerDown, onPointerLeave, onPointerUp, onMouseEnter, onMouseLeave, ...props }: ClickedViewProps) => {
   const colorMerge = useColorMerge();
@@ -28,9 +28,8 @@ export const ClickedView = ({ children, className, style, onPointerDown, onPoint
           ]),
         },
       ),
-      ...style,
     };
-  }, [colorMerge, focused.get, handelShadowColor, style]);
+  }, [colorMerge, focused.get, handelShadowColor]);
   return (
     <div
       onFocus={() => {
@@ -60,9 +59,9 @@ export const ClickedView = ({ children, className, style, onPointerDown, onPoint
         onPointerLeave?.(e);
       }}
       style={{
-        ...mergeObject(fullStyle),
+        ...mergeObject<React.CSSProperties>(fullStyle, style),
       }}
-      className={tw("btn select-none w-full relative overflow-hidden transition-[transform]", className)}
+      className={tw("relative w-full transition-[transform] overflow-hidden select-none btn", className)}
       {...props}
     >
       {range(1, 3).map((index) => {

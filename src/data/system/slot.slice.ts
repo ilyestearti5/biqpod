@@ -1,22 +1,16 @@
+import React from "react";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
 import { nanoid } from "@reduxjs/toolkit";
 import { range } from "@/utils";
 import { store } from "@/store";
-import config from "@/apis/slot";
-import React from "react";
-export type SlotIds = keyof typeof config.data;
+import { TableDefConfig } from "@/types";
 export interface SlotType {
   slotId?: string;
   focused?: number | null;
   submited?: number | null;
-  selected?: {
-    [x: number]: boolean;
-  };
-  skiped?: {
-    [x: number]: boolean;
-  };
+  selected?: Record<number, boolean>;
+  skiped?: Record<number, boolean>;
   length?: number;
   direction?: "forward" | "backward" | null;
   redirect?: boolean;

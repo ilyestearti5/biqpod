@@ -1,13 +1,12 @@
 import React from "react";
 import { useColorMerge } from "@/hooks";
-import { SettingConfig } from "@/reducers/Settings/SettingConfig";
 import { Input } from "../Input";
 import { getFocus } from "@/utils";
 import { fieldHooks, initNewFeild, useEffectDelay } from "@/hooks";
-import { FeildGeneralProps } from "@/types/global";
 import { execAction, useAction } from "@/data/system/actions.model";
 import { Button } from "@/components/Button";
 import { Translate } from "../Translate";
+import { FeildGeneralProps, SettingConfig } from "@/types";
 export type StringFeildProps = FeildGeneralProps<string | undefined, SettingConfig["string"]>;
 // String Feild Rendering
 export function StringFeild({ state, config = {}, id }: StringFeildProps) {

@@ -67,7 +67,7 @@ export function Icons() {
       slotId="icons-list"
       data={filterdIcons}
       itemSize={50}
-      component={({ data, style, status, index, handel }) => {
+      render={({ data, style, status, index, handel }) => {
         const hover = useCopyState(false);
         const colorMerge = useColorMerge();
         // tools
@@ -91,16 +91,7 @@ export function Icons() {
                 },
               ),
             }}
-            className={tw(`
-              flex
-              justify-between
-              items-center
-              p-3
-              gap-2
-              border
-              border-solid
-              border-transparent
-            `)}
+            className={tw(`flex justify-between items-center gap-2 p-3 border border-transparent border-solid`)}
             onClick={() => {
               handel.focus();
               handel.submit();

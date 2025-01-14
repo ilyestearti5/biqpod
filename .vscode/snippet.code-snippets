@@ -52,12 +52,22 @@
   },
   "srg": {
     "scope": "javascript,typescript,javascript,typescriptreact",
-    "prefix": "srg",
+    "prefix": "stateg",
     "body": "const $1 = useCopyState<$2>($3)",
   },
   "sr": {
     "scope": "javascript,typescript,javascript,typescriptreact",
-    "prefix": "sr",
+    "prefix": "state",
     "body": "const $1 = useCopyState($2)",
   },
+  "temp": {
+    "scope": "javascript,typescript,javascript,typescriptreact",
+    "prefix": "getTemp",
+    "body": "const $1 = getTemp($2)",
+  },
+  "tempg": {
+    "scope": "javascript,typescript,javascript,typescriptreact",
+    "prefix": "getTempTypes",
+    "body": "const $1 = getTemp<$2>($3)",
+  }
 }

@@ -1,30 +1,16 @@
+import keys from "@/apis/keys";
 import React from "react";
 import { defineTable } from "@/data/pkg/table.def";
-import { TableDefConfig } from "@/types/global";
-import { Command, CommandIds, execCommand, isExist } from "./command.model";
+import { execCommand, isExist } from "./command.model";
 import { Shortcut, getFocus } from "@/utils";
 import { store } from "@/store";
-import { Db } from "@/utils";
 import { nanoid } from "@reduxjs/toolkit";
 import { con } from "@/utils/index";
-import keys from "@/apis/keys";
 import { getTemp } from "@/reducers/Object/object.slice";
-import { Action } from "./actions.model";
-import { FullStateManagment } from "@/types/global";
 import { useEffectDelay } from "@/hooks";
+import { Biqpod, FullStateManagment, TableDefConfig } from "@/types";
 const { data } = keys;
-export interface Key {
-  value?: string;
-  keyId?: string;
-  command?: Command["commandId"];
-  only?: boolean;
-  when?: string;
-  preventDefault?: boolean;
-  repeation?: boolean;
-  type?: "up" | "down";
-  private?: boolean;
-  action?: Action["actionId"];
-}
+export type Key = Biqpod.System.Key;
 const initConfig: TableDefConfig<Key, "keyId", "keys"> = {
   name: "keys",
   id: "keyId",
