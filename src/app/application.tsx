@@ -14,6 +14,7 @@ import { defaultObject, delay, mapAsync } from "@/utils";
 import { createRoot } from "react-dom/client";
 import { Button, Card, CircleLoading, Translate } from "@/components";
 import { addCommand, Color, colorHooks, getTemp, initUser, Key, Lang, langHooks, setTemp, useIdleStatus } from "@/hooks";
+import { isDesktop } from ".";
 const { data } = settings;
 export const defineGlobal = (name: string, config: any) => {
   window[name] = config;
@@ -52,6 +53,18 @@ export const Application = ({ props }: ApplicationProps) => {
   initSystem();
   initUser();
   React.useEffect(() => {
+    if (isDesktop) {
+      const { ipcRenderer } = require("electron");
+      const callback = (_e: any, id: number) => {
+        setTemp("windowId", id);
+      };
+      ipcRenderer.on("windowId", callback);
+      return () => {
+        ipcRenderer.off("windowId", callback);
+      };
+    }
+  }, []);
+  React.useEffect(() => {
     settingHooks.setAll(
       Object.entries(data).map(([key, props]: [string, any]) => {
         return {
@@ -65,7 +78,7 @@ export const Application = ({ props }: ApplicationProps) => {
   const isDev = getTemp<boolean>("env.isDev");
   React.useEffect(() => {
     if (isDev) {
-      window.auth = getMainCloud().app.auth;
+      window.auth = getMainCloud()?.app.auth;
       window.cloud = ClientCloud;
       window.execAction = execAction;
       window.execCommand = execCommand;

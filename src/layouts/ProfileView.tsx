@@ -5,7 +5,7 @@ import { openDialog, openMenu } from "@/functions/web-utils";
 import { execAction, isLoading, isSuccess, useAction } from "@/data/system/actions.model";
 import { delay, mergeArray, setFocused, tw } from "@/utils";
 import { checkFormByFeilds, fieldHooks, useUser, showToast, useColorMerge, useCopyState, handelShadowColor } from "@/hooks";
-import { Anchor, AsyncComponent, BlurOverlay, Button, Card, CircleLoading, CircleTip, EmptyComponent, Feild, Icon, Line, MultiScreenPage, Scroll, Translate } from "@/components";
+import { Anchor, AsyncComponent, BlurOverlay, Button, Card, CircleLoading, CircleTip, EmptyComponent, Feild, Icon, JoinComponentBy, Line, MultiScreenPage, Scroll, Translate } from "@/components";
 import { allIcons, getMainCloud } from "@/apis";
 import googleSrc from "@/assets/google.png";
 import facebookSrc from "@/assets/facebook.png";
@@ -148,7 +148,7 @@ export const SignupPage = () => {
         throw "Password and confirm password must be the same!";
       }
       try {
-        await getMainCloud().app.auth.createUserWithEmailAndPassword(email, passwordState.get);
+        await getMainCloud()?.app.auth.createUserWithEmailAndPassword(email, passwordState.get);
       } catch (e: any) {
         if (e.code === "auth/email-already-in-use") showToast("Email Is Used", "error");
         else showToast(e.messag, "error");
@@ -248,7 +248,7 @@ export const LoginPage = () => {
   const colorMerge = useColorMerge();
   const email = fieldHooks.getOneFeild("loginUseremail", "value");
   const passwordState = useCopyState<undefined | string>("");
-  useAction(
+  const loginAction = useAction(
     "login",
     async () => {
       if (!email) {
@@ -259,10 +259,11 @@ export const LoginPage = () => {
         showToast("Password must be at least 6 characters", "error");
         return;
       }
-      await getMainCloud().app.auth.signInWithEmailAndPassword(email, passwordState.get);
+      await getMainCloud()?.app.auth.signInWithEmailAndPassword(email, passwordState.get);
     },
     [email, passwordState.get],
   );
+  const isLoadingLogin = isLoading(loginAction);
   const choisenProvider = useCopyState<null | Biqpod.Cloud.Auth.Providers>(null);
   const signAction = useAction(
     "sign-in-provider",
@@ -270,127 +271,160 @@ export const LoginPage = () => {
       if (!choisenProvider.get) {
         throw "Provider Not Found";
       }
-      await getMainCloud().app.auth.signIn(choisenProvider.get);
+      await getMainCloud()?.app.auth.signIn(choisenProvider.get);
     },
     [choisenProvider.get],
   );
   const signInActionLoading = isLoading(signAction);
   const providerHovered = useCopyState<null | Biqpod.Cloud.Auth.Providers>(null);
+  const usersList: Biqpod.Account.User[] = [];
   return (
-    <Scroll className="flex max-sm:flex-col items-center">
-      <div className="p-8 w-1/2 max-sm:w-full">
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (email && passwordState.get) {
-              try {
-                await getMainCloud().app.auth.signInWithEmailAndPassword(email, passwordState.get);
-              } catch {
-                showToast("Password Or Email Is Incorrect 😴", "error");
-              }
-            } else if (!email) {
-              showToast("Email Required!", "warning");
-            } else {
-              showToast("Password Required!", "warning");
-            }
-          }}
-        >
-          <div className="mb-4">
-            <label className="block mb-2 capitalize">
-              <Translate content="email" /> :{" "}
-            </label>
-            <Feild
-              controls={{
-                [emailRegExp]: {
-                  err: "Invalid email",
-                  succ: "Valid email",
-                },
-              }}
-              inputName="loginUseremail"
-              placeholder="@exmple.com"
-              propositions={email && !email.includes("@") ? [email + "@gmail.com"] : []}
+    <EmptyComponent>
+      {!!usersList.length && (
+        <div className="p-2">
+          <Card className="w-full overflow-hidden">
+            <JoinComponentBy
+              list={usersList.map((oneUser, index) => {
+                const isHover = useCopyState(false);
+                const colorMerge = useColorMerge();
+                return (
+                  <div
+                    key={index}
+                    onClick={() => {}}
+                    onMouseEnter={() => {
+                      isHover.set(true);
+                    }}
+                    onMouseLeave={() => {
+                      isHover.set(false);
+                    }}
+                    style={{
+                      ...colorMerge(isHover.get && "gray.opacity"),
+                    }}
+                    className="flex items-center gap-2 p-2 cursor-pointer"
+                  >
+                    <div className="relative rounded-full w-12 h-12 overflow-hidden">
+                      {oneUser.photo && <img src={oneUser.photo} className="w-full h-full object-cover" />}
+                      {!oneUser.photo && <Icon icon={allIcons.solid.faUser} />}
+                    </div>
+                    <div>
+                      <h3 className="capitalize">
+                        {oneUser.firstname} {oneUser.lastname}
+                      </h3>
+                      <p>{oneUser.email}</p>
+                    </div>
+                  </div>
+                );
+              })}
+              joinComponent={<Line />}
             />
-          </div>
-          <div className="mb-4">
-            <label className="block mb-2 capitalize">
-              <Translate content="password" />
-            </label>
-            <Password placeholder="********" state={passwordState} />
-          </div>
-          <Button type="submit" className="py-2">
-            <Translate content="login" />
-          </Button>
-        </form>
-        <div className="flex justify-evenly items-center gap-3 my-3">
-          {signInProviders.map(({ provider, image }) => {
-            const loading = signInActionLoading && choisenProvider.get === provider;
-            const isHovered = providerHovered.get === provider;
-            return (
-              <div
-                className="p-2 rounded-xl cursor-pointer"
-                style={{
-                  ...colorMerge(isHovered && "gray.opacity"),
-                }}
-                key={provider}
-              >
-                <div
-                  onMouseEnter={() => {
-                    providerHovered.set(provider);
-                  }}
-                  onMouseLeave={() => {
-                    providerHovered.set(null);
-                  }}
-                  className={tw("flex justify-center items-center w-[50px] h-[50px]", image && "rounded-none")}
-                  onClick={async () => {
-                    choisenProvider.set(provider);
-                    await execAction("sign-in-provider");
-                  }}
-                >
-                  {!loading && <img className="w-full h-full object-cover" src={image} />}
-                  {loading && <Icon icon={allIcons.solid.faSpinner} iconClassName="text-3xl animate-spin" />}
-                </div>
-              </div>
-            );
-          })}
+          </Card>
         </div>
-        <p className="text-center text-sm">
-          <span
-            style={{
-              ...colorMerge({
-                color: "gray.opacity.2",
-              }),
-            }}
-            className="capitalize"
-          >
-            <Translate content="don't have an account?" />
-          </span>{" "}
-          <Anchor
-            onClick={(e) => {
+      )}
+      <Scroll className="flex max-sm:flex-col items-center">
+        <div className="p-8 w-1/2 max-sm:w-full">
+          <form
+            onSubmit={async (e) => {
               e.preventDefault();
-              setTemp("focusedLoginView", 1);
-            }}
-            className="capitalize"
-          >
-            <Translate content="sign up" />
-          </Anchor>
-        </p>
-      </div>
-      <div className="flex justify-center items-center p-8 w-1/2 max-sm:w-full">
-        <div className="flex flex-col gap-1">
-          <h2
-            className="mb-4 font-semibold text-2xl capitalize"
-            style={{
-              ...colorMerge({
-                color: "primary",
-              }),
+              execAction("login");
             }}
           >
-            <Translate content="login into Biq Pod" />
-          </h2>
-          <StaticContent />
+            <div className="mb-4">
+              <label className="block mb-2 capitalize">
+                <Translate content="email" /> :{" "}
+              </label>
+              <Feild
+                controls={{
+                  [emailRegExp]: {
+                    err: "Invalid email",
+                    succ: "Valid email",
+                  },
+                }}
+                inputName="loginUseremail"
+                placeholder="@exmple.com"
+                propositions={email && !email.includes("@") ? [email + "@gmail.com"] : []}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2 capitalize">
+                <Translate content="password" />
+              </label>
+              <Password placeholder="********" state={passwordState} />
+            </div>
+            <Button type="submit" iconClassName={tw(isLoadingLogin && "animate-spin")} icon={isLoadingLogin ? allIcons.solid.faRotate : undefined} className="py-2">
+              <Translate content="login" />
+            </Button>
+          </form>
+          <div className="flex justify-evenly items-center gap-3 my-3">
+            {signInProviders.map(({ provider, image }) => {
+              const loading = signInActionLoading && choisenProvider.get === provider;
+              const isHovered = providerHovered.get === provider;
+              return (
+                <div
+                  className="p-2 rounded-xl cursor-pointer"
+                  style={{
+                    ...colorMerge(isHovered && "gray.opacity"),
+                  }}
+                  key={provider}
+                >
+                  <div
+                    onMouseEnter={() => {
+                      providerHovered.set(provider);
+                    }}
+                    onMouseLeave={() => {
+                      providerHovered.set(null);
+                    }}
+                    className={tw("flex justify-center items-center w-[50px] h-[50px]", image && "rounded-none")}
+                    onClick={async () => {
+                      choisenProvider.set(provider);
+                      await execAction("sign-in-provider");
+                    }}
+                  >
+                    {!loading && <img className="w-full h-full object-cover" src={image} />}
+                    {loading && <Icon icon={allIcons.solid.faSpinner} iconClassName="text-3xl animate-spin" />}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-sm">
+            <span
+              style={{
+                ...colorMerge({
+                  color: "gray.opacity.2",
+                }),
+              }}
+              className="capitalize"
+            >
+              <Translate content="don't have an account?" />
+            </span>{" "}
+            <Anchor
+              onClick={(e) => {
+                e.preventDefault();
+                setTemp("focusedLoginView", 1);
+              }}
+              className="capitalize"
+            >
+              <Translate content="sign up" />
+            </Anchor>
+          </p>
         </div>
-      </div>
-    </Scroll>
+        <div className="flex justify-center items-center p-8 w-1/2 max-sm:w-full">
+          <div className="flex flex-col gap-1">
+            <h2
+              className="mb-4 font-semibold text-2xl capitalize"
+              style={{
+                ...colorMerge({
+                  color: "primary",
+                }),
+              }}
+            >
+              <Translate content="login into Biq Pod" />
+            </h2>
+            <StaticContent />
+          </div>
+        </div>
+      </Scroll>
+    </EmptyComponent>
   );
 };
 export const LoginContent = () => {
@@ -491,7 +525,7 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
             if (response) {
               return;
             }
-            await getMainCloud().app.auth.signOut();
+            await getMainCloud()?.app.auth.signOut();
           }}
         >
           <Translate content="logout" />

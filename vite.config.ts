@@ -3,9 +3,8 @@ import dts, { PluginOptions } from "vite-plugin-dts";
 import path from "path";
 import pkg from "./package.json";
 import react from "@vitejs/plugin-react";
-export default defineConfig(({ command }) => {
-  const args = process.argv.slice(2);
-  const platform = args[2];
+export default defineConfig(({ command, mode }) => {
+  const platform = mode;
   const options: PluginOptions = {
     tsconfigPath: "./tsconfig.json",
     rollupTypes: true,

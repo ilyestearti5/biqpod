@@ -10,7 +10,7 @@ export interface ListProps<T> {
   component: FunctionComponentListItem<T>;
   skipFn?: (item: T, index: number) => boolean;
 }
-export function List<T>({ slotId, component: Component, data, skipFn }: ListProps<T>) {
+export function List<T>({ slotId, component, data, skipFn }: ListProps<T>) {
   const focus = slotHooks.getOneFeild(slotId, "focused");
   const submit = slotHooks.getOneFeild(slotId, "submited");
   const select = slotHooks.getOneFeild(slotId, "selected");
@@ -43,6 +43,9 @@ export function List<T>({ slotId, component: Component, data, skipFn }: ListProp
   React.useEffect(() => {
     slotHooks.setOneFeild(slotId, "skiped", dataSkiped);
   }, [dataSkiped]);
+  const Component = React.useMemo(() => {
+    return component;
+  }, []);
   return (
     <EmptyComponent>
       {data.map((item, index) => {

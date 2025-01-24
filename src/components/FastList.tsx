@@ -42,7 +42,7 @@ export function FastList<T>({
   itemSize,
   scrollWidth = 15,
   slotId,
-  render: Item,
+  render,
   handelSkip,
   data,
   maxHeight: max,
@@ -65,6 +65,9 @@ export function FastList<T>({
       escape(slotId);
     }
   }, [data]);
+  const Item = React.useMemo(() => {
+    return render;
+  }, []);
   React.useEffect(() => {
     if (typeof focused != "number") {
       return;

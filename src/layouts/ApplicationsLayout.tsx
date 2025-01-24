@@ -8,7 +8,7 @@ export const ApplicationsLayout = () => {
   const visibility = viewTemps.getTemp("applications");
   const apps = useTemp<ProjectConfig[]>("list.applications");
   React.useEffect(() => {
-    return getMainCloud().app.nosql.onCollectionSnapshot<ProjectConfig>("projects", (props) => {
+    return getMainCloud()?.app.nosql.onCollectionSnapshot<ProjectConfig>("projects", (props) => {
       apps.set(
         props.map(({ id, data }) => {
           return {

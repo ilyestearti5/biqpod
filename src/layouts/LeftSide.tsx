@@ -5,6 +5,7 @@ import { useColorMerge } from "@/hooks";
 import { isSorted } from "@/utils/index";
 import { tw } from "@/utils";
 import { ReactElement } from "@/types";
+import { Scroll } from "@/components";
 const leftSideVisibility = "visibility/leftSide.boolean";
 export interface SideProps extends ReactElement {
   floorWindow?: boolean;
@@ -22,7 +23,6 @@ export const LeftSide = ({ children, floorWindow, className, style = {}, ...prop
   return (
     <div className={tw("max-md:left-0 max-md:z-[200] max-md:absolute h-full", setting && "absolute left-0 z-[200]")}>
       <ResizeView
-        children={children}
         className={tw(`z-[10000000000000000] flex flex-col border-transparent border-r border-solid h-full overflow-hidden`, !visibility && "border-r-0", className)}
         hidden={!visibility}
         max={() => Math.max(innerWidth / 3, 350)}
@@ -40,7 +40,9 @@ export const LeftSide = ({ children, floorWindow, className, style = {}, ...prop
           ...style,
         }}
         {...props}
-      />
+      >
+        <Scroll>{children}</Scroll>
+      </ResizeView>
     </div>
   );
 };

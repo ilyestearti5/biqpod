@@ -1,4 +1,4 @@
-import { ClientCloud, initMyCloud } from "./apis/server.config";
+import { initMyCloud } from "./apis/server.config";
 // in this momoent , a new cloud plugin named my-cloud created
 export const myCloud = initMyCloud({
   apiKey: "AIzaSyBmcnHP80KXpBXltHrVnP1MZPsiSbVbWqQ",
@@ -10,4 +10,5 @@ export const myCloud = initMyCloud({
   storageBucket: "water-fetch.appspot.com",
   databaseURL: "https://water-fetch-default-rtdb.firebaseio.com",
 });
-export const mainCloud = new ClientCloud("main", myCloud);
+
+myCloud.setAsMain();

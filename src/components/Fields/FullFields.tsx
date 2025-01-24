@@ -20,7 +20,6 @@ import { CircleTip } from "../CircleTip";
 import { Icon, IconProps } from "../Icon";
 import { JoinComponentBy } from "../JoinComponentBy";
 import { Line } from "../Line";
-import { ClickedView } from "../ClickedView";
 import { nanoid } from "@reduxjs/toolkit";
 import { Biqpod, SettingConfig, SettingValueType, State } from "@/types";
 export interface FullFieldRecordNextCallbackParams {
@@ -60,7 +59,7 @@ export function FullFieldRecord<T extends keyof SettingValueType>({ value, onCha
     set: onChange,
   };
   return (
-    <div className="p-2">
+    <div className="p-2 w-full">
       {type == "boolean" && <BooleanFeild id={id} state={state} config={config} />}
       {type == "array" && <ArrayFeild id={id} state={state} config={config} />}
       {type == "enum" && <EnumFeild id={id} state={state} config={config} />}
@@ -94,67 +93,65 @@ export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
           const elementId = `full-field-${parentId}-${nanoid()}`;
           return (
             <div className="w-full cursor-pointer" key={id}>
-              <ClickedView className="rounded-xl" tabIndex={-1}>
-                <div
-                  onClick={(e) => {
-                    if (document.getElementById("#" + elementId)?.contains(e.target as HTMLElement)) return;
-                    indexes.set((s) => {
-                      const o = config?.multiple ? { ...s } : {};
-                      o[index] = !o[index];
-                      return o;
-                    });
-                  }}
-                  className="flex justify-between items-center px-2 w-full h-[50px]"
-                >
-                  <div className="flex items-center gap-1">
-                    {icon && <Icon icon={icon} />}
-                    <label htmlFor={`${id}-${index}`} className="capitalize cursor-pointer">
-                      {label} :
-                    </label>
-                  </div>
-                  {indexes.get[index] && (
-                    <div id={elementId} className="flex items-center gap-1">
-                      {index > 0 && (
-                        <CircleTip
-                          onClick={() => {
-                            indexes.set((s) => {
-                              const o = config?.multiple ? { ...s } : {};
-                              o[index - 1] = !o[index - 1];
-                              return o;
-                            });
-                          }}
-                          icon={allIcons.solid.faChevronUp}
-                        />
-                      )}
-                      {index + 1 < preparedList.length && (
-                        <CircleTip
-                          onClick={() => {
-                            let stop = false;
-                            const props: FullFieldRecordNextCallbackParams = {
-                              indexes: indexes.get,
-                              state: state.get,
-                              stop() {
-                                stop = true;
-                              },
-                              currentValue: value,
-                            };
-                            onNext?.(props);
-                            if (stop) {
-                              return;
-                            }
-                            indexes.set((s) => {
-                              const o = config?.multiple ? { ...s } : {};
-                              o[index + 1] = !o[index + 1];
-                              return o;
-                            });
-                          }}
-                          icon={allIcons.solid.faChevronDown}
-                        />
-                      )}
-                    </div>
-                  )}
+              <div
+                onClick={(e) => {
+                  if (document.getElementById("#" + elementId)?.contains(e.target as HTMLElement)) return;
+                  indexes.set((s) => {
+                    const o = config?.multiple ? { ...s } : {};
+                    o[index] = !o[index];
+                    return o;
+                  });
+                }}
+                className="flex justify-between items-center px-2 w-full h-[50px]"
+              >
+                <div className="flex items-center gap-1">
+                  {icon && <Icon icon={icon} />}
+                  <label htmlFor={`${id}-${index}`} className="capitalize cursor-pointer">
+                    {label} :
+                  </label>
                 </div>
-              </ClickedView>
+                {indexes.get[index] && (
+                  <div id={elementId} className="flex items-center gap-1">
+                    {index > 0 && (
+                      <CircleTip
+                        onClick={() => {
+                          indexes.set((s) => {
+                            const o = config?.multiple ? { ...s } : {};
+                            o[index - 1] = !o[index - 1];
+                            return o;
+                          });
+                        }}
+                        icon={allIcons.solid.faChevronUp}
+                      />
+                    )}
+                    {index + 1 < preparedList.length && (
+                      <CircleTip
+                        onClick={() => {
+                          let stop = false;
+                          const props: FullFieldRecordNextCallbackParams = {
+                            indexes: indexes.get,
+                            state: state.get,
+                            stop() {
+                              stop = true;
+                            },
+                            currentValue: value,
+                          };
+                          onNext?.(props);
+                          if (stop) {
+                            return;
+                          }
+                          indexes.set((s) => {
+                            const o = config?.multiple ? { ...s } : {};
+                            o[index + 1] = !o[index + 1];
+                            return o;
+                          });
+                        }}
+                        icon={allIcons.solid.faChevronDown}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
               <div className={tw("flex justify-center h-[0px] overflow-hidden", animated && "transition-[height]", indexes.get[index] && "h-[150px]")}>
                 <FullFieldRecord
                   key={index}

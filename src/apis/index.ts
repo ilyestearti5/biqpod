@@ -1,10 +1,10 @@
 import { showFrame } from "@/hooks";
 import { delay } from "@/utils";
-import { getMainCloud, Path } from "./server.config";
+import { getMainCloud, Path, CloudSelection } from "./server.config";
 import * as brands from "@fortawesome/free-brands-svg-icons";
 import * as regular from "@fortawesome/free-regular-svg-icons";
 import * as solid from "@fortawesome/free-solid-svg-icons";
-import { Biqpod, ProjectConfig } from "@/types";
+import { ProjectConfig } from "@/types";
 export * from "./server.config";
 export interface GenerateAuthUrlResult {
   url: string;
@@ -42,22 +42,22 @@ export async function signInAccount({ place, ...props }: SignInAccountProps) {
   }
 }
 export async function getProjectConfig(projectId: string): Promise<ProjectConfig> {
-  const data = await getMainCloud().app.nosql.getDoc<ProjectConfig>(["projects", projectId]);
+  const data = await getMainCloud()?.app.nosql.getDoc<ProjectConfig>(["projects", projectId]);
   return {
     ...data!,
     id: projectId,
   };
 }
-export function onManySnaping<T extends string>(
-  props: Record<T, { path: Path; selection?: Biqpod.Cloud.Database.NoSQL.Selection<Record<string, any>> }>,
-  callback: (executed: T) => void,
-  skip = 0,
-): Record<T, Function> {
+export function onManySnaping<T extends string>(props: Record<T, { path: Path; selection?: CloudSelection<any> }>, callback: (executed: T) => void, skip = 0): Record<T, Function> {
   const o: Record<string, Function> = {};
+  const cloud = getMainCloud();
+  if (!cloud) {
+    throw "Cloud not found";
+  }
   for (const prop in props) {
     let some = skip;
     const { path, selection } = props[prop];
-    o[prop] = getMainCloud().app.nosql.onCollectionSnapshot(
+    o[prop] = cloud.app.nosql.onCollectionSnapshot(
       path,
       () => {
         if (some) {
@@ -72,10 +72,10 @@ export function onManySnaping<T extends string>(
   return o;
 }
 export function getFunction<R, P = any>(name: string, mode?: boolean, metaData: object = {}) {
-  return getMainCloud().app.functions.getFunction<R, P>(name, mode, metaData);
+  return getMainCloud()?.app.functions.getFunction<R, P>(name, mode, metaData);
 }
 export function getUserFunction<R, P = any>(name: string, mode?: boolean, metaData: object = {}) {
-  return getMainCloud().app.functions.getUserFunction<R, P>(name, mode, metaData);
+  return getMainCloud()?.app.functions.getUserFunction<R, P>(name, mode, metaData);
 }
 export const allIcons = {
   solid,

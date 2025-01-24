@@ -5,6 +5,7 @@ import { isSorted } from "@/utils/index";
 import { tw } from "@/utils";
 import { useSettingValue } from "@/hooks";
 import { SideProps } from "./LeftSide";
+import { Scroll } from "@/components";
 const rightSideVisibility = "visibility/rightSide.boolean";
 export const RightSide = ({ children, floorWindow, className, style = {}, ...props }: SideProps) => {
   const visibility = useSettingValue(rightSideVisibility);
@@ -19,7 +20,6 @@ export const RightSide = ({ children, floorWindow, className, style = {}, ...pro
   return (
     <div className={tw("max-md:right-0 max-md:z-50 max-md:absolute h-full", setting && "absolute right-0 z-50")}>
       <ResizeView
-        children={children}
         className={tw(`z-[10000000000000000] flex flex-col border-transparent border-l border-solid h-full overflow-hidden`, !visibility && "border-l-0", className)}
         hidden={!visibility}
         max={() => Math.max(window.innerWidth / 3, 350)}
@@ -37,7 +37,9 @@ export const RightSide = ({ children, floorWindow, className, style = {}, ...pro
           ...style,
         }}
         {...props}
-      />
+      >
+        <Scroll>{children}</Scroll>
+      </ResizeView>
     </div>
   );
 };

@@ -1,9 +1,10 @@
 import React from "react";
-import { useAsyncEffect, useCopyState, useSettingValue } from "@/hooks";
-import { getTemp } from "@/reducers/Object/object.slice";
+import { onceState, useAsyncEffect, useCopyState, useSettingValue } from "@/hooks";
+import { getTemp, setTemp } from "@/reducers/Object/object.slice";
 import { EmptyComponent } from "./EmptyComponent";
-import { delay, transformCase } from "@/utils";
+import { transformCase } from "@/utils";
 import { cashLangs, langHooks } from "@/data/system/lang.model";
+import { getMainCloud } from "@/apis";
 export interface TranslateProps {
   content: string;
   lang?: string;
@@ -30,11 +31,28 @@ export const useTranslate = (content: TranslateProps["content"], lang?: string):
   // generate AI if it is the content no used
   const isLoading = useAsyncEffect(async () => {
     if (choisedLang && !result && choisedLang != "en") {
-      await delay(300);
-      return;
-      // const { text } = await translate(content, { to: choisedLang });
-      // cashing.set(true);
-      // langHooks.upsert([{ word, [choisedLang]: text }]);
+      const mainCloud = getMainCloud();
+      if (!mainCloud) {
+        return;
+      }
+      await new Promise((res) => {
+        onceState(
+          "langs.isTranslateBefore",
+          (s) => !s,
+          () => {
+            res(true);
+          },
+        );
+      });
+      setTemp("langs.isTranslateBefore", true);
+      try {
+        const text = await mainCloud.app.ai.translate(content, choisedLang);
+        if (text) {
+          cashing.set(true);
+          langHooks.upsert([{ word, [choisedLang]: text }]);
+        }
+      } catch {}
+      setTemp("langs.isTranslateBefore", false);
     }
   }, [result, word, choisedLang, content]);
   const correctResult = React.useMemo(() => result || content, [result, content]);

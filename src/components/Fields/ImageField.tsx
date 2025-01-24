@@ -1,8 +1,7 @@
 import React from "react";
 import { useColorMerge, useSettingValue, useCopyState, openCamera, showToast } from "@/hooks";
-import { mergeObject, tw } from "@/utils";
-import { openDialog } from "@/functions/web-utils";
-
+import { mergeArray, mergeObject, tw } from "@/utils";
+import { imageExtensions, openDialog, openMenu } from "@/functions/web-utils";
 import { Icon } from "../Icon";
 import { allIcons } from "@/apis";
 import { EmptyComponent } from "../EmptyComponent";
@@ -14,19 +13,16 @@ import { CircleTip } from "../CircleTip";
 import { BlurOverlay } from "../Overlays";
 import { FullFieldGeneralProps } from "@/types";
 export type ImageFeildProps = FullFieldGeneralProps<"image">;
-export function ImageFeild({ state, config }: ImageFeildProps) {
+export function ImageFeild({ state, config, id }: ImageFeildProps) {
   const colorMerge = useColorMerge();
   const isAnimation = useSettingValue("preferences/animation.boolean");
   const clicked = useCopyState(false);
   const src = React.useMemo(() => state.get, [state.get]);
   const dragEnter = useCopyState(false);
-  const callback = React.useCallback(
-    async (dataURL: string | null) => {
-      state.set(dataURL);
-      clicked.set(false);
-    },
-    [state.set],
-  );
+  const callback = async (dataURL: string | null) => {
+    clicked.set(false);
+    state.set(dataURL);
+  };
   const handleDrop = async (event: React.DragEvent) => {
     event.preventDefault();
     dragEnter.set(false);
@@ -56,7 +52,70 @@ export function ImageFeild({ state, config }: ImageFeildProps) {
   };
   return (
     <EmptyComponent>
-      <div className="flex justify-center">
+      <div
+        onContextMenu={(e) => {
+          e.preventDefault();
+          openMenu({
+            x: e.clientX,
+            y: e.clientY,
+            menu: mergeArray(
+              src && {
+                label: "Remove",
+                defaultIcon: allIcons.solid.faTrash,
+                click: async () => {
+                  const { response } = await openDialog({
+                    message: "Do you want to remove this image?",
+                    title: "Confirmation",
+                    type: "warning",
+                    buttons: ["Yes", "No"],
+                    defaultId: 0,
+                  });
+                  if (!response) {
+                    callback(null);
+                  }
+                },
+              },
+              src && {
+                type: "separator",
+              },
+              {
+                label: "Copy",
+                defaultIcon: allIcons.regular.faCopy,
+                click: async () => {
+                  if (src) {
+                    await navigator.clipboard.writeText(src);
+                    showToast("Image copied to clipboard", "success");
+                  }
+                },
+              },
+              {
+                label: "Paste",
+                defaultIcon: allIcons.regular.faPaste,
+                click: async () => {
+                  const data = await navigator.clipboard.read();
+                  var gettedType: undefined | string = undefined;
+                  const item = data.find((item) => {
+                    gettedType = imageExtensions.find((s) => item.types.some((r) => r.endsWith(s)));
+                    return gettedType;
+                  });
+                  if (item && gettedType) {
+                    const blob = await item.getType("image/" + gettedType);
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      callback(reader.result?.toString() || null);
+                    };
+                    reader.readAsDataURL(blob);
+                    return;
+                  }
+                  showToast("No image data found in clipboard", "error");
+                },
+              },
+            ),
+          });
+        }}
+        className="flex justify-center"
+        hidden={config?.hidden}
+      >
         <div onDrop={handleDrop} onDragEnter={() => dragEnter.set(true)} onDragOver={(event) => event.preventDefault()} onDragLeave={() => dragEnter.set(false)} className="relative overflow-hidden">
           <div
             onClick={() => clicked.set(true)}
@@ -76,6 +135,8 @@ export function ImageFeild({ state, config }: ImageFeildProps) {
                 },
               ),
             }}
+            tabIndex={1}
+            id={id}
           >
             {src && <img src={src} className="w-full h-full object-cover" alt="" />}
             {!src && (
@@ -101,8 +162,8 @@ export function ImageFeild({ state, config }: ImageFeildProps) {
           <div className="flex gap-3 p-3 overflow-hidden">
             {src && (
               <Tab
-                className="w-[80px] h-[80px]"
-                iconClassName="w-[40px] h-[40px]"
+                className="w-[70px] h-[70px]"
+                iconClassName="w-[30px] h-[30px]"
                 onClick={async () => {
                   const { response } = await openDialog({
                     message: "Do you want to remove this image?",
@@ -119,8 +180,8 @@ export function ImageFeild({ state, config }: ImageFeildProps) {
               />
             )}
             <Tab
-              className="w-[80px] h-[80px]"
-              iconClassName="w-[40px] h-[40px]"
+              className="w-[70px] h-[70px]"
+              iconClassName="w-[30px] h-[30px]"
               onClick={async () => {
                 const fileElement = document.createElement("input");
                 fileElement.type = "file";
@@ -140,8 +201,31 @@ export function ImageFeild({ state, config }: ImageFeildProps) {
               icon={allIcons.solid.faUpload}
             />
             <Tab
-              className="w-[80px] h-[80px]"
-              iconClassName="w-[40px] h-[40px]"
+              className="w-[70px] h-[70px]"
+              iconClassName="w-[30px] h-[30px]"
+              onClick={async () => {
+                const data = await navigator.clipboard.read();
+                var gettedType: undefined | string = undefined;
+                const item = data.find((item) => {
+                  gettedType = imageExtensions.find((s) => item.types.some((r) => r.endsWith(s)));
+                  return gettedType;
+                });
+                if (item && gettedType) {
+                  const blob = await item.getType("image/" + gettedType);
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    callback(reader.result?.toString() || null);
+                  };
+                  reader.readAsDataURL(blob);
+                  return;
+                }
+                showToast("No image data found in clipboard", "error");
+              }}
+              icon={allIcons.regular.faPaste}
+            />
+            <Tab
+              className="w-[70px] h-[70px]"
+              iconClassName="w-[30px] h-[30px]"
               onClick={async () => {
                 try {
                   const result = await openCamera("take");

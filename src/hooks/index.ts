@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { store } from "@/store";
 import { viewTemps, cameraTemp, iframeTemp } from "@/reducers/Object/allTemps";
 import { viewHooks } from "@/data/system/views.model";
@@ -16,7 +16,7 @@ import { con, Db, Delay, getSeparateSearchInput, include, isLike, mergeArray, tr
 import { Command, CommandIds, commandsHooks } from "@/data/system/command.model";
 import { ColorIds, colorHooks, Color } from "@/data/system/colors.model";
 import { langHooks } from "@/data/system/lang.model";
-import { Biqpod, CameraConfig, CameraResult, FullCameraResult, FullStateManagment, Nothing, SettingConfig, SettingValueType } from "@/types";
+import { Biqpod, CameraConfig, CameraResult, FullCameraResult, FullStateManagment, Nothing, SettingConfig, SettingValueType, State } from "@/types";
 export * from "@/reducers/Global/keyboard.slice";
 export * from "@/reducers/Global/title.slice";
 export * from "@/reducers/Object/object.slice";
@@ -39,7 +39,7 @@ export * from "@/data/system/colors.model";
 export * from "@/data/system/actions.model";
 export function useAsyncMemo<T>(callback: () => Promise<T>, deps: any[] = [], cleanUp?: (deps: any[]) => void): T | null {
   const state = useCopyState<T | null>(null);
-  React.useEffect(() => {
+  useEffect(() => {
     callback().then(state.set);
     return () => {
       cleanUp?.(deps);
@@ -49,7 +49,7 @@ export function useAsyncMemo<T>(callback: () => Promise<T>, deps: any[] = [], cl
 }
 export function useAsyncEffect(callback: () => Promise<void>, deps: any[] = [], cleanUp: (deps: any[]) => void = () => {}) {
   const isLoading = useCopyState(true);
-  React.useEffect(() => {
+  useEffect(() => {
     isLoading.set(true);
     callback()
       .then()
@@ -60,8 +60,8 @@ export function useAsyncEffect(callback: () => Promise<void>, deps: any[] = [], 
   }, deps);
   return isLoading.get;
 }
-export function useCopyState<T>(initData: T | (() => T)) {
-  const [get, set] = React.useState(initData);
+export function useCopyState<T>(initData: T | (() => T)): State<T> {
+  const [get, set] = useState(initData);
   return {
     get,
     set,
@@ -69,11 +69,11 @@ export function useCopyState<T>(initData: T | (() => T)) {
 }
 export function useDref<T>(firstState: T, upload: (val: T) => any, download: (val: T) => T = (v) => v) {
   const state = useCopyState(download(firstState));
-  const draf = React.useDeferredValue(state.get);
-  React.useEffect(() => {
+  const draf = useDeferredValue(state.get);
+  useEffect(() => {
     upload(draf);
   }, [draf]);
-  React.useEffect(() => {
+  useEffect(() => {
     state.set(download(firstState));
   }, [firstState]);
   return state;
@@ -81,7 +81,7 @@ export function useDref<T>(firstState: T, upload: (val: T) => any, download: (va
 export function useMemoDelay<G>(fn: () => G, deps: any[] = [], time = 1000): [boolean, G | null] {
   const state = useCopyState<null | G>(null);
   const loading = useCopyState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     const dl = new Delay();
     loading.set(true);
     dl.start(time).then(() => {
@@ -97,7 +97,7 @@ export function useMemoDelay<G>(fn: () => G, deps: any[] = [], time = 1000): [bo
 }
 export function useEffectDelay(fn: () => Promise<void> | void | (() => Promise<void> | void), deps: any[] = [], time = 1000) {
   const isLoading = useCopyState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     const dl = new Delay();
     isLoading.set(true);
     let cleanUp: ReturnType<typeof fn>;
@@ -145,19 +145,19 @@ export function useIdleStatus<T>(fn: () => Promise<T>, deps: any[] = []) {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export function useSettingById<ID extends keyof SettingValueType>(settingId: `${string}.${ID}`): Biqpod.System.Setting.Type<ID> | null {
   const setting = settingHooks.getOne(settingId);
-  const result = React.useMemo(() => {
+  const result = useMemo(() => {
     return setting ? setting : null;
   }, [setting]) as any;
   return result;
 }
 export function usePublicSettings() {
   const settings = settingHooks.getAll();
-  const result = React.useMemo(() => settings.filter(({ private: prev = false }) => !prev), [settings]);
+  const result = useMemo(() => settings.filter(({ private: prev = false }) => !prev), [settings]);
   return result;
 }
 export function useSettingConfig<ID extends keyof SettingValueType>(settingId: `${string}.${ID}`): SettingConfig[ID] | null {
   const setting = settingHooks.getOneFeild(settingId, "config");
-  const result = React.useMemo(() => {
+  const result = useMemo(() => {
     return setting ? setting : null;
   }, [setting]) as any;
   return result;
@@ -170,7 +170,7 @@ export function usePublicSettingsFilter() {
   // get the choised view
   const viewSetting = viewHooks.getOneFeild("settings.viewType", "focused") as "list" | "tree" | undefined;
   // search using setting id
-  const sortedSetting = React.useMemo(() => {
+  const sortedSetting = useMemo(() => {
     if (viewSetting == "list") {
       return Db.orderBy(settings, "name", "asc");
     } else if (viewSetting) {
@@ -181,11 +181,11 @@ export function usePublicSettingsFilter() {
   }, [viewSetting, settings]);
   const findBy = useSettingValue("settings/findBy.enum") as keyof Biqpod.System.Setting.Type<keyof SettingConfig> | "nice" | undefined;
   //
-  const separateSearchInput = React.useMemo(() => {
+  const separateSearchInput = useMemo(() => {
     return Object.entries(getSeparateSearchInput(String(value))).map(([key, value]) => [key, value.join(" ")]);
   }, [value]);
   // thr true result
-  const result = React.useMemo(() => {
+  const result = useMemo(() => {
     return sortedSetting.filter((setting) => {
       return separateSearchInput.every(([keySearch, valueSearch]) => {
         switch (keySearch) {
@@ -215,7 +215,7 @@ export function usePublicSettingsFilter() {
       });
     });
   }, [separateSearchInput, sortedSetting, findBy]);
-  React.useEffect(() => {
+  useEffect(() => {
     setTemp("configurations.found.length", result.length);
   }, [result]);
   // get settings sorted and
@@ -234,10 +234,10 @@ export function removeField(fieldId: string) {
   fieldHooks.remove([fieldId]);
 }
 export function useDeviceType() {
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
-  const [isTablet, setIsTablet] = React.useState(window.innerWidth > 768 && window.innerWidth <= 1024);
-  const [isDesktop, setIsDesktop] = React.useState(window.innerWidth > 1024);
-  React.useEffect(() => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
+  useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       setIsMobile(width <= 768);
@@ -258,20 +258,20 @@ export function useSettingValue<ID extends keyof SettingConfig>(settingId: Biqpo
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export function useShortcutsOfCommand(commandId: CommandIds | string) {
   const allKeys = keyHooks.getAll();
-  const keys = React.useMemo(() => {
+  const keys = useMemo(() => {
     return Db.join({ commandId }, allKeys, "commandId->command");
   }, [commandId, allKeys]);
   return keys;
 }
 export function useAllKeys() {
   const allKeys = keyHooks.getAll();
-  return React.useMemo(() => {
+  return useMemo(() => {
     return allKeys.filter(({ value }) => value);
   }, [allKeys]);
 }
 export function useShortcutsOfAction(actionName: string) {
   const allKeys = useAllKeys();
-  return React.useMemo(() => {
+  return useMemo(() => {
     return Db.join({ actionName }, allKeys, "actionName->action");
   }, [allKeys]);
 }
@@ -281,13 +281,13 @@ export function showSetting(settingId: SettingIds | Biqpod.System.Setting.Type<k
 }
 export function usePublicCommands() {
   const commands = commandsHooks.getAll();
-  return React.useMemo(() => commands.filter((cmd) => !cmd.private), [commands]);
+  return useMemo(() => commands.filter((cmd) => !cmd.private), [commands]);
 }
 export function usePublicCommandsFilter() {
   const commands = usePublicCommands();
   const v = fieldHooks.getOneFeild("findConfigurations", "value");
   const allKeys = useAllKeys();
-  const commandsAndKeys = React.useMemo(() => {
+  const commandsAndKeys = useMemo(() => {
     const data = Db.fullJoin(commands, allKeys, "commandId->command").map(({ childs, data }) => {
       return {
         ...data,
@@ -296,7 +296,7 @@ export function usePublicCommandsFilter() {
     });
     return data;
   }, [commands, allKeys]);
-  const r = React.useMemo(() => {
+  const r = useMemo(() => {
     if (!v) {
       return commandsAndKeys;
     }
@@ -325,7 +325,7 @@ export function usePublicCommandsFilter() {
       });
     });
   }, [v, commandsAndKeys]);
-  React.useEffect(() => {
+  useEffect(() => {
     setTemp("configurations.found.length", r.length);
   }, [r]);
   return r;
@@ -335,7 +335,7 @@ export function usePublicCommandsFilter() {
 export function useManyFeilds<S extends string | number, T extends FeildRecord<S>>(fields: T, deps: any = []): Record<keyof T, string | undefined> {
   const e = Object.entries<string>(fields);
   const allFeilds = e.map(([, fieldId]) => fieldHooks.getOneFeild(fieldId, "value"));
-  return React.useMemo(() => {
+  return useMemo(() => {
     const result: any = {};
     e.forEach(([name], index) => {
       const value = allFeilds[index];
@@ -351,7 +351,7 @@ export function resetManyFeilds<T extends string>(fields: T[]) {
 }
 export function initNewFeild(fieldId: string) {
   const field = fieldHooks.getOne(fieldId);
-  React.useEffect(() => {
+  useEffect(() => {
     if (field) {
       return;
     }
@@ -370,7 +370,7 @@ export function initNewFeild(fieldId: string) {
   }, [field]);
 }
 export function usePrevious(value: string | undefined, selection: TextAreaProps["selection"]) {
-  const previousString = React.useMemo(() => {
+  const previousString = useMemo(() => {
     if (!selection) {
       return value || "";
     }
@@ -381,7 +381,7 @@ export function usePrevious(value: string | undefined, selection: TextAreaProps[
 }
 //
 export function useNext(value: string | undefined, selection: TextAreaProps["selection"]) {
-  const nextString = React.useMemo(() => {
+  const nextString = useMemo(() => {
     if (!selection) {
       return value || "";
     }
@@ -392,7 +392,7 @@ export function useNext(value: string | undefined, selection: TextAreaProps["sel
 }
 //
 export function useSelected(value: string | undefined, selection: TextAreaProps["selection"]) {
-  const selectedString = React.useMemo(() => {
+  const selectedString = useMemo(() => {
     if (!selection) {
       return value || "";
     }
@@ -509,7 +509,7 @@ export function openCamera<T extends keyof FullCameraResult>(type: T) {
 export function useColorMerge<T extends Partial<Record<Biqpod.Types.CssColorKeys, ColorIds | ReturnColorHandelFunction>>>() {
   const allColors = colorHooks.getEntity();
   const isDark = useSettingValue("window/dark.boolean");
-  return React.useCallback(
+  return useCallback(
     (...args: (Nothing | ColorIds | T)[]) => {
       const firstResult: any = {};
       type Ret = Partial<Record<keyof T, string>>;
@@ -618,8 +618,8 @@ export { store };
 export function initUser() {
   const loading = useTemp<boolean>("user-is-loading");
   const currentUid = useCopyState<Nothing | string>(null);
-  React.useEffect(() => {
-    return getMainCloud().app.auth.onAuthStateChanged(async (uid) => {
+  useEffect(() => {
+    return getMainCloud()?.app.auth.onAuthStateChanged(async (uid) => {
       loading.set(false);
       currentUid.set(uid);
     });
@@ -627,25 +627,52 @@ export function initUser() {
   useAsyncEffect(async () => {
     if (currentUid.get) {
       const mainCloud = getMainCloud();
-      const userInfo = await mainCloud.app.auth.setUserData();
+      const userInfo = await mainCloud?.app.auth.setUserData();
       if (userInfo) {
-        await mainCloud.app.nosql.upsertDoc(["users", currentUid.get], userInfo);
+        await mainCloud?.app.nosql.upsertDoc(["users", currentUid.get], userInfo);
       }
     }
   }, [currentUid.get]);
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentUid.get) {
-      return getMainCloud().app.nosql.onDocSnapshot<Biqpod.Account.User>(["users", currentUid.get], (data) => {
+      return getMainCloud()?.app.nosql.onDocSnapshot<Biqpod.Account.User>(["users", currentUid.get], (data) => {
         setTemp("user-info", data ? { ...data, uid: currentUid.get } : null);
       });
     } else {
       setTemp("user-info", null);
     }
   }, [currentUid.get]);
+  const settingDownloaded = useCopyState(false);
+  const allSettings = settingHooks.getAll();
+  useAsyncEffect(async () => {
+    if (currentUid.get && !settingDownloaded.get) {
+      const mainCloud = getMainCloud();
+      const data = await mainCloud?.app.nosql.getDoc<{ data: Record<string, any> }>(["users", currentUid.get, "private", "settings"]);
+      if (data) {
+        Object.entries(data.data).map(([settingId, value]) => {
+          setSettingValue(settingId as any, value);
+        });
+        settingDownloaded.set(true);
+      }
+    }
+  }, [currentUid.get, settingDownloaded.get]);
+  useAsyncEffect(async () => {
+    if (currentUid.get && settingDownloaded.get && allSettings.length) {
+      const mainCloud = getMainCloud();
+      const ref = ["users", currentUid.get, "private", "settings"];
+      if (mainCloud) {
+        let data: Record<string, any> = {};
+        allSettings.forEach(({ settingId, value }) => {
+          data[settingId] = value;
+        });
+        await mainCloud.app.nosql.upsertDoc(ref, { data });
+      }
+    }
+  }, [allSettings, currentUid.get, settingDownloaded.get]);
 }
 export function useUserIsLoading() {
   const userIsLoading = getTemp<boolean>("user-is-loading");
-  return React.useMemo(() => {
+  return useMemo(() => {
     return userIsLoading ?? true;
   }, [userIsLoading]);
 }
@@ -678,7 +705,7 @@ export function showNotification({ ...notification }: Partial<NotificationType>)
 }
 export function useChangedSetting() {
   const settings = settingHooks.getAll();
-  return React.useMemo(() => settings.filter(({ def, value }) => !isLike(def, value)), [settings]);
+  return useMemo(() => settings.filter(({ def, value }) => !isLike(def, value)), [settings]);
 }
 export function showFrame(src: string | URL, id = nanoid()) {
   const customId = "iframe-" + id;
@@ -718,7 +745,7 @@ export function addNewWord(text: string, langs: Record<string, string>) {
   ]);
 }
 export async function getTheme(themeId: string) {
-  const blob = await getMainCloud().app.storage.getFileContent(["global", "themes", themeId.concat(".json")]);
+  const blob = await getMainCloud()?.app.storage.getFileContent(["global", "themes", themeId.concat(".json")]);
   const fileContent = await blob?.text();
   if (fileContent) {
     const result: Record<string, Color> = JSON.parse(fileContent);

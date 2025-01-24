@@ -313,7 +313,7 @@ export namespace Biqpod {
       createdAt: string;
       id?: string;
     }
-    export type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+    export type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
     export type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
     export interface Payout {
       payoutId?: string;
@@ -326,7 +326,9 @@ export namespace Biqpod {
         label: string;
         duration: number;
       } | null;
-      transaction?: {} | null;
+      transaction?: {
+        saller?: string;
+      } | null;
       product?: {
         name: string;
       } | null;
@@ -334,6 +336,8 @@ export namespace Biqpod {
         serviceId: string;
       };
       meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+      mode?: "sandbox" | "live";
+      createdAt?: number;
     }
   }
   export namespace Api {
@@ -464,6 +468,7 @@ export namespace Biqpod {
           nullable: boolean;
           expandIcon: boolean;
           search: boolean;
+          placeholder: string;
         }>;
         string: Partial<{
           maxLength: number;
@@ -518,6 +523,7 @@ export namespace Biqpod {
           alt: string;
           rounded: boolean;
           size: number;
+          hidden: boolean;
         }>;
         range: Partial<{
           min: number;
@@ -574,10 +580,12 @@ export namespace Biqpod {
       id: string;
       title: string;
       type?: "info" | "warning" | "error" | "success";
+      photo?: string;
       desc?: string;
       removable?: boolean;
       status?: "loading" | "idle";
       showDesc?: boolean;
+      createdAt?: number;
       buttons?: {
         label: string;
         command:
@@ -709,7 +717,7 @@ export interface FileProps extends ElectronApp.OpenDialogOptions {
   visibility: Partial<Record<"upload" | "clearAll" | "emptyMessage" | "fileName", boolean>>;
 }
 export interface State<T = undefined> {
-  get: T;
+  readonly get: T;
   set: React.Dispatch<React.SetStateAction<T>>;
 }
 export interface FeildGeneralProps<T, C extends object> {

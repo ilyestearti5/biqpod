@@ -1,5 +1,4 @@
 import { default as default_2 } from 'electron';
-import { default as default_3 } from 'react';
 import { EntityAdapter } from '@reduxjs/toolkit';
 import { EntityId } from '@reduxjs/toolkit';
 import { EntitySelectors } from '@reduxjs/toolkit';
@@ -318,7 +317,7 @@ declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         interface Payout {
             payoutId?: string;
@@ -331,7 +330,9 @@ declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -339,6 +340,8 @@ declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     namespace Api {
@@ -463,6 +466,7 @@ declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -515,6 +519,7 @@ declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -571,10 +576,12 @@ declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {
@@ -828,34 +835,19 @@ export declare function defineTable<T extends object, I extends keyof T, N exten
         getOne(id: EntityId): { [K in keyof T]: T[K]; } | undefined;
         setOne(id: EntityId, changes: Update<T, EntityId>["changes"]): void;
         setWriteStatus(status?: InitState<T, I>["writeStatus"]): void;
-        useOne(id: EntityId): {
-            get: { [K in keyof T]: T[K]; } | undefined;
-            set: default_3.Dispatch<default_3.SetStateAction<{ [K in keyof T]: T[K]; } | undefined>>;
-        };
+        useOne(id: EntityId): State<    { [K in keyof T]: T[K]; } | undefined>;
         getOneFeild<F extends keyof T>(recordId: EntityId, field: F): ({ [K in keyof T]: T[K]; }[F] & ({} | null)) | undefined;
         setOneFeild<F extends keyof T>(id: EntityId, field: F, value: T[F]): void;
-        useOneFeild<F extends keyof T>(recordeId: EntityId, field: F): {
-            get: ({ [K in keyof T]: T[K]; }[F] & ({} | null)) | undefined;
-            set: default_3.Dispatch<default_3.SetStateAction<({ [K in keyof T]: T[K]; }[F] & ({} | null)) | undefined>>;
-        };
+        useOneFeild<F extends keyof T>(recordeId: EntityId, field: F): State<({ [K in keyof T]: T[K]; }[F] & ({} | null)) | undefined>;
         getOneFeilds<F extends keyof T>(id: EntityId, fields: F[]): { [key in F]: T[F]; } | undefined;
         getAll(): T[];
         setAll(data: InsertRowParams<T>["payload"]): void;
-        useAll(): {
-            get: T[];
-            set: default_3.Dispatch<default_3.SetStateAction<T[]>>;
-        };
+        useAll(): State<T[]>;
         getWriteStatus(): "ready" | QueryStatus;
-        useWriteStatus(): {
-            get: "idle" | "ready" | "loading" | "error" | "success";
-            set: default_3.Dispatch<default_3.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-        };
+        useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
         getStatus(): QueryStatus;
         setStatus(value: ReturnType<() => QueryStatus>): void;
-        useStatus(): {
-            get: "idle" | "loading" | "error" | "success";
-            set: default_3.Dispatch<default_3.SetStateAction<"idle" | "loading" | "error" | "success">>;
-        };
+        useStatus(): State<"idle" | "loading" | "error" | "success">;
         getEntity(): Record<EntityId, T>;
         getLoadingTime(): number;
         setLoadingTime(time: number): void;
@@ -939,6 +931,11 @@ declare interface StartApplicationProps {
     }>;
     timeLoading?: number;
     isDev?: boolean;
+}
+
+declare interface State<T = undefined> {
+    readonly get: T;
+    set: React.Dispatch<React.SetStateAction<T>>;
 }
 
 declare interface TableDefConfig<T extends object = any, I extends keyof T = any, N extends string = any, A extends object = {}> {

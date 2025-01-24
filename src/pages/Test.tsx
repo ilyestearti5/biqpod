@@ -72,7 +72,7 @@ import {
   TabCode,
   TabsCode,
 } from "@/test/Components";
-import React from "react";
+import { useMemo } from "react";
 import { Layoutes } from "../layouts";
 import { InnerWindow } from "../layouts/InnerWindow";
 import { Tester } from "../layouts/Tester";
@@ -108,7 +108,7 @@ export function Test() {
   const user = useUser();
   const allSettings = settingHooks.getAll();
   const colorMerge = useColorMerge();
-  const chargeIcons = React.useMemo(() => {
+  const chargeIcons = useMemo(() => {
     const chargeIcons: Partial<Record<PayoutResult["status"], typeof allIcons.solid.faHome>> = {
       failed: allIcons.solid.faWarning,
       pending: allIcons.solid.faClock,
@@ -117,7 +117,7 @@ export function Test() {
     };
     return chargeIcons;
   }, []);
-  const chargeColors = React.useMemo(() => {
+  const chargeColors = useMemo(() => {
     const result: Partial<Record<PayoutResult["status"], string>> = {
       failed: "#e74c3c", // Beautiful red for failed status
       pending: "#f39c12", // Warm orange for pending status
@@ -225,7 +225,32 @@ export function Test() {
             </h1>
           </Header>
           <Window>
-            <LeftSide className="rounded-ee-[30px] rounded-se-[30px]" floorWindow />
+            <LeftSide className="rounded-ee-[20px] rounded-se-[20px]" floorWindow>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam
+              provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum
+              cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum
+              ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor
+              sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error
+              quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione
+              delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in
+              voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit
+              eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet
+              consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam
+              mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus
+              aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas
+              voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet
+              iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur,
+              adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque?
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam
+              provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum
+              cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum
+              ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor
+              sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam provident quae error
+              quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione
+              delectus aliquam provident quae error quisquam mollitia eaque?
+            </LeftSide>
             <InnerWindow>
               {import.meta.env.DEV && (
                 <div
@@ -606,11 +631,21 @@ export function Test() {
                         <Button
                           onClick={() => {
                             showBottomSheet(
-                              <div className="relative flex flex-col gap-y-3 overflow-hidden">
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, sint. Earum atque quam quod possimus ea, blanditiis quibusdam temporibus quae deserunt aliquid
-                                sit. Vel ea, consequuntur explicabo excepturi maxime perspiciatis.
-                                <Anchor href="/form-exmple">Click Here</Anchor>
-                                <MarkDown value={"Hello You ```js console.log('Hello')```"}></MarkDown>
+                              <div className="p-3">
+                                <h1 className="text-2xl">Bottom Sheet</h1>
+                                <p className="text-lg">This is a bottom sheet</p>
+                                <img src={"https://cdn.pixabay.com/photo/2018/01/14/23/12/nature-3082832_1280.jpg"} />
+                                <MarkDown
+                                  value={`\`\`\`json
+{
+  "name": "Ahmed",
+  "age": 20,
+  "country": "Egypt",
+  "city": "Cairo",
+  "email": "ahmed@gmail.com"
+  }
+  \`\`\``}
+                                />
                               </div>,
                             );
                           }}
@@ -685,9 +720,7 @@ export function Test() {
                         ...colorMerge("secondary.background"),
                       }}
                     >
-                      <h1 className="font-bold text-4xl max-md:text-center">
-                        <Translate content={label} />
-                      </h1>
+                      <h1 className="font-bold text-4xl max-md:text-center">{label}</h1>
                     </div>
                     <Line />
                     <div className="flex flex-wrap max-lg:justify-center gap-3 p-3 max-md:w-full">

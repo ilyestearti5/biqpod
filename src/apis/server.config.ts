@@ -4,8 +4,14 @@ import { Biqpod, CloudFunction, Nothing } from "@/types";
 import { mergeArray } from "@/utils";
 export * from "./plugins/mycloud";
 export type Path = Biqpod.Cloud.Path;
+export type CloudSelection<T extends object> = Biqpod.Cloud.Database.NoSQL.Selection<T>;
+export interface AiMessage {
+  message: string;
+  response: Blob;
+}
 export class ClientCloud {
-  inited: Record<string, boolean> = {};
+  inited: Partial<Record<string, boolean>> = {};
+  private static main: string = "main";
   public app = {
     // for access database
     nosql: {
@@ -16,11 +22,11 @@ export class ClientCloud {
       deleteDoc: async (_path: Path) => {},
       // read options
       getDoc: async <T extends object>(_path: Path): Promise<T | null> => null,
-      getDocs: async <T extends object>(_path: Path, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>): Promise<{ id: string; data: T }[] | null> => null,
+      getDocs: async <T extends object>(_path: Path, _selection?: CloudSelection<T>): Promise<{ id: string; data: T }[] | null> => null,
       onDocSnapshot: <T extends object>(_path: Path, _callback: (data: T | null) => void) => {
         return () => {};
       },
-      onCollectionSnapshot: <T extends object>(_path: Path, _callback: (data: { id: string; data: T }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => {
+      onCollectionSnapshot: <T extends object>(_path: Path, _callback: (data: { id: string; data: T }[]) => void, _selection?: CloudSelection<T>) => {
         return () => {};
       },
       onAutoSnapshot: <T extends object, ID extends boolean>(_path: Path, _callback: (data: ID extends true ? T | null : { id: string; data: T }[]) => void) => {
@@ -38,11 +44,11 @@ export class ClientCloud {
       deleteRecord: async (_table: string, _id: string) => {},
       // read options
       getRecord: async <T extends object>(_table: string, _id: string): Promise<T | null> => null,
-      getRecords: async <T extends object>(_table: string, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>): Promise<{ id: string; data: T }[] | null> => null,
+      getRecords: async <T extends object>(_table: string, _selection?: CloudSelection<T>): Promise<{ id: string; data: T }[] | null> => null,
       onRecordSnapshot: <T extends object>(_table: string, _id: string, _callback: (data: T | null) => void) => {
         return () => {};
       },
-      onTableSnapshot: <T extends object>(_table: string, _callback: (data: { id: string; data: T }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => {
+      onTableSnapshot: <T extends object>(_table: string, _callback: (data: { id: string; data: T }[]) => void, _selection?: CloudSelection<T>) => {
         return () => {};
       },
     },
@@ -96,8 +102,17 @@ export class ClientCloud {
       },
       // rest of the functions methods
     },
+    ai: {
+      sendMessage: async (_messages: (Blob | string)[]): Promise<AiMessage | null> => {
+        return null;
+      },
+      translate: async (_text: string, _to: string, _from?: string): Promise<string | null> => {
+        return null;
+      },
+    },
   };
-  static list: Record<string, ClientCloud> = {};
+  static list: Partial<Record<string, ClientCloud>> = {};
+  #name: string;
   constructor(name: string, extend?: string | ClientCloud) {
     if (ClientCloud.list[name]) {
       throw "Cloud Already Exists";
@@ -107,10 +122,19 @@ export class ClientCloud {
         this.app = extend.app;
         this.inited = extend.inited;
       } else {
-        this.app = ClientCloud.list[extend].app;
+        const app = ClientCloud.list[extend]?.app;
+        if (app) {
+          this.app = app;
+        } else {
+          console.warn(`no app config defined from '${extend}' to '${name}'`);
+        }
       }
     }
+    this.#name = name;
     ClientCloud.list[name] = this;
+  }
+  get name() {
+    return this.#name;
   }
   set<T extends keyof ClientCloud["app"], S extends keyof ClientCloud["app"][T]>(a: T, b: S, callback: ClientCloud["app"][T][S]) {
     this.inited[`${a}/${b.toString()}`] = true;
@@ -127,8 +151,14 @@ export class ClientCloud {
           throw `${state} Not Defined`;
         };
   }
+  setAsMain() {
+    ClientCloud.setMain(this.name);
+  }
   static setMain(cloud: string | ClientCloud) {
-    return new ClientCloud("main", cloud);
+    ClientCloud.main = typeof cloud == "string" ? cloud : cloud.name;
+  }
+  static getMain() {
+    return ClientCloud.list[ClientCloud.main];
   }
 }
 export function isDoc(path: Path) {
@@ -148,7 +178,7 @@ export function getSingleQueryOperators(): string[] {
 export function getCompoundQueryOperators(): string[] {
   return ["and", "or"];
 }
-export const queryTest = <R, T extends object>(
+export function queryTest<R, T extends object>(
   query: Biqpod.Cloud.Database.NoSQL.Query<T>,
   {
     single,
@@ -157,15 +187,15 @@ export const queryTest = <R, T extends object>(
     single: (query: Biqpod.Cloud.Database.NoSQL.SingleQuery<T>) => R;
     compound: (query: Biqpod.Cloud.Database.NoSQL.CompoundQuery<T>) => R;
   }> = {},
-): R | undefined => {
+): R | undefined {
   if (getSingleQueryOperators().includes(query.operator)) {
     return single?.(query as Biqpod.Cloud.Database.NoSQL.SingleQuery<T>);
   } else if (getCompoundQueryOperators().includes(query.operator)) {
     return compound?.(query as Biqpod.Cloud.Database.NoSQL.CompoundQuery<T>);
   }
-};
-export function getMainCloud() {
-  return ClientCloud.list["main"];
+}
+export function getMainCloud(): ClientCloud | undefined {
+  return ClientCloud.getMain();
 }
 export function where(field: string, operator: Biqpod.Cloud.Database.NoSQL.SingleQuery["operator"], value: any) {
   return {
@@ -186,10 +216,7 @@ export function or(...querys: (Biqpod.Cloud.Database.NoSQL.Query<any> | Nothing)
     querys: mergeArray(...querys),
   };
 }
-export function orderBy<T extends object, S extends keyof T>(
-  by: S,
-  _type: Required<Biqpod.Cloud.Database.NoSQL.Selection<T>>["order"]["type"] = "asc",
-): Biqpod.Cloud.Database.NoSQL.Selection<T>["order"] {
+export function orderBy<T extends object, S extends keyof T>(by: S, _type: Required<CloudSelection<T>>["order"]["type"] = "asc"): CloudSelection<T>["order"] {
   return {
     type: "asc",
     field: by,

@@ -61,11 +61,22 @@ export interface BiqpodDesktopConfig {
   appProtocol?: string;
 }
 export const getFocused = () => BrowserWindow.getFocusedWindow();
+app.on("browser-window-created", (_e, win) => {
+  win.webContents.send("windowId", win.id);
+});
 export const actions: Record<string, (e: Electron.IpcMainInvokeEvent) => void> =
   {
     minimize: () => getFocused()?.minimize(),
     maximize: () => getFocused()?.maximize(),
     unmaximize: () => getFocused()?.unmaximize(),
+    toggleMaximize: () => {
+      const win = getFocused();
+      if (win?.isMaximized()) {
+        win.unmaximize();
+      } else {
+        win?.maximize();
+      }
+    },
     close: () => getFocused()?.close(),
     toggleDevTools: () => getFocused()?.webContents.toggleDevTools(),
     reload: () => getFocused()?.webContents.reload(),

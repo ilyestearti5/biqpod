@@ -72,11 +72,44 @@ export const generateQuery = <T extends object>(db: Firestore, path: Path, selec
   );
   return query(ref, ...fullQuery);
 };
+interface Data {
+  messages?: {
+    role: "user" | "assistant";
+    content: string;
+  }[];
+  model?: string;
+  temperature?: number;
+  max_completion_tokens?: number;
+  top_p?: number;
+  stream?: boolean;
+}
 export function initMyCloud(options: FirebaseOptions) {
   const myCloud = new ClientCloud("my-cloud");
   const app = initializeApp({
     ...options,
   });
+  const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
+  const apiKey = "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"; // Replace with your actual key or set it as an environment variable.
+  const askAi = async (data: Data) => {
+    return await fetch(groqUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ ...defaultData, ...data }),
+    }).then((response) => {
+      return response.json();
+    });
+  };
+  const defaultData: Data = {
+    messages: [],
+    model: "llama3-70b-8192",
+    temperature: 1,
+    max_completion_tokens: 1024,
+    top_p: 1,
+    stream: false,
+  };
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
@@ -323,6 +356,18 @@ export function initMyCloud(options: FirebaseOptions) {
       return await response.json();
     };
     return result;
+  });
+  myCloud.set("ai", "translate", async (msg, to, from = "en") => {
+    const content = `translate from ${from} to ${to} the text: \n${msg}`;
+    const response = await askAi({
+      messages: [
+        {
+          role: "user",
+          content,
+        },
+      ],
+    });
+    return response?.choices[0]?.message?.content;
   });
   return myCloud;
 }

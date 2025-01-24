@@ -15,7 +15,7 @@ export const AuthRoute = ({ onAuthSuccess, successComponent: Component = <EmptyC
   const isLoading = useAsyncEffect(async () => {
     await delay(1200);
     if (token) {
-      await getMainCloud().app.auth.signInWithCustomToken(token);
+      await getMainCloud()?.app.auth.signInWithCustomToken(token);
     }
   }, [token]);
   React.useEffect(() => {

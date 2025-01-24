@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Field as FeildType, fieldHooks } from "@/data/system/field.model";
 import { TextArea, TextAreaProps } from "../TextArea";
 import { tw } from "@/utils";
@@ -59,7 +59,6 @@ export function Feild({
     fieldHooks.setOneFeild(inputName, "controls", controls || {});
   }, [controls, inputName]);
   const position = useCopyState<Omit<DOMRect, "toJSON"> | null>(null);
-
   React.useEffect(() => {
     if (focused.get) {
       setTemp("input.focused", inputName);
@@ -69,6 +68,13 @@ export function Feild({
       setTemp("input.position", null);
     }
   }, [focused.get, position]);
+
+  useEffect(() => {
+    return () => {
+      setTemp("input.focused", null);
+      setTemp("input.position", null);
+    };
+  }, []);
 
   return (
     <ChangableComponent

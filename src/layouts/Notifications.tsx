@@ -54,7 +54,7 @@ export function Notifications() {
         }
       }}
       className={tw(
-        `right-[10px] bottom-[10px] z-[1000000000000] fixed border border-transparent border-solid rounded-xl w-1/2 transition-[transform,border-radius,right,bottom,width,height] duration-300 overflow-hidden`,
+        `right-[10px] bottom-[10px] z-[1000000000000] fixed border border-transparent border-solid rounded-xl w-1/2 max-md:w-4/5 transition-[transform,border-radius,right,bottom,width,height] duration-300 overflow-hidden`,
         !fullScreen.get && "max-md:w-[calc(100%-20px)]",
         !fullScreen.get && !visibility && "translate-x-[100%]",
         fullScreen.get && "w-full h-full rounded-[0px] bottom-[0px] right-[0px]",

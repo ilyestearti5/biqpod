@@ -336,7 +336,7 @@ declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         interface Payout {
             payoutId?: string;
@@ -349,7 +349,9 @@ declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -357,6 +359,8 @@ declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     namespace Api {
@@ -481,6 +485,7 @@ declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -533,6 +538,7 @@ declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -589,10 +595,12 @@ declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {

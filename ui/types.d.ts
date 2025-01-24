@@ -320,7 +320,7 @@ export declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        export type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        export type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         export type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         export interface Payout {
             payoutId?: string;
@@ -333,7 +333,9 @@ export declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -341,6 +343,8 @@ export declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     export namespace Api {
@@ -465,6 +469,7 @@ export declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -517,6 +522,7 @@ export declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -573,10 +579,12 @@ export declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {
@@ -932,7 +940,7 @@ declare interface SlotType {
 }
 
 export declare interface State<T = undefined> {
-    get: T;
+    readonly get: T;
     set: React.Dispatch<React.SetStateAction<T>>;
 }
 

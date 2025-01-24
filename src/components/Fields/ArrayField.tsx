@@ -37,7 +37,7 @@ export function ArrayFeild({ state, id, config }: ArrayFeildProps) {
         {uniqueData.map((item, index) => {
           const menu = [
             {
-              defaultIcon: allIcons.solid.faCopy,
+              defaultIcon: allIcons.regular.faCopy,
               label: "Copy",
               click: async () => {
                 await navigator.clipboard.writeText(item);
@@ -65,6 +65,7 @@ export function ArrayFeild({ state, id, config }: ArrayFeildProps) {
               <span>{item}</span>
               <span className="max-md:flex hidden">
                 <Tip
+                  className="w-[20px] h-[20px]"
                   icon={allIcons.solid.faEllipsisV}
                   onClick={({ clientY, clientX }) => {
                     openMenu({ x: clientX, y: clientY, menu });

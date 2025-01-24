@@ -5,6 +5,7 @@ import { EmptyComponent } from "./EmptyComponent";
 import { mergeObject, tw } from "@/utils";
 import { Nothing, ReactElement, State } from "@/types";
 import { IconProps } from "./Icon";
+import React from "react";
 export interface TabsProps extends ReactElement {
   buttonClassName?: string;
   state: State<string | Nothing>;
@@ -12,8 +13,13 @@ export interface TabsProps extends ReactElement {
   hideLabelWhereSmalled?: boolean;
   direction?: "vertical" | "horizontal";
 }
-export const Tabs = ({ state, tabs = [], direction = "horizontal", hideLabelWhereSmalled = true, buttonClassName, className, style, ...props }: TabsProps) => {
+export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal", hideLabelWhereSmalled = true, buttonClassName, className, style, ...props }: TabsProps) => {
   const colorMerge = useColorMerge();
+  React.useEffect(() => {
+    if (state.get === undefined && defaultValue) {
+      state.set(defaultValue.toString());
+    }
+  }, [state.get]);
   return (
     <div
       className={tw(
@@ -42,24 +48,26 @@ export const Tabs = ({ state, tabs = [], direction = "horizontal", hideLabelWher
         list={tabs.map(({ label, icon, value }) => {
           const isActive = state.get == value;
           return (
-            <Button
-              className={tw("sm:px-7 sm:py-4 rounded-full w-fit max-sm:w-[40px] max-sm:h-[40px] text-xs", direction == "vertical" && "w-full", buttonClassName)}
-              style={{
-                ...colorMerge(
-                  !isActive && "transparent",
-                  !isActive && {
-                    color: "text.color",
-                  },
-                ),
-              }}
-              key={value}
-              icon={icon}
-              onClick={() => {
-                state.set(value);
-              }}
-            >
-              <span className={tw(hideLabelWhereSmalled && "max-sm:hidden")}>{label}</span>
-            </Button>
+            <span>
+              <Button
+                className={tw("sm:px-7 sm:py-4 rounded-full w-fit max-sm:w-[40px] max-sm:h-[40px] text-xs", direction == "vertical" && "w-full", buttonClassName)}
+                style={{
+                  ...colorMerge(
+                    !isActive && "transparent",
+                    !isActive && {
+                      color: "text.color",
+                    },
+                  ),
+                }}
+                key={value}
+                icon={icon}
+                onClick={() => {
+                  state.set(value);
+                }}
+              >
+                <span className={tw(hideLabelWhereSmalled && "max-sm:hidden")}>{label}</span>
+              </Button>
+            </span>
           );
         })}
         joinComponent={<EmptyComponent />}

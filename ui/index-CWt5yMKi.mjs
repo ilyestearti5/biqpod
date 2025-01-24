@@ -16683,12 +16683,15 @@ const k = {
   G: function(c, l, a) {
     const s = c.getFullYear() > 0 ? 1 : 0;
     switch (l) {
+      // AD, BC
       case "G":
       case "GG":
       case "GGG":
         return a.era(s, { width: "abbreviated" });
+      // A, B
       case "GGGGG":
         return a.era(s, { width: "narrow" });
+      // Anno Domini, Before Christ
       case "GGGG":
       default:
         return a.era(s, { width: "wide" });
@@ -16733,22 +16736,28 @@ const k = {
   Q: function(c, l, a) {
     const s = Math.ceil((c.getMonth() + 1) / 3);
     switch (l) {
+      // 1, 2, 3, 4
       case "Q":
         return String(s);
+      // 01, 02, 03, 04
       case "QQ":
         return L(s, 2);
+      // 1st, 2nd, 3rd, 4th
       case "Qo":
         return a.ordinalNumber(s, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
       case "QQQ":
         return a.quarter(s, {
           width: "abbreviated",
           context: "formatting"
         });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
       case "QQQQQ":
         return a.quarter(s, {
           width: "narrow",
           context: "formatting"
         });
+      // 1st quarter, 2nd quarter, ...
       case "QQQQ":
       default:
         return a.quarter(s, {
@@ -16761,22 +16770,28 @@ const k = {
   q: function(c, l, a) {
     const s = Math.ceil((c.getMonth() + 1) / 3);
     switch (l) {
+      // 1, 2, 3, 4
       case "q":
         return String(s);
+      // 01, 02, 03, 04
       case "qq":
         return L(s, 2);
+      // 1st, 2nd, 3rd, 4th
       case "qo":
         return a.ordinalNumber(s, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
       case "qqq":
         return a.quarter(s, {
           width: "abbreviated",
           context: "standalone"
         });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
       case "qqqqq":
         return a.quarter(s, {
           width: "narrow",
           context: "standalone"
         });
+      // 1st quarter, 2nd quarter, ...
       case "qqqq":
       default:
         return a.quarter(s, {
@@ -16792,18 +16807,22 @@ const k = {
       case "M":
       case "MM":
         return k.M(c, l);
+      // 1st, 2nd, ..., 12th
       case "Mo":
         return a.ordinalNumber(s + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
       case "MMM":
         return a.month(s, {
           width: "abbreviated",
           context: "formatting"
         });
+      // J, F, ..., D
       case "MMMMM":
         return a.month(s, {
           width: "narrow",
           context: "formatting"
         });
+      // January, February, ..., December
       case "MMMM":
       default:
         return a.month(s, { width: "wide", context: "formatting" });
@@ -16813,22 +16832,28 @@ const k = {
   L: function(c, l, a) {
     const s = c.getMonth();
     switch (l) {
+      // 1, 2, ..., 12
       case "L":
         return String(s + 1);
+      // 01, 02, ..., 12
       case "LL":
         return L(s + 1, 2);
+      // 1st, 2nd, ..., 12th
       case "Lo":
         return a.ordinalNumber(s + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
       case "LLL":
         return a.month(s, {
           width: "abbreviated",
           context: "standalone"
         });
+      // J, F, ..., D
       case "LLLLL":
         return a.month(s, {
           width: "narrow",
           context: "standalone"
         });
+      // January, February, ..., December
       case "LLLL":
       default:
         return a.month(s, { width: "wide", context: "standalone" });
@@ -16857,6 +16882,7 @@ const k = {
   E: function(c, l, a) {
     const s = c.getDay();
     switch (l) {
+      // Tue
       case "E":
       case "EE":
       case "EEE":
@@ -16864,16 +16890,19 @@ const k = {
           width: "abbreviated",
           context: "formatting"
         });
+      // T
       case "EEEEE":
         return a.day(s, {
           width: "narrow",
           context: "formatting"
         });
+      // Tu
       case "EEEEEE":
         return a.day(s, {
           width: "short",
           context: "formatting"
         });
+      // Tuesday
       case "EEEE":
       default:
         return a.day(s, {
@@ -16886,10 +16915,13 @@ const k = {
   e: function(c, l, a, s) {
     const e = c.getDay(), o = (e - s.weekStartsOn + 8) % 7 || 7;
     switch (l) {
+      // Numerical value (Nth day of week with current locale or weekStartsOn)
       case "e":
         return String(o);
+      // Padded numerical value
       case "ee":
         return L(o, 2);
+      // 1st, 2nd, ..., 7th
       case "eo":
         return a.ordinalNumber(o, { unit: "day" });
       case "eee":
@@ -16897,16 +16929,19 @@ const k = {
           width: "abbreviated",
           context: "formatting"
         });
+      // T
       case "eeeee":
         return a.day(e, {
           width: "narrow",
           context: "formatting"
         });
+      // Tu
       case "eeeeee":
         return a.day(e, {
           width: "short",
           context: "formatting"
         });
+      // Tuesday
       case "eeee":
       default:
         return a.day(e, {
@@ -16919,10 +16954,13 @@ const k = {
   c: function(c, l, a, s) {
     const e = c.getDay(), o = (e - s.weekStartsOn + 8) % 7 || 7;
     switch (l) {
+      // Numerical value (same as in `e`)
       case "c":
         return String(o);
+      // Padded numerical value
       case "cc":
         return L(o, l.length);
+      // 1st, 2nd, ..., 7th
       case "co":
         return a.ordinalNumber(o, { unit: "day" });
       case "ccc":
@@ -16930,16 +16968,19 @@ const k = {
           width: "abbreviated",
           context: "standalone"
         });
+      // T
       case "ccccc":
         return a.day(e, {
           width: "narrow",
           context: "standalone"
         });
+      // Tu
       case "cccccc":
         return a.day(e, {
           width: "short",
           context: "standalone"
         });
+      // Tuesday
       case "cccc":
       default:
         return a.day(e, {
@@ -16952,27 +16993,34 @@ const k = {
   i: function(c, l, a) {
     const s = c.getDay(), e = s === 0 ? 7 : s;
     switch (l) {
+      // 2
       case "i":
         return String(e);
+      // 02
       case "ii":
         return L(e, l.length);
+      // 2nd
       case "io":
         return a.ordinalNumber(e, { unit: "day" });
+      // Tue
       case "iii":
         return a.day(s, {
           width: "abbreviated",
           context: "formatting"
         });
+      // T
       case "iiiii":
         return a.day(s, {
           width: "narrow",
           context: "formatting"
         });
+      // Tu
       case "iiiiii":
         return a.day(s, {
           width: "short",
           context: "formatting"
         });
+      // Tuesday
       case "iiii":
       default:
         return a.day(s, {
@@ -17103,13 +17151,21 @@ const k = {
     if (s === 0)
       return "Z";
     switch (l) {
+      // Hours and optional minutes
       case "X":
         return gl(s);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XX`
       case "XXXX":
       case "XX":
         return y(s);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XXX`
       case "XXXXX":
       case "XXX":
+      // Hours and minutes with `:` delimiter
       default:
         return y(s, ":");
     }
@@ -17118,13 +17174,21 @@ const k = {
   x: function(c, l, a) {
     const s = c.getTimezoneOffset();
     switch (l) {
+      // Hours and optional minutes
       case "x":
         return gl(s);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xx`
       case "xxxx":
       case "xx":
         return y(s);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xxx`
       case "xxxxx":
       case "xxx":
+      // Hours and minutes with `:` delimiter
       default:
         return y(s, ":");
     }
@@ -17133,10 +17197,12 @@ const k = {
   O: function(c, l, a) {
     const s = c.getTimezoneOffset();
     switch (l) {
+      // Short
       case "O":
       case "OO":
       case "OOO":
         return "GMT" + bl(s, ":");
+      // Long
       case "OOOO":
       default:
         return "GMT" + y(s, ":");
@@ -17146,10 +17212,12 @@ const k = {
   z: function(c, l, a) {
     const s = c.getTimezoneOffset();
     switch (l) {
+      // Short
       case "z":
       case "zz":
       case "zzz":
         return "GMT" + bl(s, ":");
+      // Long
       case "zzzz":
       default:
         return "GMT" + y(s, ":");
@@ -17729,48 +17797,45 @@ function xE(c, l) {
   return a;
 }
 export {
-  IU as $,
-  LE as A,
-  rE as B,
-  tu as C,
+  JU as $,
+  pE as A,
+  LE as B,
+  rE as C,
   TU as D,
-  bT as E,
-  wl as F,
-  Q9 as G,
-  u7 as H,
-  rD as I,
-  fE as J,
-  eN as K,
-  D0 as L,
-  hb as M,
-  tE as N,
-  lE as O,
-  aw as P,
-  lx as Q,
-  $U as R,
+  tu as E,
+  bT as F,
+  wl as G,
+  Q9 as H,
+  u7 as I,
+  rD as J,
+  tE as K,
+  lE as L,
+  aw as M,
+  lx as N,
+  $U as O,
+  YU as P,
+  _U as Q,
+  aE as R,
   Hl as S,
-  YU as T,
-  _U as U,
-  aE as V,
-  dE as W,
-  ZU as X,
-  Sl as Y,
-  qU as Z,
-  PU as _,
+  dE as T,
+  ZU as U,
+  Sl as V,
+  qU as W,
+  PU as X,
+  IU as Y,
+  jU as Z,
+  DU as _,
   XU as a,
-  jU as a0,
-  DU as a1,
-  JU as a2,
-  cE as a3,
-  sE as a4,
-  eE as a5,
-  RU as a6,
-  oE as a7,
-  nE as a8,
-  GU as a9,
-  hE as aa,
-  uE as ab,
-  xE as ac,
+  cE as a0,
+  sE as a1,
+  eE as a2,
+  RU as a3,
+  oE as a4,
+  nE as a5,
+  GU as a6,
+  hE as a7,
+  uE as a8,
+  xE as a9,
   UH as b,
   pZ as c,
   KU as d,
@@ -17792,8 +17857,8 @@ export {
   ME as t,
   qq as u,
   mE as v,
-  SZ as w,
-  bZ as x,
-  dZ as y,
-  pE as z
+  fE as w,
+  SZ as x,
+  bZ as y,
+  dZ as z
 };

@@ -12,6 +12,11 @@ import { QueryStatus } from 'react-query';
 import * as regular from '@fortawesome/free-regular-svg-icons';
 import * as solid from '@fortawesome/free-solid-svg-icons';
 
+export declare interface AiMessage {
+    message: string;
+    response: Blob;
+}
+
 export declare const allIcons: {
     solid: typeof solid;
     regular: typeof regular;
@@ -324,7 +329,7 @@ declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         interface Payout {
             payoutId?: string;
@@ -337,7 +342,9 @@ declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -345,6 +352,8 @@ declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     namespace Api {
@@ -469,6 +478,7 @@ declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -521,6 +531,7 @@ declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -577,10 +588,12 @@ declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {
@@ -707,7 +720,9 @@ declare namespace Biqpod {
 }
 
 export declare class ClientCloud {
-    inited: Record<string, boolean>;
+    #private;
+    inited: Partial<Record<string, boolean>>;
+    private static main;
     app: {
         nosql: {
             createDoc: <T extends object>(_path: Path, _content: T) => Promise<void>;
@@ -715,7 +730,7 @@ export declare class ClientCloud {
             updateDoc: <T extends object>(_path: Path, _content: T) => Promise<void>;
             deleteDoc: (_path: Path) => Promise<void>;
             getDoc: <T extends object>(_path: Path) => Promise<T | null>;
-            getDocs: <T extends object>(_path: Path, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => Promise<{
+            getDocs: <T extends object>(_path: Path, _selection?: CloudSelection<T>) => Promise<{
                 id: string;
                 data: T;
             }[] | null>;
@@ -723,7 +738,7 @@ export declare class ClientCloud {
             onCollectionSnapshot: <T extends object>(_path: Path, _callback: (data: {
                 id: string;
                 data: T;
-            }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => () => void;
+            }[]) => void, _selection?: CloudSelection<T>) => () => void;
             onAutoSnapshot: <T extends object, ID extends boolean>(_path: Path, _callback: (data: ID extends true ? T | null : {
                 id: string;
                 data: T;
@@ -735,7 +750,7 @@ export declare class ClientCloud {
             updateRecord: <T extends object>(_table: string, _id: string, _content: T) => Promise<void>;
             deleteRecord: (_table: string, _id: string) => Promise<void>;
             getRecord: <T extends object>(_table: string, _id: string) => Promise<T | null>;
-            getRecords: <T extends object>(_table: string, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => Promise<{
+            getRecords: <T extends object>(_table: string, _selection?: CloudSelection<T>) => Promise<{
                 id: string;
                 data: T;
             }[] | null>;
@@ -743,7 +758,7 @@ export declare class ClientCloud {
             onTableSnapshot: <T extends object>(_table: string, _callback: (data: {
                 id: string;
                 data: T;
-            }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => () => void;
+            }[]) => void, _selection?: CloudSelection<T>) => () => void;
         };
         storage: {
             createFile(_path: Path, _content: string | Blob | Uint8Array | ArrayBuffer, _options?: Partial<{
@@ -778,9 +793,14 @@ export declare class ClientCloud {
             getFunction: <R, P = any>(_name: string, _dev?: boolean, _metaData?: object) => Promise<CloudFunction<R, P> | null>;
             getUserFunction: <R, P = any>(_name: string, _dev?: boolean, _metaData?: object) => Promise<CloudFunction<R, P> | null>;
         };
+        ai: {
+            sendMessage: (_messages: (Blob | string)[]) => Promise<AiMessage | null>;
+            translate: (_text: string, _to: string, _from?: string) => Promise<string | null>;
+        };
     };
-    static list: Record<string, ClientCloud>;
+    static list: Partial<Record<string, ClientCloud>>;
     constructor(name: string, extend?: string | ClientCloud);
+    get name(): string;
     set<T extends keyof ClientCloud["app"], S extends keyof ClientCloud["app"][T]>(a: T, b: S, callback: ClientCloud["app"][T][S]): void;
     remove<T extends keyof ClientCloud["app"], S extends keyof ClientCloud["app"][T]>(a: T, b: S): void;
     get<T extends keyof ClientCloud["app"], S extends keyof ClientCloud["app"][T]>(a: T, b: S): {
@@ -790,7 +810,7 @@ export declare class ClientCloud {
             updateDoc: <T_1 extends object>(_path: Path, _content: T_1) => Promise<void>;
             deleteDoc: (_path: Path) => Promise<void>;
             getDoc: <T_1 extends object>(_path: Path) => Promise<T_1 | null>;
-            getDocs: <T_1 extends object>(_path: Path, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T_1>) => Promise<{
+            getDocs: <T_1 extends object>(_path: Path, _selection?: CloudSelection<T_1>) => Promise<{
                 id: string;
                 data: T_1;
             }[] | null>;
@@ -798,7 +818,7 @@ export declare class ClientCloud {
             onCollectionSnapshot: <T_1 extends object>(_path: Path, _callback: (data: {
                 id: string;
                 data: T_1;
-            }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T_1>) => () => void;
+            }[]) => void, _selection?: CloudSelection<T_1>) => () => void;
             onAutoSnapshot: <T_1 extends object, ID extends boolean>(_path: Path, _callback: (data: ID extends true ? T_1 | null : {
                 id: string;
                 data: T_1;
@@ -810,7 +830,7 @@ export declare class ClientCloud {
             updateRecord: <T_1 extends object>(_table: string, _id: string, _content: T_1) => Promise<void>;
             deleteRecord: (_table: string, _id: string) => Promise<void>;
             getRecord: <T_1 extends object>(_table: string, _id: string) => Promise<T_1 | null>;
-            getRecords: <T_1 extends object>(_table: string, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T_1>) => Promise<{
+            getRecords: <T_1 extends object>(_table: string, _selection?: CloudSelection<T_1>) => Promise<{
                 id: string;
                 data: T_1;
             }[] | null>;
@@ -818,7 +838,7 @@ export declare class ClientCloud {
             onTableSnapshot: <T_1 extends object>(_table: string, _callback: (data: {
                 id: string;
                 data: T_1;
-            }[]) => void, _selection?: Biqpod.Cloud.Database.NoSQL.Selection<T_1>) => () => void;
+            }[]) => void, _selection?: CloudSelection<T_1>) => () => void;
         };
         storage: {
             createFile(_path: Path, _content: string | Blob | Uint8Array | ArrayBuffer, _options?: Partial<{
@@ -853,10 +873,19 @@ export declare class ClientCloud {
             getFunction: <R, P = any>(_name: string, _dev?: boolean, _metaData?: object) => Promise<CloudFunction<R, P> | null>;
             getUserFunction: <R, P = any>(_name: string, _dev?: boolean, _metaData?: object) => Promise<CloudFunction<R, P> | null>;
         };
+        ai: {
+            sendMessage: (_messages: (Blob | string)[]) => Promise<AiMessage | null>;
+            translate: (_text: string, _to: string, _from?: string) => Promise<string | null>;
+        };
     }[T][S] | (() => never);
+    setAsMain(): void;
+    static setMain(cloud: string | ClientCloud): void;
+    static getMain(): ClientCloud | undefined;
 }
 
 declare type CloudFunction<R, P = any> = (data: P) => Promise<R>;
+
+export declare type CloudSelection<T extends object> = Biqpod.Cloud.Database.NoSQL.Selection<T>;
 
 declare interface FileProps extends default_2.OpenDialogOptions {
     nullable: boolean;
@@ -881,17 +910,17 @@ export declare const generateQuery: <T extends object>(db: Firestore, path: Path
 
 export declare function getCompoundQueryOperators(): string[];
 
-export declare function getFunction<R, P = any>(name: string, mode?: boolean, metaData?: object): Promise<CloudFunction<R, P> | null>;
+export declare function getFunction<R, P = any>(name: string, mode?: boolean, metaData?: object): Promise<CloudFunction<R, P> | null> | undefined;
 
 export declare function getIsDev(isDev?: boolean): boolean;
 
-export declare function getMainCloud(): ClientCloud;
+export declare function getMainCloud(): ClientCloud | undefined;
 
 export declare function getProjectConfig(projectId: string): Promise<ProjectConfig>;
 
 export declare function getSingleQueryOperators(): string[];
 
-export declare function getUserFunction<R, P = any>(name: string, mode?: boolean, metaData?: object): Promise<CloudFunction<R, P> | null>;
+export declare function getUserFunction<R, P = any>(name: string, mode?: boolean, metaData?: object): Promise<CloudFunction<R, P> | null> | undefined;
 
 declare interface IconProps {
     icon?: FontAwesomeIconProps["icon"];
@@ -919,12 +948,12 @@ declare type Nothing = false | 0 | null | "" | undefined;
 
 export declare function onManySnaping<T extends string>(props: Record<T, {
     path: Path;
-    selection?: Biqpod.Cloud.Database.NoSQL.Selection<Record<string, any>>;
+    selection?: CloudSelection<any>;
 }>, callback: (executed: T) => void, skip?: number): Record<T, Function>;
 
 export declare function or(...querys: (Biqpod.Cloud.Database.NoSQL.Query<any> | Nothing)[]): Biqpod.Cloud.Database.NoSQL.CompoundQuery<any>;
 
-export declare function orderBy<T extends object, S extends keyof T>(by: S, _type?: Required<Biqpod.Cloud.Database.NoSQL.Selection<T>>["order"]["type"]): Biqpod.Cloud.Database.NoSQL.Selection<T>["order"];
+export declare function orderBy<T extends object, S extends keyof T>(by: S, _type?: Required<CloudSelection<T>>["order"]["type"]): CloudSelection<T>["order"];
 
 export declare type Path = Biqpod.Cloud.Path;
 
@@ -932,10 +961,10 @@ declare type ProjectConfig = Biqpod.Project.Config;
 
 export declare type QueryFilterConstraint = QueryFieldFilterConstraint | QueryCompositeFilterConstraint;
 
-export declare const queryTest: <R, T extends object>(query: Biqpod.Cloud.Database.NoSQL.Query<T>, { single, compound, }?: Partial<{
+export declare function queryTest<R, T extends object>(query: Biqpod.Cloud.Database.NoSQL.Query<T>, { single, compound, }?: Partial<{
     single: (query: Biqpod.Cloud.Database.NoSQL.SingleQuery<T>) => R;
     compound: (query: Biqpod.Cloud.Database.NoSQL.CompoundQuery<T>) => R;
-}>) => R | undefined;
+}>): R | undefined;
 
 declare type ReactElement<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T>;
 

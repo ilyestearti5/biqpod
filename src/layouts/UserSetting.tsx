@@ -1,7 +1,6 @@
 import React from "react";
 import { List } from "@/components/List";
 import { Tip } from "@/components/Tip";
-import { faCodeFork, faList, faRotateBack } from "@fortawesome/free-solid-svg-icons";
 import { ViewPage } from "@/components/ViewPage";
 import { viewHooks } from "@/data/system/views.model";
 import { Line } from "@/components/Line";
@@ -12,6 +11,7 @@ import { openDialog, settingHooks, useChangedSetting, useColorMerge } from "@/ho
 import { getSlotData, slotHooks } from "@/data/system/slot.slice";
 import { TitleView } from "@/components/TitleView";
 import { mergeArray } from "@/utils";
+import { allIcons } from "@/apis";
 export function UserSetting() {
   const changedSettings = useChangedSetting();
   const layoutTools = React.useMemo(() => {
@@ -22,7 +22,7 @@ export function UserSetting() {
           const { response } = await openDialog({
             message: "Are You Sure About Reset All Configurations",
             defaultId: 0,
-            title: "Reset All Config",
+            title: "Reset",
             buttons: ["Yes", "No"],
             type: "warning",
           });
@@ -38,7 +38,7 @@ export function UserSetting() {
             );
           }
         },
-        icon: faRotateBack,
+        icon: allIcons.solid.faRotateBack,
         title: "reset all",
       },
       {
@@ -46,14 +46,14 @@ export function UserSetting() {
           viewHooks.setOneFeild("settings.viewType", "focused", "list");
         },
         title: "list",
-        icon: faList,
+        icon: allIcons.solid.faList,
       },
       {
         click() {
           viewHooks.setOneFeild("settings.viewType", "focused", "tree");
         },
         title: "tree",
-        icon: faCodeFork,
+        icon: allIcons.solid.faCodeFork,
       },
     );
   }, [changedSettings]);

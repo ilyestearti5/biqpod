@@ -10,8 +10,8 @@ import { Icon } from "@/components/Icon";
 import { List } from "@/components/List";
 import { handelShadowColor, useColorMerge, useCopyState } from "@/hooks";
 import { allIcons } from "@/apis";
-import { BlurOverlay } from "@/components";
 import { Biqpod, ListItemProps, MenuRecordProps } from "@/types";
+import { BlurOverlay } from "@/components";
 export const MenuRecord = ({ item, status, handelFocus, handelSubmit }: ListItemProps<MenuRecordProps>) => {
   if (item.type == "separator") {
     return (
@@ -89,50 +89,52 @@ export const MenuLayout = () => {
           reset();
         }
       }}
-      className={tw("duration-75 scale-100")}
+      className={tw("scale-100")}
       hidden={!menuId}
     >
-      <div
-        style={{
-          ...colorMerge("secondary.background", {
-            borderColor: "borders",
-            boxShadow: handelShadowColor([
-              {
-                colorId: "shadow.color",
-                blur: 20,
-                size: 10,
-                x: 0,
-                y: 5,
-              },
-            ]),
-          }),
-          ...mergeObject<React.CSSProperties>(
-            menuPosition &&
-              menuDim?.width &&
-              (innerWidth > menuPosition.x + menuDim.width
-                ? {
-                    left: menuPosition.x,
-                  }
-                : {
-                    right: innerWidth - menuPosition.x,
-                  }),
-            menuPosition &&
-              menuDim?.height &&
-              (innerHeight > menuPosition.y + menuDim.height
-                ? {
-                    top: menuPosition.y,
-                  }
-                : {
-                    bottom: innerHeight - menuPosition.x,
-                  }),
-          ),
-        }}
-        className="absolute flex flex-col py-1 border border-transparent border-solid rounded-md md:w-[350px] max-md:w-[200px] overflow-hidden"
-      >
-        <PositionView positionId="menu-list" onElement={element.set}>
-          <List skipFn={({ enabled = true, type }) => type == "separator" || !enabled} slotId="menu-list" component={MenuRecord} data={menuList || []} />
-        </PositionView>
-      </div>
+      {!!menuList?.length && (
+        <div
+          style={{
+            ...colorMerge("secondary.background", {
+              borderColor: "borders",
+              boxShadow: handelShadowColor([
+                {
+                  colorId: "shadow.color",
+                  blur: 20,
+                  size: 10,
+                  x: 0,
+                  y: 5,
+                },
+              ]),
+            }),
+            ...mergeObject<React.CSSProperties>(
+              menuPosition &&
+                menuDim?.width &&
+                (innerWidth > menuPosition.x + menuDim.width
+                  ? {
+                      left: menuPosition.x,
+                    }
+                  : {
+                      right: innerWidth - menuPosition.x,
+                    }),
+              menuPosition &&
+                menuDim?.height &&
+                (innerHeight > menuPosition.y + menuDim.height
+                  ? {
+                      top: menuPosition.y,
+                    }
+                  : {
+                      bottom: innerHeight - menuPosition.y,
+                    }),
+            ),
+          }}
+          className="absolute flex flex-col py-1 border border-transparent border-solid rounded-md md:w-[350px] max-md:w-[200px] overflow-hidden"
+        >
+          <PositionView positionId="menu-list" onElement={element.set}>
+            <List skipFn={({ enabled = true, type }) => type == "separator" || !enabled} slotId="menu-list" component={MenuRecord} data={menuList || []} />
+          </PositionView>
+        </div>
+      )}
     </BlurOverlay>
   );
 };

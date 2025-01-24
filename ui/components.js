@@ -1,10 +1,10 @@
-import { e as S, v as Z, j as k, S as X, b as s, s as V, f as M, I as P, h as T, F as _, P as q, c as C, J as G, n as J, L as Y, i as Q, k as U, l as $, m as ee, E as te, o as O, p as H, q as A, r as se, t as E, w as ae, x as ne } from "./SeparatedComponents-Ce31pUFr.mjs";
-import { A as Ye, N as Qe, B as Ue, y as et, O as tt, Q as st, C as at, D as nt, G as rt, K as ot, $ as lt, H as it, M as ct, T as dt, R as ut, U as mt, X as ft, Y as gt, _ as pt, V as ht, z as wt, Z as vt } from "./SeparatedComponents-Ce31pUFr.mjs";
-import { t as v, S as D, r as re, a as oe, D as le, s as R, f as ie, b as ce, m as de } from "./index-DV9BsmoW.mjs";
+import { e as S, v as Z, j as k, S as X, b as s, s as V, f as M, I as P, h as T, F as _, P as q, c as C, J as G, n as J, L as Y, i as Q, k as U, l as $, m as ee, E as te, o as O, p as H, q as A, r as se, t as E, w as ae, x as ne } from "./SeparatedComponents-DltGgzky.mjs";
+import { A as Je, N as Ye, B as Qe, y as Ue, O as et, Q as tt, C as st, D as at, G as nt, K as rt, $ as ot, H as lt, M as it, T as ct, R as dt, U as ut, X as mt, Y as ft, _ as gt, V as pt, z as ht, Z as wt } from "./SeparatedComponents-DltGgzky.mjs";
+import { t as v, S as D, r as re, a as oe, D as le, s as R, f as ie, b as ce, m as de } from "./index-CWt5yMKi.mjs";
 import w from "react";
-import { B as ue, A as me, E as fe, O as ge, S as pe, N as he, F as we, P as ve, D as be, R as ye, a as xe, I as ke, C as Ce, b as B, c as Ne } from "./ViewPage-3u_LYk8f.mjs";
-import { d as yt, q as xt, r as kt, e as Ct, f as Nt, p as Lt, g as Ft, j as It, k as Mt, K as Tt, L as St, M as zt, m as At, n as Et, i as jt, t as Vt, u as $t, l as Bt, v as Pt, T as Ot, w as Ht, x as Dt, y as Rt, z as Xt, G as Kt, V as Wt, h as Zt, o as _t, s as qt } from "./ViewPage-3u_LYk8f.mjs";
-const Ve = ({ children: e, ...o }) => {
+import { B as ue, A as me, E as fe, O as ge, S as pe, N as he, F as we, P as ve, D as be, R as ye, a as xe, I as ke, C as B, b as Ce } from "./ViewPage---K9VAvA.mjs";
+import { c as bt, q as yt, r as xt, d as kt, e as Ct, f as Nt, p as Lt, g as Ft, j as It, k as Mt, K as Tt, L as St, M as zt, m as At, n as Et, i as jt, t as Vt, u as $t, l as Bt, v as Pt, T as Ot, w as Ht, x as Dt, y as Rt, z as Xt, G as Kt, V as Wt, h as Zt, o as _t, s as qt } from "./ViewPage---K9VAvA.mjs";
+const je = ({ children: e, ...o }) => {
   const r = S("preferences/animation.boolean"), c = Z.getTemp("shadow-window");
   return /* @__PURE__ */ k(X, { ...o, children: [
     e,
@@ -22,10 +22,10 @@ const Ve = ({ children: e, ...o }) => {
     )
   ] });
 };
-function $e({ children: e }) {
+function Ve({ children: e }) {
   return /* @__PURE__ */ s("div", { className: "flex justify-center items-center px-3 w-full window-dragged h-full text-center capitalize overflow-hidden", children: e });
 }
-const Be = () => {
+const $e = () => {
   const e = S("window/dark.boolean"), o = M();
   return /* @__PURE__ */ s(
     "button",
@@ -57,12 +57,12 @@ const Be = () => {
     }
   );
 };
-function Le({ value: e, onChange: o, type: r, config: c, id: n }) {
+function Ne({ value: e, onChange: o, type: r, config: c, id: n }) {
   const t = c, a = {
     get: e,
     set: o
   };
-  return /* @__PURE__ */ k("div", { className: "p-2", children: [
+  return /* @__PURE__ */ k("div", { className: "p-2 w-full", children: [
     r == "boolean" && /* @__PURE__ */ s(ue, { id: n, state: a, config: t }),
     r == "array" && /* @__PURE__ */ s(me, { id: n, state: a, config: t }),
     r == "enum" && /* @__PURE__ */ s(fe, { id: n, state: a, config: t }),
@@ -79,7 +79,7 @@ function Le({ value: e, onChange: o, type: r, config: c, id: n }) {
     r == "pin" && /* @__PURE__ */ s(q, { id: n, state: a, config: t })
   ] });
 }
-const Pe = ({ config: e, id: o, state: r }) => {
+const Be = ({ config: e, id: o, state: r }) => {
   const c = Object.entries((e == null ? void 0 : e.list) || []).map(([a, i]) => ({ id: a, ...i })), n = C({});
   w.useEffect(() => {
     n.set({});
@@ -91,7 +91,7 @@ const Pe = ({ config: e, id: o, state: r }) => {
       list: c.map((a, i) => {
         const { label: l, icon: u, type: b, id: p, config: y, onNext: m } = a, x = r.get[p], g = `full-field-${o}-${J()}`;
         return /* @__PURE__ */ k("div", { className: "w-full cursor-pointer", children: [
-          /* @__PURE__ */ s(Ce, { className: "rounded-xl", tabIndex: -1, children: /* @__PURE__ */ k(
+          /* @__PURE__ */ k(
             "div",
             {
               onClick: (f) => {
@@ -147,9 +147,9 @@ const Pe = ({ config: e, id: o, state: r }) => {
                 ] })
               ]
             }
-          ) }),
+          ),
           /* @__PURE__ */ s("div", { className: v("flex justify-center h-[0px] overflow-hidden", t && "transition-[height]", n.get[i] && "h-[150px]"), children: /* @__PURE__ */ s(
-            Le,
+            Ne,
             {
               type: b,
               onChange: (f) => {
@@ -170,7 +170,7 @@ const Pe = ({ config: e, id: o, state: r }) => {
       joinComponent: /* @__PURE__ */ s(Y, {})
     }
   ) });
-}, Oe = ({ state: e, config: o = {}, id: r }) => {
+}, Pe = ({ state: e, config: o = {}, id: r }) => {
   const c = w.useRef(null), n = C(!1), t = o.min || 0, a = o.max || 100, i = o.isFloat || !1, l = w.useMemo(() => {
     var h;
     return (h = c.current) == null ? void 0 : h.getBoundingClientRect();
@@ -279,7 +279,7 @@ const Pe = ({ config: e, id: o, state: r }) => {
     }
   );
 };
-function He({
+function Oe({
   onUpdate: e,
   onScroll: o,
   render: r,
@@ -326,7 +326,7 @@ function He({
     }
   );
 }
-function De({
+function He({
   "aria-selected": e,
   children: o,
   className: r,
@@ -396,7 +396,7 @@ function De({
     }
   );
 }
-function Re({ position: e, style: o, className: r, children: c, ...n }) {
+function De({ position: e, style: o, className: r, children: c, ...n }) {
   const t = M();
   return /* @__PURE__ */ s(
     "div",
@@ -446,7 +446,7 @@ function Re({ position: e, style: o, className: r, children: c, ...n }) {
     }
   );
 }
-function Xe({ length: e = 4, direction: o = "vertical", color: r, choisedIcon: c = T.solid.faStar, unchoisedIcon: n = T.regular.faStar, starts: t = e, onSubmit: a }) {
+function Re({ length: e = 4, direction: o = "vertical", color: r, choisedIcon: c = T.solid.faStar, unchoisedIcon: n = T.regular.faStar, starts: t = e, onSubmit: a }) {
   const i = M();
   return /* @__PURE__ */ s("div", { className: v("flex", o == "horizontal" && "flex-col"), children: re(e).map((l, u) => /* @__PURE__ */ s(
     ee,
@@ -468,7 +468,7 @@ function Xe({ length: e = 4, direction: o = "vertical", color: r, choisedIcon: c
     l
   )) });
 }
-const Ke = ({ className: e, children: o, onMouseEnter: r, onMouseDown: c, ...n }) => {
+const Xe = ({ className: e, children: o, onMouseEnter: r, onMouseDown: c, ...n }) => {
   const t = M(), a = S("preferences/animation.boolean"), i = C(!1);
   return /* @__PURE__ */ k(
     "button",
@@ -530,7 +530,7 @@ const Ke = ({ className: e, children: o, onMouseEnter: r, onMouseDown: c, ...n }
     }
   );
 };
-function Fe({ string: e = "expmle", time: o = 10 }) {
+function Le({ string: e = "expmle", time: o = 10 }) {
   const r = C(e), c = C(""), n = C(!0);
   return w.useEffect(() => {
     const t = r.get, a = oe(t.split("").filter(Boolean));
@@ -552,8 +552,8 @@ function Fe({ string: e = "expmle", time: o = 10 }) {
     isLoading: n.get
   };
 }
-const We = ({ content: e, time: o }) => {
-  const { state: r, value: c } = Fe({
+const Ke = ({ content: e, time: o }) => {
+  const { state: r, value: c } = Le({
     time: o,
     string: e
   });
@@ -561,7 +561,7 @@ const We = ({ content: e, time: o }) => {
     r.set(e || "");
   }, [e]), /* @__PURE__ */ s(te, { children: c });
 };
-function Ze({ inputName: e, defaultContent: o, value: r, setValue: c, visibility: n, setVisibility: t, controls: a, placeholder: i }) {
+function We({ inputName: e, defaultContent: o, value: r, setValue: c, visibility: n, setVisibility: t, controls: a, placeholder: i }) {
   const l = C(!1), u = `focus-input-update-${e}`, b = `escape-input-update-${e}`;
   O(u, async () => {
     var m;
@@ -588,7 +588,7 @@ function Ze({ inputName: e, defaultContent: o, value: r, setValue: c, visibility
   return /* @__PURE__ */ s("div", { className: "p-2 group", children: /* @__PURE__ */ k("div", { className: "flex items-center gap-1", children: [
     /* @__PURE__ */ s("h1", { className: "truncate", hidden: !!n, children: r || o }),
     n && /* @__PURE__ */ s(
-      Ne,
+      Ce,
       {
         placeholder: i,
         controls: a,
@@ -617,7 +617,7 @@ function Ze({ inputName: e, defaultContent: o, value: r, setValue: c, visibility
     ) })
   ] }) });
 }
-function _e({ ref: e, position: { x: o, y: r } = { x: -2e4, y: -2e3 }, children: c, style: n, className: t, ...a }) {
+function Ze({ ref: e, position: { x: o, y: r } = { x: -2e4, y: -2e3 }, children: c, style: n, className: t, ...a }) {
   return /* @__PURE__ */ s(
     "div",
     {
@@ -633,8 +633,8 @@ function _e({ ref: e, position: { x: o, y: r } = { x: -2e4, y: -2e3 }, children:
     }
   );
 }
-const j = ({ ...e }) => /* @__PURE__ */ s("span", { className: "w-[40px] h-full inline-flex items-center justify-center transition-[background]", ...e, tabIndex: -1 }), Ie = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,5 10,5 10,6 0,6 Z" }) }), Me = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "m 2,1e-5 0,2 -2,0 0,8 8,0 0,-2 2,0 0,-8 z m 1,1 6,0 0,6 -1,0 0,-5 -5,0 z m -2,2 6,0 0,6 -6,0 z" }) }), Te = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,0 0,0.7 4.3,5 0,9.3 0,10 0.7,10 5,5.7 9.3,10 10,10 10,9.3 5.7,5 10,0.7 10,0 9.3,0 5,4.3 0.7,0 Z" }) }), Se = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,0 0,10 10,10 10,0 Z M 1,1 9,1 9,9 1,9 Z" }) });
-function qe() {
+const j = ({ ...e }) => /* @__PURE__ */ s("span", { className: "w-[40px] h-full inline-flex items-center justify-center transition-[background]", ...e, tabIndex: -1 }), Fe = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,5 10,5 10,6 0,6 Z" }) }), Ie = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "m 2,1e-5 0,2 -2,0 0,8 8,0 0,-2 2,0 0,-8 z m 1,1 6,0 0,6 -1,0 0,-5 -5,0 z m -2,2 6,0 0,6 -6,0 z" }) }), Me = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,0 0,0.7 4.3,5 0,9.3 0,10 0.7,10 5,5.7 9.3,10 10,10 10,9.3 5.7,5 10,0.7 10,0 9.3,0 5,4.3 0.7,0 Z" }) }), Te = ({ color: e }) => /* @__PURE__ */ s("svg", { version: "1.1", width: "10", height: "10", children: /* @__PURE__ */ s("path", { className: "transition-[fill]", fill: e, d: "M 0,0 0,10 10,10 10,0 Z M 1,1 9,1 9,9 1,9 Z" }) });
+function _e() {
   const e = M(), o = C(!1), r = C(!1), c = C(!1), n = se("window.maximized"), t = E ? require("electron").ipcRenderer : null, a = e({ background: "text.color" }).background;
   return w.useEffect(() => (t == null || t.on("window-restored", (i, l) => {
     ae("window.maximized", l);
@@ -656,7 +656,7 @@ function qe() {
         style: {
           ...e(o.get && "gray.opacity")
         },
-        children: /* @__PURE__ */ s(Ie, { color: a })
+        children: /* @__PURE__ */ s(Fe, { color: a })
       }
     ),
     /* @__PURE__ */ s(
@@ -674,7 +674,7 @@ function qe() {
         style: {
           ...e(r.get && "gray.opacity")
         },
-        children: n ? /* @__PURE__ */ s(Me, { color: a }) : /* @__PURE__ */ s(Se, { color: a })
+        children: n ? /* @__PURE__ */ s(Ie, { color: a }) : /* @__PURE__ */ s(Te, { color: a })
       }
     ),
     /* @__PURE__ */ s(
@@ -705,7 +705,7 @@ function qe() {
           i == 0 && (t == null || t.invoke("action", "close"));
         },
         children: /* @__PURE__ */ s(
-          Te,
+          Me,
           {
             color: c.get ? e({
               color: "primary.content"
@@ -717,98 +717,98 @@ function qe() {
   ] });
 }
 export {
-  yt as Anchor,
+  bt as Anchor,
   me as ArrayFeild,
-  Ye as AsyncComponent,
-  Qe as BallLoading,
-  xt as BlurOverlay,
+  Je as AsyncComponent,
+  Ye as BallLoading,
+  yt as BlurOverlay,
   ue as BooleanFeild,
-  Ue as Button,
-  et as Card,
-  tt as CardWait,
-  st as CardioLoading,
-  $e as CenterWindowDrag,
-  kt as ChangableComponent,
-  at as CircleLoading,
+  Qe as Button,
+  Ue as Card,
+  et as CardWait,
+  tt as CardioLoading,
+  Ve as CenterWindowDrag,
+  xt as ChangableComponent,
+  st as CircleLoading,
   B as CircleTip,
-  Ce as ClickedView,
-  Te as CloseActionIcon,
+  kt as ClickedView,
+  Me as CloseActionIcon,
   Ct as ColorsList,
-  Be as DarkLightIcon,
+  $e as DarkLightIcon,
   Nt as DataBaseManagmentList,
   be as DateFeild,
   Lt as DownOverlay,
   te as EmptyComponent,
   fe as EnumFeild,
   Ft as FastList,
-  Ne as Feild,
+  Ce as Feild,
   _ as FileFeild,
-  nt as FileInfo,
+  at as FileInfo,
   we as FilterFeild,
-  rt as Focus,
-  Pe as FullField,
-  Le as FullFieldRecord,
-  ot as HorizontalLine,
+  nt as Focus,
+  Be as FullField,
+  Ne as FullFieldRecord,
+  rt as HorizontalLine,
   P as Icon,
   It as Icons,
   Mt as Image,
   ke as ImageFeild,
-  He as InfinityScroll,
-  lt as InnerTranslate,
-  Ve as InnerWindow,
-  it as Input,
+  Oe as InfinityScroll,
+  ot as InnerTranslate,
+  je as InnerWindow,
+  lt as Input,
   G as JoinComponentBy,
   Tt as KeyPanding,
-  De as LargeButton,
+  He as LargeButton,
   Y as Line,
-  ct as LineLoading,
+  it as LineLoading,
   St as List,
-  dt as Loadings,
+  ct as Loadings,
   zt as MarkDown,
-  Se as MaximizeActionIcon,
-  Ie as MinimizeActionIcon,
+  Te as MaximizeActionIcon,
+  Fe as MinimizeActionIcon,
   At as MultiScreenPage,
   Et as Note,
   he as NumberFeild,
   ge as ObjectFeild,
-  Re as PanelSide,
+  De as PanelSide,
   jt as Password,
   ve as PasswordFeild,
   q as PinField,
   Vt as PositionView,
-  Oe as RangeFeild,
+  Pe as RangeFeild,
   xe as RecorderFeild,
   ye as RegexpFeild,
-  ut as RenderType,
+  dt as RenderType,
   $t as ResizeView,
   X as Scroll,
-  mt as SeparatedViewsLine,
-  ft as SeparatedViewsLineTitle,
+  ut as SeparatedViewsLine,
+  mt as SeparatedViewsLineTitle,
   Bt as SinglePanding,
   Pt as Slot,
-  Xe as Starts,
+  Re as Starts,
   pe as StringFeild,
-  Ke as StyledButton,
+  Xe as StyledButton,
   Ot as Tab,
   Ht as Tabs,
-  We as TextAnimation,
+  Ke as TextAnimation,
   Dt as TextArea,
-  gt as Tip,
+  ft as Tip,
   Rt as TitleProvider,
   Xt as TitleView,
-  pt as Translate,
+  gt as Translate,
   Kt as Tree,
-  Me as UnMaximizeActionIcon,
-  Ze as UpdateData,
-  ht as VericalLine,
+  Ie as UnMaximizeActionIcon,
+  We as UpdateData,
+  pt as VericalLine,
   Wt as ViewPage,
-  _e as ViewPanel,
-  qe as WindowControls,
+  Ze as ViewPanel,
+  _e as WindowControls,
   j as WindowsButton,
   Zt as dateToStringForInput,
-  wt as iconsFileFeild,
+  ht as iconsFileFeild,
   _t as objectIfPrefix,
   qt as slotId,
-  Fe as useTextAnimation,
-  vt as useTranslate
+  Le as useTextAnimation,
+  wt as useTranslate
 };

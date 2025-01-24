@@ -1,6 +1,5 @@
 import React from "react";
 import { enumTemp, onState, useColorMerge } from "@/hooks";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { useCopyState } from "@/hooks";
@@ -12,7 +11,6 @@ export type EnumFeildProps = FullFieldGeneralProps<"enum">;
 export const slotId = "enum/list";
 // render enum list
 export function EnumFeild({ config = {}, id, state }: EnumFeildProps) {
-  const elementRef = React.createRef<HTMLDivElement>();
   const colorMerge = useColorMerge();
   const focused = useCopyState(false);
   const choised = React.useMemo(() => {
@@ -37,7 +35,6 @@ export function EnumFeild({ config = {}, id, state }: EnumFeildProps) {
         });
       }}
       id={id}
-      ref={elementRef}
       tabIndex={1}
       onClick={() => {
         enumTemp.setTemp("id", complexeId);
@@ -76,7 +73,7 @@ export function EnumFeild({ config = {}, id, state }: EnumFeildProps) {
         ),
       }}
     >
-      <div className="w-full text-center">{choised?.content || choised?.value || "no option choised"}</div>
+      <div className="w-full text-center">{choised?.content || choised?.value || config.placeholder || "no option choised"}</div>
       {config.expandIcon !== false && Boolean(config.list?.length) && <FontAwesomeIcon icon={complexeId == selectedId ? faAngleUp : faAngleDown} />}
     </ChangableComponent>
   );

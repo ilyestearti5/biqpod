@@ -27,12 +27,19 @@ export const ChangableComponent = ({ onContentChange, onElement, ...props }: Cha
         const rect = element.getBoundingClientRect();
         state.set(rect);
       };
-      callback();
+      const rObs = new ResizeObserver(callback);
       const mObs = new MutationObserver(callback);
+      const iObs = new IntersectionObserver(callback);
+      rObs.observe(element, { box: "border-box" });
+      rObs.observe(element, { box: "content-box" });
+      rObs.observe(element, { box: "device-pixel-content-box" });
       mObs.observe(element, { attributes: true, subtree: true, characterData: true, childList: true });
+      iObs.observe(element);
       addEventListener("resize", callback);
       return () => {
+        rObs.disconnect();
         mObs.disconnect();
+        iObs.disconnect();
         removeEventListener("resize", callback);
       };
     }

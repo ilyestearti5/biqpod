@@ -4,6 +4,7 @@ import { JSXElement, size, useColorMerge, useCopyState, viewTemps } from "@/hook
 import { mergeObject, tw } from "@/utils";
 import { Line } from "../components/Line";
 import { ChangableComponent } from "../components/PositionView";
+import { Scroll } from "@/components";
 export interface BottomSheetLayoutProps {
   min?: number | `${number}${size}`;
   max?: number | `${number}${size}`;
@@ -63,7 +64,6 @@ export const BottomSheetLayout = () => {
     const scrollBarThumb = eleRef.current;
     if (scrollBarThumb) {
       const handleTouchMove = (e: TouchEvent) => {
-        // console.log("scrolling 1");
         e.preventDefault();
         touchMove.set(true);
         const { clientY } = e.touches[0];
@@ -105,16 +105,16 @@ export const BottomSheetLayout = () => {
               typeof transformState.get == "number" && {
                 transform: `translateY(${Math.max(transformState.get, 0)}px)`,
               },
-            info.get?.min != undefined && {
-              minHeight: info.get?.min,
-            },
-            info.get?.max != undefined && {
-              maxHeight: info.get?.max,
-            },
+            // info.get?.min != undefined && {
+            //   minHeight: info.get?.min,
+            // },
+            // info.get?.max != undefined && {
+            //   maxHeight: info.get?.max,
+            // },
           ),
         }}
         className={tw(
-          `bottom-0 z-[1000] fixed inset-x-0 flex flex-col flex-none border-x shadow-lg border-t border-transparent border-solid rounded-se-3xl rounded-ss-3xl min-h-[100px] max-h-[60vh] transform translate-y-full overflow-hidden`,
+          `bottom-0 z-[1000] fixed inset-x-0 flex flex-col flex-none border-x shadow-lg border-t border-transparent border-solid rounded-se-3xl rounded-ss-3xl transform translate-y-full overflow-hidden`,
           id && "translate-y-0",
           !isMove.get && "transition-transform duration-300",
         )}
@@ -160,7 +160,7 @@ export const BottomSheetLayout = () => {
           </div>
         </div>
         <Line />
-        <div className="overflow-hidden">{element}</div>
+        <Scroll className="h-fit max-h-[80vh]">{element}</Scroll>
       </ChangableComponent>
     </EmptyComponent>
   );

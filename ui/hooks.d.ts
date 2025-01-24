@@ -1,6 +1,5 @@
-import { default as default_2 } from 'react';
-import { default as default_3 } from 'electron';
-import { Dispatch } from 'react';
+import { default as default_2 } from 'electron';
+import { default as default_3 } from 'react';
 import { EnhancedStore } from '@reduxjs/toolkit';
 import { EntityAdapter } from '@reduxjs/toolkit';
 import { EntityId } from '@reduxjs/toolkit';
@@ -9,7 +8,6 @@ import { EntityState } from '@reduxjs/toolkit';
 import { FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { QueryStatus } from 'react-query';
-import { SetStateAction } from 'react';
 import { Slice } from '@reduxjs/toolkit';
 import { SliceSelectors } from '@reduxjs/toolkit';
 import { Store } from '@reduxjs/toolkit';
@@ -42,20 +40,12 @@ export declare const actionHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Action>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            actionId: string;
-            status: QueryStatus | "ready";
-            args?: any;
-            output?: any;
-        } | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<{
-            actionId: string;
-            status: QueryStatus | "ready";
-            args?: any;
-            output?: any;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    actionId: string;
+    status: QueryStatus | "ready";
+    args?: any;
+    output?: any;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Action>(recordId: EntityId, field: F): ({
         actionId: string;
         status: QueryStatus | "ready";
@@ -63,38 +53,21 @@ export declare const actionHooks: {
         output?: any;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Action>(id: EntityId, field: F, value: Biqpod.System.Action[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Action>(recordeId: EntityId, field: F): {
-        get: ({
-            actionId: string;
-            status: QueryStatus | "ready";
-            args?: any;
-            output?: any;
-        }[F] & ({} | null)) | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<({
-            actionId: string;
-            status: QueryStatus | "ready";
-            args?: any;
-            output?: any;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Action>(recordeId: EntityId, field: F): State<({
+    actionId: string;
+    status: QueryStatus | "ready";
+    args?: any;
+    output?: any;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Action>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Action ? { [key in T]: Biqpod.System.Action[F]; } : never) | undefined;
     getAll(): Biqpod.System.Action[];
     setAll(data: Record<EntityId, Biqpod.System.Action> | readonly Biqpod.System.Action[]): void;
-    useAll(): {
-        get: Biqpod.System.Action[];
-        set: default_2.Dispatch<default_2.SetStateAction<Biqpod.System.Action[]>>;
-    };
+    useAll(): State<Biqpod.System.Action[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Action>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -538,7 +511,7 @@ declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         interface Payout {
             payoutId?: string;
@@ -551,7 +524,9 @@ declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -559,6 +534,8 @@ declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     namespace Api {
@@ -683,6 +660,7 @@ declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -735,6 +713,7 @@ declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -791,10 +770,12 @@ declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {
@@ -984,22 +965,13 @@ export declare const colorHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Color>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            colorId: string;
-            dark?: string | undefined;
-            light?: string | undefined;
-            default?: string | undefined;
-            propositions?: string[] | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        colorId: string;
-        dark?: string | undefined;
-        light?: string | undefined;
-        default?: string | undefined;
-        propositions?: string[] | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    colorId: string;
+    dark?: string | undefined;
+    light?: string | undefined;
+    default?: string | undefined;
+    propositions?: string[] | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Color>(recordId: EntityId, field: F): ({
         colorId: string;
         dark?: string | undefined;
@@ -1008,40 +980,22 @@ export declare const colorHooks: {
         propositions?: string[] | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Color>(id: EntityId, field: F, value: Biqpod.System.Color[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Color>(recordeId: EntityId, field: F): {
-        get: ({
-            colorId: string;
-            dark?: string | undefined;
-            light?: string | undefined;
-            default?: string | undefined;
-            propositions?: string[] | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: Dispatch<SetStateAction<({
-        colorId: string;
-        dark?: string | undefined;
-        light?: string | undefined;
-        default?: string | undefined;
-        propositions?: string[] | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Color>(recordeId: EntityId, field: F): State<({
+    colorId: string;
+    dark?: string | undefined;
+    light?: string | undefined;
+    default?: string | undefined;
+    propositions?: string[] | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Color>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Color ? { [key in T]: Biqpod.System.Color[F]; } : never) | undefined;
     getAll(): Biqpod.System.Color[];
     setAll(data: Record<EntityId, Biqpod.System.Color> | readonly Biqpod.System.Color[]): void;
-    useAll(): {
-        get: Biqpod.System.Color[];
-        set: Dispatch<SetStateAction<Biqpod.System.Color[]>>;
-    };
+    useAll(): State<Biqpod.System.Color[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Color>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -1198,22 +1152,13 @@ export declare const commandsHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Command>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            commandId: string;
-            label?: string | undefined;
-            commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
-            private?: boolean | undefined;
-            blocked?: boolean | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        commandId: string;
-        label?: string | undefined;
-        commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
-        private?: boolean | undefined;
-        blocked?: boolean | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    commandId: string;
+    label?: string | undefined;
+    commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
+    private?: boolean | undefined;
+    blocked?: boolean | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Command>(recordId: EntityId, field: F): ({
         commandId: string;
         label?: string | undefined;
@@ -1222,40 +1167,22 @@ export declare const commandsHooks: {
         blocked?: boolean | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Command>(id: EntityId, field: F, value: Biqpod.System.Command[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Command>(recordeId: EntityId, field: F): {
-        get: ({
-            commandId: string;
-            label?: string | undefined;
-            commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
-            private?: boolean | undefined;
-            blocked?: boolean | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: Dispatch<SetStateAction<({
-        commandId: string;
-        label?: string | undefined;
-        commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
-        private?: boolean | undefined;
-        blocked?: boolean | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Command>(recordeId: EntityId, field: F): State<({
+    commandId: string;
+    label?: string | undefined;
+    commands?: (Biqpod.System.Command["commandId"] | PayloadAction<any> | number)[] | undefined;
+    private?: boolean | undefined;
+    blocked?: boolean | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Command>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Command ? { [key in T]: Biqpod.System.Command[F]; } : never) | undefined;
     getAll(): Biqpod.System.Command[];
     setAll(data: Record<EntityId, Biqpod.System.Command> | readonly Biqpod.System.Command[]): void;
-    useAll(): {
-        get: Biqpod.System.Command[];
-        set: Dispatch<SetStateAction<Biqpod.System.Command[]>>;
-    };
+    useAll(): State<Biqpod.System.Command[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Command>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -2394,7 +2321,7 @@ export declare interface DatePickerTimeResult {
 
 export declare function defineKeys(command: CommandIds | string, keys: Omit<Key, "command">[]): void;
 
-declare interface DialogProps extends default_3.MessageBoxOptions {
+declare interface DialogProps extends default_2.MessageBoxOptions {
     force?: boolean;
     native?: boolean;
 }
@@ -2450,36 +2377,20 @@ export declare const fieldHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Field>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            fieldId: string;
-            selection?: {
-                direction: HTMLTextAreaElement["selectionDirection"];
-                end: HTMLTextAreaElement["selectionEnd"];
-                start: HTMLTextAreaElement["selectionStart"];
-            } | undefined;
-            value: string;
-            controls: Record<string, {
-                succ?: string;
-                err?: string;
-            }>;
-            history?: string[] | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        fieldId: string;
-        selection?: {
-        direction: HTMLTextAreaElement["selectionDirection"];
-        end: HTMLTextAreaElement["selectionEnd"];
-        start: HTMLTextAreaElement["selectionStart"];
-        } | undefined;
-        value: string;
-        controls: Record<string, {
-        succ?: string;
-        err?: string;
-        }>;
-        history?: string[] | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    fieldId: string;
+    selection?: {
+    direction: HTMLTextAreaElement["selectionDirection"];
+    end: HTMLTextAreaElement["selectionEnd"];
+    start: HTMLTextAreaElement["selectionStart"];
+    } | undefined;
+    value: string;
+    controls: Record<string, {
+    succ?: string;
+    err?: string;
+    }>;
+    history?: string[] | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Field>(recordId: EntityId, field: F): ({
         fieldId: string;
         selection?: {
@@ -2495,54 +2406,29 @@ export declare const fieldHooks: {
         history?: string[] | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Field>(id: EntityId, field: F, value: Biqpod.System.Field[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Field>(recordeId: EntityId, field: F): {
-        get: ({
-            fieldId: string;
-            selection?: {
-                direction: HTMLTextAreaElement["selectionDirection"];
-                end: HTMLTextAreaElement["selectionEnd"];
-                start: HTMLTextAreaElement["selectionStart"];
-            } | undefined;
-            value: string;
-            controls: Record<string, {
-                succ?: string;
-                err?: string;
-            }>;
-            history?: string[] | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: Dispatch<SetStateAction<({
-        fieldId: string;
-        selection?: {
-        direction: HTMLTextAreaElement["selectionDirection"];
-        end: HTMLTextAreaElement["selectionEnd"];
-        start: HTMLTextAreaElement["selectionStart"];
-        } | undefined;
-        value: string;
-        controls: Record<string, {
-        succ?: string;
-        err?: string;
-        }>;
-        history?: string[] | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Field>(recordeId: EntityId, field: F): State<({
+    fieldId: string;
+    selection?: {
+    direction: HTMLTextAreaElement["selectionDirection"];
+    end: HTMLTextAreaElement["selectionEnd"];
+    start: HTMLTextAreaElement["selectionStart"];
+    } | undefined;
+    value: string;
+    controls: Record<string, {
+    succ?: string;
+    err?: string;
+    }>;
+    history?: string[] | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Field>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Field ? { [key in T]: Biqpod.System.Field[F]; } : never) | undefined;
     getAll(): Biqpod.System.Field[];
     setAll(data: Record<EntityId, Biqpod.System.Field> | readonly Biqpod.System.Field[]): void;
-    useAll(): {
-        get: Biqpod.System.Field[];
-        set: Dispatch<SetStateAction<Biqpod.System.Field[]>>;
-    };
+    useAll(): State<Biqpod.System.Field[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Field>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -2673,7 +2559,7 @@ loadingTime: number;
 changed: boolean;
 }>>;
 
-declare interface FileProps extends default_3.OpenDialogOptions {
+declare interface FileProps extends default_2.OpenDialogOptions {
     nullable: boolean;
     visibility: Partial<Record<"upload" | "clearAll" | "emptyMessage" | "fileName", boolean>>;
 }
@@ -2917,32 +2803,18 @@ export declare const keyHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Key>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            value?: string | undefined;
-            keyId?: string | undefined;
-            command?: Biqpod.System.Command["commandId"] | undefined;
-            only?: boolean | undefined;
-            when?: string | undefined;
-            preventDefault?: boolean | undefined;
-            repeation?: boolean | undefined;
-            type?: "up" | "down" | undefined;
-            private?: boolean | undefined;
-            action?: Biqpod.System.Action["actionId"] | undefined;
-        } | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<{
-            value?: string | undefined;
-            keyId?: string | undefined;
-            command?: Biqpod.System.Command["commandId"] | undefined;
-            only?: boolean | undefined;
-            when?: string | undefined;
-            preventDefault?: boolean | undefined;
-            repeation?: boolean | undefined;
-            type?: "up" | "down" | undefined;
-            private?: boolean | undefined;
-            action?: Biqpod.System.Action["actionId"] | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    value?: string | undefined;
+    keyId?: string | undefined;
+    command?: Biqpod.System.Command["commandId"] | undefined;
+    only?: boolean | undefined;
+    when?: string | undefined;
+    preventDefault?: boolean | undefined;
+    repeation?: boolean | undefined;
+    type?: "up" | "down" | undefined;
+    private?: boolean | undefined;
+    action?: Biqpod.System.Action["actionId"] | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Key>(recordId: EntityId, field: F): ({
         value?: string | undefined;
         keyId?: string | undefined;
@@ -2956,50 +2828,27 @@ export declare const keyHooks: {
         action?: Biqpod.System.Action["actionId"] | undefined;
     }[F] & {}) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Key>(id: EntityId, field: F, value: Biqpod.System.Key[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Key>(recordeId: EntityId, field: F): {
-        get: ({
-            value?: string | undefined;
-            keyId?: string | undefined;
-            command?: Biqpod.System.Command["commandId"] | undefined;
-            only?: boolean | undefined;
-            when?: string | undefined;
-            preventDefault?: boolean | undefined;
-            repeation?: boolean | undefined;
-            type?: "up" | "down" | undefined;
-            private?: boolean | undefined;
-            action?: Biqpod.System.Action["actionId"] | undefined;
-        }[F] & {}) | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<({
-            value?: string | undefined;
-            keyId?: string | undefined;
-            command?: Biqpod.System.Command["commandId"] | undefined;
-            only?: boolean | undefined;
-            when?: string | undefined;
-            preventDefault?: boolean | undefined;
-            repeation?: boolean | undefined;
-            type?: "up" | "down" | undefined;
-            private?: boolean | undefined;
-            action?: Biqpod.System.Action["actionId"] | undefined;
-        }[F] & {}) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Key>(recordeId: EntityId, field: F): State<({
+    value?: string | undefined;
+    keyId?: string | undefined;
+    command?: Biqpod.System.Command["commandId"] | undefined;
+    only?: boolean | undefined;
+    when?: string | undefined;
+    preventDefault?: boolean | undefined;
+    repeation?: boolean | undefined;
+    type?: "up" | "down" | undefined;
+    private?: boolean | undefined;
+    action?: Biqpod.System.Action["actionId"] | undefined;
+    }[F] & {}) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Key>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Key ? { [key in T]: Biqpod.System.Key[F]; } : never) | undefined;
     getAll(): Biqpod.System.Key[];
     setAll(data: Record<EntityId, Biqpod.System.Key> | readonly Biqpod.System.Key[]): void;
-    useAll(): {
-        get: Biqpod.System.Key[];
-        set: default_2.Dispatch<default_2.SetStateAction<Biqpod.System.Key[]>>;
-    };
+    useAll(): State<Biqpod.System.Key[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Key>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -3130,7 +2979,7 @@ loadingTime: number;
 changed: boolean;
 }>>;
 
-export declare interface KeyState extends Record<Parameters<default_2.KeyboardEvent<HTMLElement>["getModifierState"]>[0], boolean> {
+export declare interface KeyState extends Record<Parameters<default_3.KeyboardEvent<HTMLElement>["getModifierState"]>[0], boolean> {
     Key?: string;
 }
 
@@ -3151,49 +3000,28 @@ export declare const langHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Lang>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            [x: string]: string;
-            word: string;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        [x: string]: string;
-        word: string;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    [x: string]: string;
+    word: string;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Lang>(recordId: EntityId, field: F): {
         [x: string]: string;
         word: string;
     }[F] | undefined;
     setOneFeild<F extends keyof Biqpod.System.Lang>(id: EntityId, field: F, value: Biqpod.System.Lang[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Lang>(recordeId: EntityId, field: F): {
-        get: {
-            [x: string]: string;
-            word: string;
-        }[F] | undefined;
-        set: Dispatch<SetStateAction<    {
-        [x: string]: string;
-        word: string;
-        }[F] | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Lang>(recordeId: EntityId, field: F): State<    {
+    [x: string]: string;
+    word: string;
+    }[F] | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Lang>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Lang ? { [key in T]: Biqpod.System.Lang[F]; } : never) | undefined;
     getAll(): Biqpod.System.Lang[];
     setAll(data: Record<EntityId, Biqpod.System.Lang> | readonly Biqpod.System.Lang[]): void;
-    useAll(): {
-        get: Biqpod.System.Lang[];
-        set: Dispatch<SetStateAction<Biqpod.System.Lang[]>>;
-    };
+    useAll(): State<Biqpod.System.Lang[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Lang>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -3348,26 +3176,15 @@ export declare const logHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Log>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            logId?: string | undefined;
-            title: string;
-            createdAt?: string | undefined;
-            showDesc?: boolean | undefined;
-            desc?: string | undefined;
-            type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
-            category?: string | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        logId?: string | undefined;
-        title: string;
-        createdAt?: string | undefined;
-        showDesc?: boolean | undefined;
-        desc?: string | undefined;
-        type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
-        category?: string | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    logId?: string | undefined;
+    title: string;
+    createdAt?: string | undefined;
+    showDesc?: boolean | undefined;
+    desc?: string | undefined;
+    type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
+    category?: string | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Log>(recordId: EntityId, field: F): ({
         logId?: string | undefined;
         title: string;
@@ -3378,44 +3195,24 @@ export declare const logHooks: {
         category?: string | undefined;
     }[F] & {}) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Log>(id: EntityId, field: F, value: Biqpod.System.Log[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Log>(recordeId: EntityId, field: F): {
-        get: ({
-            logId?: string | undefined;
-            title: string;
-            createdAt?: string | undefined;
-            showDesc?: boolean | undefined;
-            desc?: string | undefined;
-            type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
-            category?: string | undefined;
-        }[F] & {}) | undefined;
-        set: Dispatch<SetStateAction<({
-        logId?: string | undefined;
-        title: string;
-        createdAt?: string | undefined;
-        showDesc?: boolean | undefined;
-        desc?: string | undefined;
-        type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
-        category?: string | undefined;
-        }[F] & {}) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Log>(recordeId: EntityId, field: F): State<({
+    logId?: string | undefined;
+    title: string;
+    createdAt?: string | undefined;
+    showDesc?: boolean | undefined;
+    desc?: string | undefined;
+    type?: "INFO" | "SUCC" | "ERR" | "WARN" | undefined;
+    category?: string | undefined;
+    }[F] & {}) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Log>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Log ? { [key in T]: Biqpod.System.Log[F]; } : never) | undefined;
     getAll(): Biqpod.System.Log[];
     setAll(data: Record<EntityId, Biqpod.System.Log> | readonly Biqpod.System.Log[]): void;
-    useAll(): {
-        get: Biqpod.System.Log[];
-        set: Dispatch<SetStateAction<Biqpod.System.Log[]>>;
-    };
+    useAll(): State<Biqpod.System.Log[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Log>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -3546,7 +3343,7 @@ loadingTime: number;
 changed: boolean;
 }>>;
 
-declare interface MenuRecordProps extends Partial<default_3.MenuItem> {
+declare interface MenuRecordProps extends Partial<default_2.MenuItem> {
     defaultIcon?: IconProps["icon"];
 }
 
@@ -3574,10 +3371,12 @@ export declare const notifayHooks: {
         id: string;
         title: string;
         type?: "info" | "warning" | "error" | "success" | undefined;
+        photo?: string | undefined;
         desc?: string | undefined;
         removable?: boolean | undefined;
         status?: "loading" | "idle" | undefined;
         showDesc?: boolean | undefined;
+        createdAt?: number | undefined;
         buttons?: {
             label: string;
             command: string | {
@@ -3588,48 +3387,34 @@ export declare const notifayHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Notification>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            id: string;
-            title: string;
-            type?: "info" | "warning" | "error" | "success" | undefined;
-            desc?: string | undefined;
-            removable?: boolean | undefined;
-            status?: "loading" | "idle" | undefined;
-            showDesc?: boolean | undefined;
-            buttons?: {
-                label: string;
-                command: string | {
-                    action: string;
-                    arg: any;
-                };
-            }[] | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        id: string;
-        title: string;
-        type?: "info" | "warning" | "error" | "success" | undefined;
-        desc?: string | undefined;
-        removable?: boolean | undefined;
-        status?: "loading" | "idle" | undefined;
-        showDesc?: boolean | undefined;
-        buttons?: {
-        label: string;
-        command: string | {
-        action: string;
-        arg: any;
-        };
-        }[] | undefined;
-        } | undefined>>;
+    useOne(id: EntityId): State<    {
+    id: string;
+    title: string;
+    type?: "info" | "warning" | "error" | "success" | undefined;
+    photo?: string | undefined;
+    desc?: string | undefined;
+    removable?: boolean | undefined;
+    status?: "loading" | "idle" | undefined;
+    showDesc?: boolean | undefined;
+    createdAt?: number | undefined;
+    buttons?: {
+    label: string;
+    command: string | {
+    action: string;
+    arg: any;
     };
+    }[] | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Notification>(recordId: EntityId, field: F): ({
         id: string;
         title: string;
         type?: "info" | "warning" | "error" | "success" | undefined;
+        photo?: string | undefined;
         desc?: string | undefined;
         removable?: boolean | undefined;
         status?: "loading" | "idle" | undefined;
         showDesc?: boolean | undefined;
+        createdAt?: number | undefined;
         buttons?: {
             label: string;
             command: string | {
@@ -3639,58 +3424,33 @@ export declare const notifayHooks: {
         }[] | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Notification>(id: EntityId, field: F, value: Biqpod.System.Notification[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Notification>(recordeId: EntityId, field: F): {
-        get: ({
-            id: string;
-            title: string;
-            type?: "info" | "warning" | "error" | "success" | undefined;
-            desc?: string | undefined;
-            removable?: boolean | undefined;
-            status?: "loading" | "idle" | undefined;
-            showDesc?: boolean | undefined;
-            buttons?: {
-                label: string;
-                command: string | {
-                    action: string;
-                    arg: any;
-                };
-            }[] | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: Dispatch<SetStateAction<({
-        id: string;
-        title: string;
-        type?: "info" | "warning" | "error" | "success" | undefined;
-        desc?: string | undefined;
-        removable?: boolean | undefined;
-        status?: "loading" | "idle" | undefined;
-        showDesc?: boolean | undefined;
-        buttons?: {
-        label: string;
-        command: string | {
-        action: string;
-        arg: any;
-        };
-        }[] | undefined;
-        }[F] & ({} | null)) | undefined>>;
+    useOneFeild<F extends keyof Biqpod.System.Notification>(recordeId: EntityId, field: F): State<({
+    id: string;
+    title: string;
+    type?: "info" | "warning" | "error" | "success" | undefined;
+    photo?: string | undefined;
+    desc?: string | undefined;
+    removable?: boolean | undefined;
+    status?: "loading" | "idle" | undefined;
+    showDesc?: boolean | undefined;
+    createdAt?: number | undefined;
+    buttons?: {
+    label: string;
+    command: string | {
+    action: string;
+    arg: any;
     };
+    }[] | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Notification>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Notification ? { [key in T]: Biqpod.System.Notification[F]; } : never) | undefined;
     getAll(): Biqpod.System.Notification[];
     setAll(data: Record<EntityId, Biqpod.System.Notification> | readonly Biqpod.System.Notification[]): void;
-    useAll(): {
-        get: Biqpod.System.Notification[];
-        set: Dispatch<SetStateAction<Biqpod.System.Notification[]>>;
-    };
+    useAll(): State<Biqpod.System.Notification[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Notification>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -3866,7 +3626,7 @@ export declare function openCamera<T extends keyof FullCameraResult>(type: T): P
 
 export declare const openDatePicker: (config: Partial<DatePickerTimeOptions>) => Promise<DatePickerTimeResult>;
 
-export declare function openDialog(props: DialogProps): Promise<default_3.MessageBoxReturnValue>;
+export declare function openDialog(props: DialogProps): Promise<default_2.MessageBoxReturnValue>;
 
 export declare function openDuringNotifay(notifay: Partial<NotificationType>, options?: Partial<{
     time: number;
@@ -3887,7 +3647,7 @@ export declare function openNotifays(): void;
 
 export declare const openPath: ({ native, max, ...config }: OpenPathConfig) => Promise<string[]>;
 
-declare interface OpenPathConfig extends default_3.OpenDialogOptions {
+declare interface OpenPathConfig extends default_2.OpenDialogOptions {
     native?: boolean;
     max?: number;
 }
@@ -3920,30 +3680,17 @@ export declare const positionsHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Positions>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            positionId: string;
-            x?: number | undefined;
-            y?: number | undefined;
-            readonly left?: number | undefined;
-            readonly right?: number | undefined;
-            readonly top?: number | undefined;
-            readonly bottom?: number | undefined;
-            height?: number | undefined;
-            width?: number | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        positionId: string;
-        x?: number | undefined;
-        y?: number | undefined;
-        readonly left?: number | undefined;
-        readonly right?: number | undefined;
-        readonly top?: number | undefined;
-        readonly bottom?: number | undefined;
-        height?: number | undefined;
-        width?: number | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    positionId: string;
+    x?: number | undefined;
+    y?: number | undefined;
+    readonly left?: number | undefined;
+    readonly right?: number | undefined;
+    readonly top?: number | undefined;
+    readonly bottom?: number | undefined;
+    height?: number | undefined;
+    width?: number | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Positions>(recordId: EntityId, field: F): ({
         positionId: string;
         x?: number | undefined;
@@ -3956,48 +3703,26 @@ export declare const positionsHooks: {
         width?: number | undefined;
     }[F] & {}) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Positions>(id: EntityId, field: F, value: Biqpod.System.Positions[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Positions>(recordeId: EntityId, field: F): {
-        get: ({
-            positionId: string;
-            x?: number | undefined;
-            y?: number | undefined;
-            readonly left?: number | undefined;
-            readonly right?: number | undefined;
-            readonly top?: number | undefined;
-            readonly bottom?: number | undefined;
-            height?: number | undefined;
-            width?: number | undefined;
-        }[F] & {}) | undefined;
-        set: Dispatch<SetStateAction<({
-        positionId: string;
-        x?: number | undefined;
-        y?: number | undefined;
-        readonly left?: number | undefined;
-        readonly right?: number | undefined;
-        readonly top?: number | undefined;
-        readonly bottom?: number | undefined;
-        height?: number | undefined;
-        width?: number | undefined;
-        }[F] & {}) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Positions>(recordeId: EntityId, field: F): State<({
+    positionId: string;
+    x?: number | undefined;
+    y?: number | undefined;
+    readonly left?: number | undefined;
+    readonly right?: number | undefined;
+    readonly top?: number | undefined;
+    readonly bottom?: number | undefined;
+    height?: number | undefined;
+    width?: number | undefined;
+    }[F] & {}) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Positions>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Positions ? { [key in T]: Biqpod.System.Positions[F]; } : never) | undefined;
     getAll(): Biqpod.System.Positions[];
     setAll(data: Record<EntityId, Biqpod.System.Positions> | readonly Biqpod.System.Positions[]): void;
-    useAll(): {
-        get: Biqpod.System.Positions[];
-        set: Dispatch<SetStateAction<Biqpod.System.Positions[]>>;
-    };
+    useAll(): State<Biqpod.System.Positions[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Positions>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -4203,7 +3928,7 @@ export declare const setProgress: ({ options, value }: SetProgressProps) => Prom
 
 declare interface SetProgressProps {
     value?: number;
-    options?: default_3.ProgressBarOptions | undefined;
+    options?: default_2.ProgressBarOptions | undefined;
 }
 
 export declare function setSettingConfig<ID extends keyof SettingValueType>(settingId: `${string}.${ID}`, config: SettingConfig[ID]): void;
@@ -4278,6 +4003,7 @@ export declare const settingHooks: {
             nullable: boolean;
             expandIcon: boolean;
             search: boolean;
+            placeholder: string;
         }> | Partial<FileProps> | Partial<{
             canEmpty: string;
         }> | Partial<{
@@ -4294,6 +4020,7 @@ export declare const settingHooks: {
             alt: string;
             rounded: boolean;
             size: number;
+            hidden: boolean;
         }> | Partial<{
             min: number;
             max: number;
@@ -4315,180 +4042,94 @@ export declare const settingHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Setting>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
-            name?: string | undefined;
-            desc?: string | undefined;
-            private?: boolean | undefined;
-            when?: string | undefined;
-            value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-            config?: Partial<{
-                maxLength: number;
-                minLength: number;
-                help: string[];
-                locked: boolean;
-                hint: string;
-                autoChange: boolean;
-                mode: ReactElement["inputMode"];
-            }> | Partial<{
-                max: number;
-                min: number;
-                placeholder: string;
-                autoChange: boolean;
-                center: boolean;
-                size: number;
-                selectOnFocus: boolean;
-            }> | Partial<{
-                onActive: string;
-                onDisactive: string;
-                style: "checkbox" | "switch";
-            }> | Partial<{
-                proposition: "path";
-            }> | Partial<{
-                list: {
-                    content: string;
-                    value: string;
-                }[];
-                extra: string[][];
-            }> | Partial<{
-                controls: Record<string, {
-                    succ?: string;
-                    err?: string;
-                }> | undefined;
-                addText: string;
-            }> | Partial<{
-                position: "bottom" | "left" | "top" | "right";
-                list: {
-                    value: string;
-                    content?: string;
-                    desc?: string;
-                }[];
-                nullable: boolean;
-                expandIcon: boolean;
-                search: boolean;
-            }> | Partial<FileProps> | Partial<{
-                canEmpty: string;
-            }> | Partial<{
-                format: "date" | "time" | "month" | "datetime-local";
-                goToCurrent: boolean;
-            }> | Partial<{}> | Partial<{
-                length: number;
-                match: string;
-                size: number;
-                separator: string;
-                cursor: string;
-            }> | Partial<{
-                filter: string[];
-                alt: string;
-                rounded: boolean;
-                size: number;
-            }> | Partial<{
-                min: number;
-                max: number;
-                isFloat: boolean;
-                showValue: boolean;
-                marked: Record<number, string>;
-                steps: number;
-            }> | Partial<{
-                min: number;
-                max: number;
-                isFloat: boolean;
-                showValue: boolean;
-                marked: Record<number, string>;
-                steps: number;
-            }> | undefined;
-            deperacted?: boolean | undefined;
-            def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-            readonly?: boolean | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
-        name?: string | undefined;
-        desc?: string | undefined;
-        private?: boolean | undefined;
-        when?: string | undefined;
-        value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-        config?: Partial<{
-        maxLength: number;
-        minLength: number;
-        help: string[];
-        locked: boolean;
-        hint: string;
-        autoChange: boolean;
-        mode: ReactElement["inputMode"];
-        }> | Partial<{
-        max: number;
-        min: number;
-        placeholder: string;
-        autoChange: boolean;
-        center: boolean;
-        size: number;
-        selectOnFocus: boolean;
-        }> | Partial<{
-        onActive: string;
-        onDisactive: string;
-        style: "checkbox" | "switch";
-        }> | Partial<{
-        proposition: "path";
-        }> | Partial<{
-        list: {
-        content: string;
-        value: string;
-        }[];
-        extra: string[][];
-        }> | Partial<{
-        controls: Record<string, {
-        succ?: string;
-        err?: string;
-        }> | undefined;
-        addText: string;
-        }> | Partial<{
-        position: "bottom" | "left" | "top" | "right";
-        list: {
-        value: string;
-        content?: string;
-        desc?: string;
-        }[];
-        nullable: boolean;
-        expandIcon: boolean;
-        search: boolean;
-        }> | Partial<FileProps> | Partial<{
-        canEmpty: string;
-        }> | Partial<{
-        format: "date" | "time" | "month" | "datetime-local";
-        goToCurrent: boolean;
-        }> | Partial<{}> | Partial<{
-        length: number;
-        match: string;
-        size: number;
-        separator: string;
-        cursor: string;
-        }> | Partial<{
-        filter: string[];
-        alt: string;
-        rounded: boolean;
-        size: number;
-        }> | Partial<{
-        min: number;
-        max: number;
-        isFloat: boolean;
-        showValue: boolean;
-        marked: Record<number, string>;
-        steps: number;
-        }> | Partial<{
-        min: number;
-        max: number;
-        isFloat: boolean;
-        showValue: boolean;
-        marked: Record<number, string>;
-        steps: number;
-        }> | undefined;
-        deperacted?: boolean | undefined;
-        def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-        readonly?: boolean | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+    name?: string | undefined;
+    desc?: string | undefined;
+    private?: boolean | undefined;
+    when?: string | undefined;
+    value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
+    config?: Partial<{
+    maxLength: number;
+    minLength: number;
+    help: string[];
+    locked: boolean;
+    hint: string;
+    autoChange: boolean;
+    mode: ReactElement["inputMode"];
+    }> | Partial<{
+    max: number;
+    min: number;
+    placeholder: string;
+    autoChange: boolean;
+    center: boolean;
+    size: number;
+    selectOnFocus: boolean;
+    }> | Partial<{
+    onActive: string;
+    onDisactive: string;
+    style: "checkbox" | "switch";
+    }> | Partial<{
+    proposition: "path";
+    }> | Partial<{
+    list: {
+    content: string;
+    value: string;
+    }[];
+    extra: string[][];
+    }> | Partial<{
+    controls: Record<string, {
+    succ?: string;
+    err?: string;
+    }> | undefined;
+    addText: string;
+    }> | Partial<{
+    position: "bottom" | "left" | "top" | "right";
+    list: {
+    value: string;
+    content?: string;
+    desc?: string;
+    }[];
+    nullable: boolean;
+    expandIcon: boolean;
+    search: boolean;
+    placeholder: string;
+    }> | Partial<FileProps> | Partial<{
+    canEmpty: string;
+    }> | Partial<{
+    format: "date" | "time" | "month" | "datetime-local";
+    goToCurrent: boolean;
+    }> | Partial<{}> | Partial<{
+    length: number;
+    match: string;
+    size: number;
+    separator: string;
+    cursor: string;
+    }> | Partial<{
+    filter: string[];
+    alt: string;
+    rounded: boolean;
+    size: number;
+    hidden: boolean;
+    }> | Partial<{
+    min: number;
+    max: number;
+    isFloat: boolean;
+    showValue: boolean;
+    marked: Record<number, string>;
+    steps: number;
+    }> | Partial<{
+    min: number;
+    max: number;
+    isFloat: boolean;
+    showValue: boolean;
+    marked: Record<number, string>;
+    steps: number;
+    }> | undefined;
+    deperacted?: boolean | undefined;
+    def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
+    readonly?: boolean | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Setting>(recordId: EntityId, field: F): ({
         settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
         name?: string | undefined;
@@ -4540,6 +4181,7 @@ export declare const settingHooks: {
             nullable: boolean;
             expandIcon: boolean;
             search: boolean;
+            placeholder: string;
         }> | Partial<FileProps> | Partial<{
             canEmpty: string;
         }> | Partial<{
@@ -4556,6 +4198,7 @@ export declare const settingHooks: {
             alt: string;
             rounded: boolean;
             size: number;
+            hidden: boolean;
         }> | Partial<{
             min: number;
             max: number;
@@ -4576,198 +4219,103 @@ export declare const settingHooks: {
         readonly?: boolean | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Setting>(id: EntityId, field: F, value: Setting[F]): void;
-    useOneFeild<F extends keyof Setting>(recordeId: EntityId, field: F): {
-        get: ({
-            settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
-            name?: string | undefined;
-            desc?: string | undefined;
-            private?: boolean | undefined;
-            when?: string | undefined;
-            value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-            config?: Partial<{
-                maxLength: number;
-                minLength: number;
-                help: string[];
-                locked: boolean;
-                hint: string;
-                autoChange: boolean;
-                mode: ReactElement["inputMode"];
-            }> | Partial<{
-                max: number;
-                min: number;
-                placeholder: string;
-                autoChange: boolean;
-                center: boolean;
-                size: number;
-                selectOnFocus: boolean;
-            }> | Partial<{
-                onActive: string;
-                onDisactive: string;
-                style: "checkbox" | "switch";
-            }> | Partial<{
-                proposition: "path";
-            }> | Partial<{
-                list: {
-                    content: string;
-                    value: string;
-                }[];
-                extra: string[][];
-            }> | Partial<{
-                controls: Record<string, {
-                    succ?: string;
-                    err?: string;
-                }> | undefined;
-                addText: string;
-            }> | Partial<{
-                position: "bottom" | "left" | "top" | "right";
-                list: {
-                    value: string;
-                    content?: string;
-                    desc?: string;
-                }[];
-                nullable: boolean;
-                expandIcon: boolean;
-                search: boolean;
-            }> | Partial<FileProps> | Partial<{
-                canEmpty: string;
-            }> | Partial<{
-                format: "date" | "time" | "month" | "datetime-local";
-                goToCurrent: boolean;
-            }> | Partial<{}> | Partial<{
-                length: number;
-                match: string;
-                size: number;
-                separator: string;
-                cursor: string;
-            }> | Partial<{
-                filter: string[];
-                alt: string;
-                rounded: boolean;
-                size: number;
-            }> | Partial<{
-                min: number;
-                max: number;
-                isFloat: boolean;
-                showValue: boolean;
-                marked: Record<number, string>;
-                steps: number;
-            }> | Partial<{
-                min: number;
-                max: number;
-                isFloat: boolean;
-                showValue: boolean;
-                marked: Record<number, string>;
-                steps: number;
-            }> | undefined;
-            deperacted?: boolean | undefined;
-            def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-            readonly?: boolean | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: Dispatch<SetStateAction<({
-        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
-        name?: string | undefined;
-        desc?: string | undefined;
-        private?: boolean | undefined;
-        when?: string | undefined;
-        value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-        config?: Partial<{
-        maxLength: number;
-        minLength: number;
-        help: string[];
-        locked: boolean;
-        hint: string;
-        autoChange: boolean;
-        mode: ReactElement["inputMode"];
-        }> | Partial<{
-        max: number;
-        min: number;
-        placeholder: string;
-        autoChange: boolean;
-        center: boolean;
-        size: number;
-        selectOnFocus: boolean;
-        }> | Partial<{
-        onActive: string;
-        onDisactive: string;
-        style: "checkbox" | "switch";
-        }> | Partial<{
-        proposition: "path";
-        }> | Partial<{
-        list: {
-        content: string;
-        value: string;
-        }[];
-        extra: string[][];
-        }> | Partial<{
-        controls: Record<string, {
-        succ?: string;
-        err?: string;
-        }> | undefined;
-        addText: string;
-        }> | Partial<{
-        position: "bottom" | "left" | "top" | "right";
-        list: {
-        value: string;
-        content?: string;
-        desc?: string;
-        }[];
-        nullable: boolean;
-        expandIcon: boolean;
-        search: boolean;
-        }> | Partial<FileProps> | Partial<{
-        canEmpty: string;
-        }> | Partial<{
-        format: "date" | "time" | "month" | "datetime-local";
-        goToCurrent: boolean;
-        }> | Partial<{}> | Partial<{
-        length: number;
-        match: string;
-        size: number;
-        separator: string;
-        cursor: string;
-        }> | Partial<{
-        filter: string[];
-        alt: string;
-        rounded: boolean;
-        size: number;
-        }> | Partial<{
-        min: number;
-        max: number;
-        isFloat: boolean;
-        showValue: boolean;
-        marked: Record<number, string>;
-        steps: number;
-        }> | Partial<{
-        min: number;
-        max: number;
-        isFloat: boolean;
-        showValue: boolean;
-        marked: Record<number, string>;
-        steps: number;
-        }> | undefined;
-        deperacted?: boolean | undefined;
-        def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
-        readonly?: boolean | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Setting>(recordeId: EntityId, field: F): State<({
+    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+    name?: string | undefined;
+    desc?: string | undefined;
+    private?: boolean | undefined;
+    when?: string | undefined;
+    value: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
+    config?: Partial<{
+    maxLength: number;
+    minLength: number;
+    help: string[];
+    locked: boolean;
+    hint: string;
+    autoChange: boolean;
+    mode: ReactElement["inputMode"];
+    }> | Partial<{
+    max: number;
+    min: number;
+    placeholder: string;
+    autoChange: boolean;
+    center: boolean;
+    size: number;
+    selectOnFocus: boolean;
+    }> | Partial<{
+    onActive: string;
+    onDisactive: string;
+    style: "checkbox" | "switch";
+    }> | Partial<{
+    proposition: "path";
+    }> | Partial<{
+    list: {
+    content: string;
+    value: string;
+    }[];
+    extra: string[][];
+    }> | Partial<{
+    controls: Record<string, {
+    succ?: string;
+    err?: string;
+    }> | undefined;
+    addText: string;
+    }> | Partial<{
+    position: "bottom" | "left" | "top" | "right";
+    list: {
+    value: string;
+    content?: string;
+    desc?: string;
+    }[];
+    nullable: boolean;
+    expandIcon: boolean;
+    search: boolean;
+    placeholder: string;
+    }> | Partial<FileProps> | Partial<{
+    canEmpty: string;
+    }> | Partial<{
+    format: "date" | "time" | "month" | "datetime-local";
+    goToCurrent: boolean;
+    }> | Partial<{}> | Partial<{
+    length: number;
+    match: string;
+    size: number;
+    separator: string;
+    cursor: string;
+    }> | Partial<{
+    filter: string[];
+    alt: string;
+    rounded: boolean;
+    size: number;
+    hidden: boolean;
+    }> | Partial<{
+    min: number;
+    max: number;
+    isFloat: boolean;
+    showValue: boolean;
+    marked: Record<number, string>;
+    steps: number;
+    }> | Partial<{
+    min: number;
+    max: number;
+    isFloat: boolean;
+    showValue: boolean;
+    marked: Record<number, string>;
+    steps: number;
+    }> | undefined;
+    deperacted?: boolean | undefined;
+    def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
+    readonly?: boolean | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Setting>(id: EntityId, fields: F[]): (F extends infer T extends keyof Setting ? { [key in T]: Setting[F]; } : never) | undefined;
     getAll(): Setting[];
     setAll(data: Record<EntityId, Setting> | readonly Setting[]): void;
-    useAll(): {
-        get: Setting[];
-        set: Dispatch<SetStateAction<Setting[]>>;
-    };
+    useAll(): State<Setting[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Setting>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -4947,28 +4495,16 @@ export declare const slotHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<SlotType>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            slotId?: string | undefined;
-            focused?: number | null | undefined;
-            submited?: number | null | undefined;
-            selected?: Record<number, boolean> | undefined;
-            skiped?: Record<number, boolean> | undefined;
-            length?: number | undefined;
-            direction?: "forward" | "backward" | null | undefined;
-            redirect?: boolean | undefined;
-        } | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<{
-            slotId?: string | undefined;
-            focused?: number | null | undefined;
-            submited?: number | null | undefined;
-            selected?: Record<number, boolean> | undefined;
-            skiped?: Record<number, boolean> | undefined;
-            length?: number | undefined;
-            direction?: "forward" | "backward" | null | undefined;
-            redirect?: boolean | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    slotId?: string | undefined;
+    focused?: number | null | undefined;
+    submited?: number | null | undefined;
+    selected?: Record<number, boolean> | undefined;
+    skiped?: Record<number, boolean> | undefined;
+    length?: number | undefined;
+    direction?: "forward" | "backward" | null | undefined;
+    redirect?: boolean | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof SlotType>(recordId: EntityId, field: F): ({
         slotId?: string | undefined;
         focused?: number | null | undefined;
@@ -4980,46 +4516,25 @@ export declare const slotHooks: {
         redirect?: boolean | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof SlotType>(id: EntityId, field: F, value: SlotType[F]): void;
-    useOneFeild<F extends keyof SlotType>(recordeId: EntityId, field: F): {
-        get: ({
-            slotId?: string | undefined;
-            focused?: number | null | undefined;
-            submited?: number | null | undefined;
-            selected?: Record<number, boolean> | undefined;
-            skiped?: Record<number, boolean> | undefined;
-            length?: number | undefined;
-            direction?: "forward" | "backward" | null | undefined;
-            redirect?: boolean | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<({
-            slotId?: string | undefined;
-            focused?: number | null | undefined;
-            submited?: number | null | undefined;
-            selected?: Record<number, boolean> | undefined;
-            skiped?: Record<number, boolean> | undefined;
-            length?: number | undefined;
-            direction?: "forward" | "backward" | null | undefined;
-            redirect?: boolean | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof SlotType>(recordeId: EntityId, field: F): State<({
+    slotId?: string | undefined;
+    focused?: number | null | undefined;
+    submited?: number | null | undefined;
+    selected?: Record<number, boolean> | undefined;
+    skiped?: Record<number, boolean> | undefined;
+    length?: number | undefined;
+    direction?: "forward" | "backward" | null | undefined;
+    redirect?: boolean | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof SlotType>(id: EntityId, fields: F[]): (F extends infer T extends keyof SlotType ? { [key in T]: SlotType[F]; } : never) | undefined;
     getAll(): SlotType[];
     setAll(data: Record<EntityId, SlotType> | readonly SlotType[]): void;
-    useAll(): {
-        get: SlotType[];
-        set: default_2.Dispatch<default_2.SetStateAction<SlotType[]>>;
-    };
+    useAll(): State<SlotType[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, SlotType>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -5164,6 +4679,11 @@ export declare interface SlotType {
 export declare const startReloadTemps: () => void;
 
 export declare const startSaveTemps: () => void;
+
+declare interface State<T = undefined> {
+    readonly get: T;
+    set: React.Dispatch<React.SetStateAction<T>>;
+}
 
 export declare const store: EnhancedStore<    {
 keyboard: KeyState;
@@ -5594,10 +5114,7 @@ export declare class Temp {
     getTemp<T>(direction: string): T | null;
     getTempFromStore<T>(direction: string, s?: FullStateManagment): T | null;
     setTemp<T>(direction: string, value: T): void;
-    useTemp<T>(direction: string): {
-        get: T | null;
-        set: Dispatch<SetStateAction<T | null>>;
-    };
+    useTemp<T>(direction: string): State<T | null>;
     get childsTemps(): Temp[];
 }
 
@@ -5610,7 +5127,7 @@ export declare function test(when: string): (props: {
 
 declare type TextAreaHeighlightRenderProps = string | ((text: string) => JSX.Element | string);
 
-declare interface TextAreaProps extends default_2.DetailedHTMLProps<default_2.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
+declare interface TextAreaProps extends default_3.DetailedHTMLProps<default_3.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
     propositions?: string[];
     selection?: Field["selection"];
     onSelectionChange?: (selection?: TextAreaProps["selection"]) => void;
@@ -5661,26 +5178,15 @@ export declare const toastHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Toast>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            id?: string | undefined;
-            message: string | number;
-            type?: "info" | "warning" | "error" | "success" | undefined;
-            time?: number | undefined;
-            showTime?: boolean | undefined;
-            closable?: boolean | undefined;
-            canCopy?: boolean | undefined;
-        } | undefined;
-        set: Dispatch<SetStateAction<    {
-        id?: string | undefined;
-        message: string | number;
-        type?: "info" | "warning" | "error" | "success" | undefined;
-        time?: number | undefined;
-        showTime?: boolean | undefined;
-        closable?: boolean | undefined;
-        canCopy?: boolean | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    id?: string | undefined;
+    message: string | number;
+    type?: "info" | "warning" | "error" | "success" | undefined;
+    time?: number | undefined;
+    showTime?: boolean | undefined;
+    closable?: boolean | undefined;
+    canCopy?: boolean | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Toast>(recordId: EntityId, field: F): ({
         id?: string | undefined;
         message: string | number;
@@ -5691,44 +5197,24 @@ export declare const toastHooks: {
         canCopy?: boolean | undefined;
     }[F] & {}) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Toast>(id: EntityId, field: F, value: Biqpod.System.Toast[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Toast>(recordeId: EntityId, field: F): {
-        get: ({
-            id?: string | undefined;
-            message: string | number;
-            type?: "info" | "warning" | "error" | "success" | undefined;
-            time?: number | undefined;
-            showTime?: boolean | undefined;
-            closable?: boolean | undefined;
-            canCopy?: boolean | undefined;
-        }[F] & {}) | undefined;
-        set: Dispatch<SetStateAction<({
-        id?: string | undefined;
-        message: string | number;
-        type?: "info" | "warning" | "error" | "success" | undefined;
-        time?: number | undefined;
-        showTime?: boolean | undefined;
-        closable?: boolean | undefined;
-        canCopy?: boolean | undefined;
-        }[F] & {}) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Toast>(recordeId: EntityId, field: F): State<({
+    id?: string | undefined;
+    message: string | number;
+    type?: "info" | "warning" | "error" | "success" | undefined;
+    time?: number | undefined;
+    showTime?: boolean | undefined;
+    closable?: boolean | undefined;
+    canCopy?: boolean | undefined;
+    }[F] & {}) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Toast>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Toast ? { [key in T]: Biqpod.System.Toast[F]; } : never) | undefined;
     getAll(): Biqpod.System.Toast[];
     setAll(data: Record<EntityId, Biqpod.System.Toast> | readonly Biqpod.System.Toast[]): void;
-    useAll(): {
-        get: Biqpod.System.Toast[];
-        set: Dispatch<SetStateAction<Biqpod.System.Toast[]>>;
-    };
+    useAll(): State<Biqpod.System.Toast[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: Dispatch<SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Toast>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -5768,28 +5254,16 @@ export declare const treeHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.Tree>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            ends: string[];
-            treeId: string;
-            focused?: string | null | undefined;
-            submited?: string | undefined;
-            selected?: Record<string, boolean> | undefined;
-            skiped?: Record<string, boolean> | undefined;
-            expanded?: Record<string, boolean> | undefined;
-            separator?: string | undefined;
-        } | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<{
-            ends: string[];
-            treeId: string;
-            focused?: string | null | undefined;
-            submited?: string | undefined;
-            selected?: Record<string, boolean> | undefined;
-            skiped?: Record<string, boolean> | undefined;
-            expanded?: Record<string, boolean> | undefined;
-            separator?: string | undefined;
-        } | undefined>>;
-    };
+    useOne(id: EntityId): State<    {
+    ends: string[];
+    treeId: string;
+    focused?: string | null | undefined;
+    submited?: string | undefined;
+    selected?: Record<string, boolean> | undefined;
+    skiped?: Record<string, boolean> | undefined;
+    expanded?: Record<string, boolean> | undefined;
+    separator?: string | undefined;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.Tree>(recordId: EntityId, field: F): ({
         ends: string[];
         treeId: string;
@@ -5801,46 +5275,25 @@ export declare const treeHooks: {
         separator?: string | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.Tree>(id: EntityId, field: F, value: Biqpod.System.Tree[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.Tree>(recordeId: EntityId, field: F): {
-        get: ({
-            ends: string[];
-            treeId: string;
-            focused?: string | null | undefined;
-            submited?: string | undefined;
-            selected?: Record<string, boolean> | undefined;
-            skiped?: Record<string, boolean> | undefined;
-            expanded?: Record<string, boolean> | undefined;
-            separator?: string | undefined;
-        }[F] & ({} | null)) | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<({
-            ends: string[];
-            treeId: string;
-            focused?: string | null | undefined;
-            submited?: string | undefined;
-            selected?: Record<string, boolean> | undefined;
-            skiped?: Record<string, boolean> | undefined;
-            expanded?: Record<string, boolean> | undefined;
-            separator?: string | undefined;
-        }[F] & ({} | null)) | undefined>>;
-    };
+    useOneFeild<F extends keyof Biqpod.System.Tree>(recordeId: EntityId, field: F): State<({
+    ends: string[];
+    treeId: string;
+    focused?: string | null | undefined;
+    submited?: string | undefined;
+    selected?: Record<string, boolean> | undefined;
+    skiped?: Record<string, boolean> | undefined;
+    expanded?: Record<string, boolean> | undefined;
+    separator?: string | undefined;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.Tree>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.Tree ? { [key in T]: Biqpod.System.Tree[F]; } : never) | undefined;
     getAll(): Biqpod.System.Tree[];
     setAll(data: Record<EntityId, Biqpod.System.Tree> | readonly Biqpod.System.Tree[]): void;
-    useAll(): {
-        get: Biqpod.System.Tree[];
-        set: default_2.Dispatch<default_2.SetStateAction<Biqpod.System.Tree[]>>;
-    };
+    useAll(): State<Biqpod.System.Tree[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.Tree>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;
@@ -5990,10 +5443,7 @@ export declare function useChangedSetting(): Setting[];
 
 export declare function useColorMerge<T extends Partial<Record<Biqpod.Types.CssColorKeys, ColorIds | ReturnColorHandelFunction>>>(): (...args: (Nothing | ColorIds | T)[]) => Partial<Record<keyof T, string>>;
 
-export declare function useCopyState<T>(initData: T | (() => T)): {
-    get: T;
-    set: default_2.Dispatch<default_2.SetStateAction<T>>;
-};
+export declare function useCopyState<T>(initData: T | (() => T)): State<T>;
 
 export declare function useDeviceType(): {
     isMobile: boolean;
@@ -6001,10 +5451,7 @@ export declare function useDeviceType(): {
     isDesktop: boolean;
 };
 
-export declare function useDref<T>(firstState: T, upload: (val: T) => any, download?: (val: T) => T): {
-    get: T;
-    set: default_2.Dispatch<default_2.SetStateAction<T>>;
-};
+export declare function useDref<T>(firstState: T, upload: (val: T) => any, download?: (val: T) => T): State<T>;
 
 export declare function useEffectDelay(fn: () => Promise<void> | void | (() => Promise<void> | void), deps?: any[], time?: number): boolean;
 
@@ -6024,18 +5471,9 @@ export declare function useFocusedTab(id: EntityId): {
 } | null;
 
 export declare function useIdleStatus<T>(fn: () => Promise<T>, deps?: any[]): {
-    status: {
-        get: "ready" | QueryStatus;
-        set: default_2.Dispatch<default_2.SetStateAction<"ready" | QueryStatus>>;
-    };
-    data: {
-        get: T | null;
-        set: default_2.Dispatch<default_2.SetStateAction<T | null>>;
-    };
-    error: {
-        get: any;
-        set: default_2.Dispatch<any>;
-    };
+    status: State<"ready" | QueryStatus>;
+    data: State<T | null>;
+    error: State<any>;
 };
 
 export declare function useManyFeilds<S extends string | number, T extends FeildRecord<S>>(fields: T, deps?: any): Record<keyof T, string | undefined>;
@@ -6075,10 +5513,7 @@ export declare function useShortcutsOfAction(actionName: string): Biqpod.System.
 
 export declare function useShortcutsOfCommand(commandId: CommandIds | string): Biqpod.System.Key[];
 
-export declare function useTemp<T>(direction: string): {
-    get: T | null;
-    set: default_2.Dispatch<default_2.SetStateAction<T | null>>;
-};
+export declare function useTemp<T>(direction: string): State<T | null>;
 
 export declare function useUser(): Biqpod.Account.User | null;
 
@@ -6108,34 +5543,19 @@ export declare const viewHooks: {
     } | undefined;
     setOne(id: EntityId, changes: Partial<Biqpod.System.View>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
-    useOne(id: EntityId): {
-        get: {
-            viewId: string;
-            label: string;
-            focused: string | null;
-            tabs: Record<string, {
-                icon?: {
-                    type: "solid" | "normal" | "brad";
-                    value: string;
-                };
-                news?: Biqpod.System.View["tabs"][string]["icon"];
-                label?: string;
-            }>;
-        } | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<{
-            viewId: string;
-            label: string;
-            focused: string | null;
-            tabs: Record<string, {
-                icon?: {
-                    type: "solid" | "normal" | "brad";
-                    value: string;
-                };
-                news?: Biqpod.System.View["tabs"][string]["icon"];
-                label?: string;
-            }>;
-        } | undefined>>;
+    useOne(id: EntityId): State<    {
+    viewId: string;
+    label: string;
+    focused: string | null;
+    tabs: Record<string, {
+    icon?: {
+    type: "solid" | "normal" | "brad";
+    value: string;
     };
+    news?: Biqpod.System.View["tabs"][string]["icon"];
+    label?: string;
+    }>;
+    } | undefined>;
     getOneFeild<F extends keyof Biqpod.System.View>(recordId: EntityId, field: F): ({
         viewId: string;
         label: string;
@@ -6150,52 +5570,28 @@ export declare const viewHooks: {
         }>;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Biqpod.System.View>(id: EntityId, field: F, value: Biqpod.System.View[F]): void;
-    useOneFeild<F extends keyof Biqpod.System.View>(recordeId: EntityId, field: F): {
-        get: ({
-            viewId: string;
-            label: string;
-            focused: string | null;
-            tabs: Record<string, {
-                icon?: {
-                    type: "solid" | "normal" | "brad";
-                    value: string;
-                };
-                news?: Biqpod.System.View["tabs"][string]["icon"];
-                label?: string;
-            }>;
-        }[F] & ({} | null)) | undefined;
-        set: default_2.Dispatch<default_2.SetStateAction<({
-            viewId: string;
-            label: string;
-            focused: string | null;
-            tabs: Record<string, {
-                icon?: {
-                    type: "solid" | "normal" | "brad";
-                    value: string;
-                };
-                news?: Biqpod.System.View["tabs"][string]["icon"];
-                label?: string;
-            }>;
-        }[F] & ({} | null)) | undefined>>;
+    useOneFeild<F extends keyof Biqpod.System.View>(recordeId: EntityId, field: F): State<({
+    viewId: string;
+    label: string;
+    focused: string | null;
+    tabs: Record<string, {
+    icon?: {
+    type: "solid" | "normal" | "brad";
+    value: string;
     };
+    news?: Biqpod.System.View["tabs"][string]["icon"];
+    label?: string;
+    }>;
+    }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Biqpod.System.View>(id: EntityId, fields: F[]): (F extends infer T extends keyof Biqpod.System.View ? { [key in T]: Biqpod.System.View[F]; } : never) | undefined;
     getAll(): Biqpod.System.View[];
     setAll(data: Record<EntityId, Biqpod.System.View> | readonly Biqpod.System.View[]): void;
-    useAll(): {
-        get: Biqpod.System.View[];
-        set: default_2.Dispatch<default_2.SetStateAction<Biqpod.System.View[]>>;
-    };
+    useAll(): State<Biqpod.System.View[]>;
     getWriteStatus(): "ready" | QueryStatus;
-    useWriteStatus(): {
-        get: "idle" | "ready" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "ready" | "loading" | "error" | "success">>;
-    };
+    useWriteStatus(): State<"idle" | "ready" | "loading" | "error" | "success">;
     getStatus(): QueryStatus;
     setStatus(value: ReturnType<() => QueryStatus>): void;
-    useStatus(): {
-        get: "idle" | "loading" | "error" | "success";
-        set: default_2.Dispatch<default_2.SetStateAction<"idle" | "loading" | "error" | "success">>;
-    };
+    useStatus(): State<"idle" | "loading" | "error" | "success">;
     getEntity(): Record<EntityId, Biqpod.System.View>;
     getLoadingTime(): number;
     setLoadingTime(time: number): void;

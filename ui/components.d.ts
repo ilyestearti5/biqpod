@@ -342,7 +342,7 @@ declare namespace Biqpod {
             createdAt: string;
             id?: string;
         }
-        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed";
+        type PayoutStatus = "pending" | "paid" | "canceled" | "expired" | "failed" | "processing";
         type PayoutType = "subscription" | "product" | "transaction" | "charge" | "payment";
         interface Payout {
             payoutId?: string;
@@ -355,7 +355,9 @@ declare namespace Biqpod {
                 label: string;
                 duration: number;
             } | null;
-            transaction?: {} | null;
+            transaction?: {
+                saller?: string;
+            } | null;
             product?: {
                 name: string;
             } | null;
@@ -363,6 +365,8 @@ declare namespace Biqpod {
                 serviceId: string;
             };
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
+            mode?: "sandbox" | "live";
+            createdAt?: number;
         }
     }
     namespace Api {
@@ -487,6 +491,7 @@ declare namespace Biqpod {
                     nullable: boolean;
                     expandIcon: boolean;
                     search: boolean;
+                    placeholder: string;
                 }>;
                 string: Partial<{
                     maxLength: number;
@@ -539,6 +544,7 @@ declare namespace Biqpod {
                     alt: string;
                     rounded: boolean;
                     size: number;
+                    hidden: boolean;
                 }>;
                 range: Partial<{
                     min: number;
@@ -595,10 +601,12 @@ declare namespace Biqpod {
             id: string;
             title: string;
             type?: "info" | "warning" | "error" | "success";
+            photo?: string;
             desc?: string;
             removable?: boolean;
             status?: "loading" | "idle";
             showDesc?: boolean;
+            createdAt?: number;
             buttons?: {
                 label: string;
                 command: string | {
@@ -1014,7 +1022,7 @@ export declare function EnumFeild({ config, id, state }: EnumFeildProps): JSX_2.
 
 export declare type EnumFeildProps = FullFieldGeneralProps<"enum">;
 
-export declare function FastList<T>({ focusId, itemSize, scrollWidth, slotId, render: Item, handelSkip, data, maxHeight: max, countLastItems, overflow: { top, bottom }, ...props }: FastListProps<T>): JSX_2.Element;
+export declare function FastList<T>({ focusId, itemSize, scrollWidth, slotId, render, handelSkip, data, maxHeight: max, countLastItems, overflow: { top, bottom }, ...props }: FastListProps<T>): JSX_2.Element;
 
 export declare interface FastListItemProps<T> extends ReactElement {
     status: {
@@ -1171,7 +1179,7 @@ export declare const iconsFileFeild: Record<QueryStatus | "ready", IconProps["ic
 declare function Image_2({ className, alt, src, children, style, ...props }: ImageProps): JSX_2.Element;
 export { Image_2 as Image }
 
-export declare function ImageFeild({ state, config }: ImageFeildProps): JSX_2.Element;
+export declare function ImageFeild({ state, config, id }: ImageFeildProps): JSX_2.Element;
 
 export declare type ImageFeildProps = FullFieldGeneralProps<"image">;
 
@@ -1239,7 +1247,7 @@ export declare function Line(): JSX_2.Element;
 
 export declare function LineLoading(): JSX_2.Element;
 
-export declare function List<T>({ slotId, component: Component, data, skipFn }: ListProps<T>): JSX_2.Element;
+export declare function List<T>({ slotId, component, data, skipFn }: ListProps<T>): JSX_2.Element;
 
 declare interface ListItemProps<T> extends ReactElement {
     handelSubmit: (fn?: Function) => (e?: any) => void;
@@ -1435,7 +1443,7 @@ export declare interface StartsProps {
 }
 
 declare interface State<T = undefined> {
-    get: T;
+    readonly get: T;
     set: React.Dispatch<React.SetStateAction<T>>;
 }
 
@@ -1455,7 +1463,7 @@ export declare interface TabProps extends ClickProps<HTMLSpanElement> {
     isActive?: boolean;
 }
 
-export declare const Tabs: ({ state, tabs, direction, hideLabelWhereSmalled, buttonClassName, className, style, ...props }: TabsProps) => JSX_2.Element;
+export declare const Tabs: ({ state, defaultValue, tabs, direction, hideLabelWhereSmalled, buttonClassName, className, style, ...props }: TabsProps) => JSX_2.Element;
 
 export declare interface TabsProps extends ReactElement {
     buttonClassName?: string;
@@ -1581,10 +1589,7 @@ export declare function useTextAnimation({ string, time }: {
     string?: string;
     time?: number;
 }): {
-    state: {
-        get: string;
-        set: default_2.Dispatch<default_2.SetStateAction<string>>;
-    };
+    state: State<string>;
     value: string;
     isLoading: boolean;
 };

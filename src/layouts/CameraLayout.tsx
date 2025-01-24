@@ -76,11 +76,11 @@ export function CameraView() {
           }
         }
       } catch (error: any) {
-        showToast(error);
+        showToast(error, "error");
         // error
       }
     };
-    if (cameraId) {
+    if (cameraId && videoElementRef.current) {
       initializeCamera();
     }
     return () => {
@@ -89,8 +89,8 @@ export function CameraView() {
         currentStream.get.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [cameraId]);
-  const canTake = cameraType && cameraId && cameraTracks.get.length >= 1;
+  }, [cameraId, videoElementRef]);
+  const canTake = cameraId && cameraTracks.get.length >= 1;
   return (
     <BlurOverlay hidden={!cameraId}>
       <SeparatedViewsLine
@@ -103,6 +103,7 @@ export function CameraView() {
                 icon={allIcons.solid.faXmark}
                 onClick={() => {
                   cameraTemp.setTemp("error", "Escape Take Image");
+                  cameraTemp.setTemp("id", null);
                   if (currentStream.get) stopTracking(currentStream.get);
                 }}
               />
@@ -127,39 +128,37 @@ export function CameraView() {
               )}
             </div>
           </div>,
-          cameraType === "take" && (
-            <div className="flex justify-evenly p-4 w-full h-[70px] text-2xl">
-              {cameraTracks.get.length > 1 && (
-                <TitleView title="Change Camera Device">
-                  <CircleTip
-                    icon={allIcons.solid.faCameraRotate}
-                    onClick={({ clientX, clientY }) => {
-                      openMenu({
-                        x: clientX,
-                        y: clientY,
-                        menu: cameraTracks.get.map(({ label, deviceId }) => ({
-                          label,
-                          async click() {
-                            await switchCameraDevice(deviceId);
-                          },
-                        })),
-                      });
-                    }}
-                  />
-                </TitleView>
-              )}
-              {cameraTracks.get.length >= 1 && (
-                <TitleView title="Take Image">
-                  <CircleTip
-                    onClick={() => {
-                      execAction("camera-take");
-                    }}
-                    icon={allIcons.solid.faCamera}
-                  />
-                </TitleView>
-              )}
-            </div>
-          ),
+          <div className="flex justify-evenly p-4 w-full h-[70px] text-2xl">
+            {cameraTracks.get.length > 1 && (
+              <TitleView title="Change Camera Device">
+                <CircleTip
+                  icon={allIcons.solid.faCameraRotate}
+                  onClick={({ clientX, clientY }) => {
+                    openMenu({
+                      x: clientX,
+                      y: clientY,
+                      menu: cameraTracks.get.map(({ label, deviceId }) => ({
+                        label,
+                        async click() {
+                          await switchCameraDevice(deviceId);
+                        },
+                      })),
+                    });
+                  }}
+                />
+              </TitleView>
+            )}
+            {cameraTracks.get.length >= 1 && (
+              <TitleView title="Take Image">
+                <CircleTip
+                  onClick={() => {
+                    execAction("camera-take");
+                  }}
+                  icon={allIcons.solid.faCamera}
+                />
+              </TitleView>
+            )}
+          </div>,
         ]}
         tabIndex={1}
         id="camera-view"
