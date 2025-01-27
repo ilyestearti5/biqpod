@@ -201,7 +201,7 @@ export declare namespace Biqpod {
             export interface ProductPrice {
                 id: string;
                 prodId?: string;
-                createdAt?: string;
+                createdAt?: number;
                 price?: number;
             }
             export interface Product {

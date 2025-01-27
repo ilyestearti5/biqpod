@@ -6,6 +6,7 @@ import { useCopyState } from "@/hooks";
 import { nanoid } from "@reduxjs/toolkit";
 import { ChangableComponent } from "../PositionView";
 import { FullFieldGeneralProps } from "@/types";
+import { MarkDown } from "../MarkDown";
 export type EnumFeildProps = FullFieldGeneralProps<"enum">;
 //
 export const slotId = "enum/list";
@@ -73,7 +74,9 @@ export function EnumFeild({ config = {}, id, state }: EnumFeildProps) {
         ),
       }}
     >
-      <div className="w-full text-center">{choised?.content || choised?.value || config.placeholder || "no option choised"}</div>
+      <div className="flex justify-center items-center gap-2 w-full">
+        <MarkDown value={choised?.content || choised?.value || config.placeholder || "no option choised"} />
+      </div>
       {config.expandIcon !== false && Boolean(config.list?.length) && <FontAwesomeIcon icon={complexeId == selectedId ? faAngleUp : faAngleDown} />}
     </ChangableComponent>
   );

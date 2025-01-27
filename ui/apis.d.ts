@@ -210,7 +210,7 @@ declare namespace Biqpod {
             interface ProductPrice {
                 id: string;
                 prodId?: string;
-                createdAt?: string;
+                createdAt?: number;
                 price?: number;
             }
             interface Product {
@@ -927,17 +927,13 @@ declare interface IconProps {
     iconClassName?: ReactElement["className"];
 }
 
-export declare function initMyCloud(options: FirebaseOptions): ClientCloud;
+export declare function initMyCloud({ functions, ...options }: InitMyCloudProps): ClientCloud;
 
-export declare interface InitMyCloudProps {
-    apiKey?: string;
-    appId?: string;
-    authDomain?: string;
-    measurementId?: string;
-    messagingSenderId?: string;
-    projectId?: string;
-    storageBucket?: string;
-    databaseURL?: string;
+export declare interface InitMyCloudProps extends FirebaseOptions {
+    functions?: {
+        devUri?: Uri;
+        prodUri?: Uri;
+    };
 }
 
 export declare function isCollection(path: Path): boolean;
@@ -977,6 +973,8 @@ export declare interface SignInAccountProps extends GenerateAuthUrlParams {
 export declare function toPath(...paths: Biqpod.Cloud.Path[]): string;
 
 export declare function toPathArray(...paths: Biqpod.Cloud.Path[]): string[];
+
+declare type Uri = (functionId: string) => string | URL;
 
 export declare function where(field: string, operator: Biqpod.Cloud.Database.NoSQL.SingleQuery["operator"], value: any): {
     field: string;

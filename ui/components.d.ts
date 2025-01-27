@@ -223,7 +223,7 @@ declare namespace Biqpod {
             interface ProductPrice {
                 id: string;
                 prodId?: string;
-                createdAt?: string;
+                createdAt?: number;
                 price?: number;
             }
             interface Product {

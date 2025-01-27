@@ -42,16 +42,19 @@ import { getStorage, ref, uploadString, uploadBytes, deleteObject, getDownloadUR
 import { ClientCloud, getIsDev, queryTest, toPath, Path } from "..";
 import { mergeArray } from "@/utils";
 import { Biqpod, CloudFunction } from "@/types";
-export interface InitMyCloudProps {
-  apiKey?: string;
-  appId?: string;
-  authDomain?: string;
-  measurementId?: string;
-  messagingSenderId?: string;
-  projectId?: string;
-  storageBucket?: string;
-  databaseURL?: string;
+type Uri = (functionId: string) => string | URL;
+export interface InitMyCloudProps extends FirebaseOptions {
+  functions?: {
+    devUri?: Uri;
+    prodUri?: Uri;
+  };
 }
+const getDevUri: Uri = (functionId) => {
+  return new URL(`http://localhost:8888/.netlify/functions/${functionId}`);
+};
+const getProdUri: Uri = (functionId) => {
+  return new URL(`https://biqpod.netlify.app/.netlify/functions/${functionId}`);
+};
 export type QueryFilterConstraint = QueryFieldFilterConstraint | QueryCompositeFilterConstraint;
 export const generateQuery = <T extends object>(db: Firestore, path: Path, selection?: Biqpod.Cloud.Database.NoSQL.Selection<T>) => {
   function reuc(query: Biqpod.Cloud.Database.NoSQL.Query<T>): QueryFilterConstraint {
@@ -83,7 +86,14 @@ interface Data {
   top_p?: number;
   stream?: boolean;
 }
-export function initMyCloud(options: FirebaseOptions) {
+export function initMyCloud({
+  functions = {
+    devUri: getDevUri,
+    prodUri: getProdUri,
+  },
+  ...options
+}: InitMyCloudProps) {
+  const { prodUri = getProdUri, devUri = getDevUri } = functions;
   const myCloud = new ClientCloud("my-cloud");
   const app = initializeApp({
     ...options,
@@ -313,8 +323,7 @@ export function initMyCloud(options: FirebaseOptions) {
     const isDev = getIsDev(mode);
     const controller = new AbortController();
     const signal = controller.signal;
-    const url = new URL(isDev ? "http://localhost:8888" : "https://biqpod.netlify.app");
-    url.pathname = "/.netlify/functions/" + name;
+    const url = new URL(isDev ? devUri(name) : prodUri(name));
     const result: CloudFunction<R, P> = async (data) => {
       const response = await fetch(url.toString(), {
         method: "POST",

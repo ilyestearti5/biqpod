@@ -2,7 +2,7 @@ import { BlurOverlay, FastList, Line, MarkDown, CircleLoading, Feild, Translate 
 import { useColorMerge, enumTemp, getSlotData, useSettingValue, slotHooks, useCopyState, fieldHooks, useMemoDelay } from "@/hooks";
 import { SettingConfig } from "@/types";
 import { include, mergeObject, tw } from "@/utils";
-import React from "react";
+import { createRef, useMemo, useEffect } from "react";
 export const EnumLayout = () => {
   const colorMerge = useColorMerge();
   const id = enumTemp.getTemp<string>("id");
@@ -10,9 +10,9 @@ export const EnumLayout = () => {
   const value = fieldHooks.getOneFeild("find-item-from-enum", "value");
   const [isLoading, animatedValue] = useMemoDelay(() => value, [value], 700);
   const positions = enumTemp.getTemp<Omit<DOMRect, "toJSON">>("positions");
-  const elementRef = React.createRef<HTMLDivElement>();
+  const elementRef = createRef<HTMLDivElement>();
   const config = enumTemp.getTemp<SettingConfig["enum"]>("config");
-  const filterd = React.useMemo(() => {
+  const filterd = useMemo(() => {
     if (!config?.search || !animatedValue) {
       return enumList || [];
     }
@@ -25,21 +25,21 @@ export const EnumLayout = () => {
   const focused = getSlotData(filterd, "enum-list", "focused");
   const submited = getSlotData(filterd, "enum-list", "submited");
   const isAnimated = useSettingValue("preferences/animation.boolean");
-  React.useEffect(() => {
+  useEffect(() => {
     if (id && submited) {
       enumTemp.setTemp("result", submited.value);
       slotHooks.setOneFeild("enum-list", "focused", null);
       slotHooks.setOneFeild("enum-list", "submited", null);
     }
   }, [submited, id]);
-  React.useEffect(() => {
+  useEffect(() => {
     enumTemp.setTemp("isLoading", isLoading);
   }, [isLoading]);
   const innersState = useCopyState<{ width: number; height: number }>({
     width: 0,
     height: 0,
   });
-  React.useEffect(() => {
+  useEffect(() => {
     const callback = () => {
       innersState.set({
         width: innerWidth,
@@ -124,9 +124,9 @@ export const EnumLayout = () => {
                     handel.focus();
                     handel.submit();
                   }}
-                  className={tw("flex justify-center items-center max-md:p-1 cursor-pointer", choised == data.value && "font-bold")}
+                  className={tw("flex justify-center items-center gap-2 max-md:p-1 cursor-pointer", choised == data.value && "font-bold")}
                 >
-                  <span>{data.content || data.value}</span>
+                  <MarkDown value={data.content || data.value} />
                 </div>
               );
             }}

@@ -26,19 +26,18 @@ export async function generateAuthUrl(params: GenerateAuthUrlParams) {
   }
   return await fn(params);
 }
-export async function signInAccount({ place, ...props }: SignInAccountProps) {
+export async function signInAccount({ place = "window", ...props }: SignInAccountProps) {
   const { url } = await generateAuthUrl(props);
   await delay(1000);
-  if (place == "frame") {
-    showFrame(url);
-  } else if (place == "window") {
-    const width = 600;
-    const height = 400;
-    const left = (window.innerWidth - width) / 2 + window.screenX;
-    const top = (window.innerHeight - height) / 2 + window.screenY;
-    window.open(url, "_blank", `width=${width},height=${height},left=${left},top=${top}`);
-  } else {
-    location.href = url;
+  switch (place) {
+    case "frame":
+      showFrame(url);
+      break;
+    case "window":
+      window.open(url, "_blank");
+      break;
+    default:
+      location.href = url;
   }
 }
 export async function getProjectConfig(projectId: string): Promise<ProjectConfig> {
