@@ -125,7 +125,7 @@ export function TextArea({
         if (typeof a === "function") {
           return a(selected);
         }
-        const founded = ss.find((s) => s.name === a);
+        const founded = choises.find((s) => s.name === a);
         return Record({
           a: founded?.name,
         });
