@@ -3,6 +3,9 @@ import { getTempFromStore } from "@/hooks";
 import { Biqpod, CloudFunction, Nothing } from "@/types";
 import { mergeArray } from "@/utils";
 export * from "./plugins/mycloud";
+export * from "./plugins/firebase";
+export * from "./plugins/devlopment";
+export * from "./plugins/appwrite";
 export type Path = Biqpod.Cloud.Path;
 export type CloudSelection<T extends object> = Biqpod.Cloud.Database.NoSQL.Selection<T>;
 export interface AiMessage {

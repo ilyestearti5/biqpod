@@ -19,7 +19,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { getFirestore, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, doc, query } from "firebase/firestore";
 import { getStorage, ref, uploadString, uploadBytes, deleteObject, getDownloadURL, listAll } from "firebase/storage";
 import { ClientCloud, generateQuery, toPath } from "..";
-export interface InitMyCloudProps {
+export interface InitFirebaseProps {
   appId: string;
   measurementId: string;
 }

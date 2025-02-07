@@ -1,17 +1,40 @@
 import { Biqpod } from "@/types";
 import { ClientCloud } from "..";
 export interface DevCloudProps {
-  port: number;
+  port?: number;
 }
-export function initMyCloud(options: DevCloudProps) {
+async function toBase64Url(input: string | Blob | ArrayBuffer | Uint8Array): Promise<string> {
+  if (typeof input === "string") {
+    return base64UrlEncode(Buffer.from(input, "utf-8"));
+  }
+  if (input instanceof ArrayBuffer) {
+    return base64UrlEncode(Buffer.from(new Uint8Array(input)));
+  }
+  if (input instanceof Uint8Array) {
+    return base64UrlEncode(Buffer.from(input));
+  }
+  if (typeof Blob !== "undefined" && input instanceof Blob) {
+    const arrayBuffer = await input.arrayBuffer();
+    return base64UrlEncode(Buffer.from(new Uint8Array(arrayBuffer)));
+  }
+  throw new Error("Unsupported input type");
+}
+function base64UrlEncode(buffer: Buffer): string {
+  return buffer
+    .toString("base64")
+    .replace(/\+/g, "-") // Replace '+' with '-'
+    .replace(/\//g, "_") // Replace '/' with '_'
+    .replace(/=+$/, ""); // Remove trailing '='
+}
+export function initDevelopmentCloud({ port = 7985 }: DevCloudProps) {
   const devCloud = new ClientCloud("development");
-  const getSavedToken = async (): Promise<string | null> => {
+  const getToken = async (): Promise<string | null> => {
     return localStorage.getItem("user-token");
   };
   const sendRequest = async (service: string, name: string, params: Record<string, any>) => {
-    const baseUrl = "http://localhost:" + options.port;
+    const baseUrl = "http://localhost:" + port;
     const url = new URL(baseUrl);
-    url.pathname = "/client/" + service + " /" + name;
+    url.pathname = "/" + service + " /" + name;
     for (const param in params) {
       url.searchParams.set(param, String(params[param]));
     }
@@ -20,7 +43,7 @@ export function initMyCloud(options: DevCloudProps) {
   };
   // auth
   devCloud.set("auth", "getCurrentAuth", async () => {
-    const token = await getSavedToken();
+    const token = await getToken();
     if (!token) {
       return null;
     }
@@ -32,13 +55,12 @@ export function initMyCloud(options: DevCloudProps) {
     }
     return uid;
   });
-  devCloud.set("auth", "signIn", async () => {});
   devCloud.set("auth", "signOut", async () => {
     // update indexed db
     localStorage.set(null);
   });
   devCloud.set("auth", "deleteUser", async () => {
-    const token = await getSavedToken();
+    const token = await getToken();
     if (!token) {
       throw "No User Login";
     }
@@ -47,7 +69,7 @@ export function initMyCloud(options: DevCloudProps) {
     });
   });
   devCloud.set("auth", "generateToken", async () => {
-    const token = await getSavedToken();
+    const token = await getToken();
     if (!token) {
       throw "Token Not Found";
     }
@@ -57,12 +79,17 @@ export function initMyCloud(options: DevCloudProps) {
     });
     return result;
   });
-  devCloud.set("auth", "resetPassword", async () => {});
+  devCloud.set("auth", "resetPassword", async () => {
+    const currentUid = await devCloud.app.auth.getCurrentAuth();
+    // login of getting the password reset email
+    currentUid?.toString();
+    await devCloud.app.auth.signOut();
+  });
   devCloud.set("auth", "confirmPasswordReset", async () => {});
   devCloud.set("auth", "onAuthStateChanged", (callback) => {
     let savedToken: string | null = null;
     const timer = setInterval(async () => {
-      const token = await getSavedToken();
+      const token = await getToken();
       if (token !== savedToken) {
         const uid = await devCloud.app.auth.getCurrentAuth();
         callback(uid);
@@ -160,19 +187,19 @@ export function initMyCloud(options: DevCloudProps) {
   devCloud.set("storage", "createFile", async (path, content) => {
     await sendRequest("storage", "createFile", {
       path,
-      content,
+      content: await toBase64Url(content),
     });
   });
   devCloud.set("storage", "upsertFile", async (path, content) => {
     await sendRequest("storage", "upsertFile", {
       path,
-      content,
+      content: await toBase64Url(content),
     });
   });
   devCloud.set("storage", "updateFile", async (path, content) => {
     await sendRequest("storage", "updateFile", {
       path,
-      content,
+      content: await toBase64Url(content),
     });
   });
   devCloud.set("storage", "deleteFile", async (path) => {

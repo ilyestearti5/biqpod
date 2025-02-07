@@ -125,7 +125,7 @@ export function TextArea({
         if (typeof a === "function") {
           return a(selected);
         }
-        const founded = choises.find((s) => s.name === a);
+        const founded = ss.find((s) => s.name === a);
         return Record({
           a: founded?.name,
         });
@@ -309,25 +309,6 @@ export function TextArea({
           onValueChange?.(e.currentTarget.value);
         }}
       />
-      {/* <div ref={firstRef} className={tw(className, `absolute inset-0 pointer-events-none overflow-y-auto overflow-x-hidden`)}>
-        <pre className="font-[inherit] text-wrap">
-          <span className="text-transparent">{props.value}</span>
-          {typeof lastWord == "string" && proposition && (
-            <EmptyComponent>
-              <span
-                style={{
-                  ...colorMerge({
-                    color: "autoCompleteInput",
-                  }),
-                }}
-              >
-                {proposition.replace(lastWord, "")}
-              </span>
-              {Boolean(autoCompleteInput.length) && <KeyPanding shortcut={autoCompleteInput.map(({ value }) => value!)} />}
-            </EmptyComponent>
-          )}
-        </pre>
-      </div> */}
       <div ref={firstRef} className={tw(className, `absolute inset-0 pointer-events-none overflow-y-auto overflow-x-hidden`)}>
         <pre className="font-[inherit] text-wrap">
           {heighlighted}

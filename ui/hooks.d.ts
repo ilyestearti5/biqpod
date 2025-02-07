@@ -530,9 +530,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {
-                serviceId: string;
-            };
+            charge?: {};
+            path?: string | null;
+            serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
             mode?: "sandbox" | "live";
             createdAt?: number;
@@ -5445,7 +5445,7 @@ export declare function useColorMerge<T extends Partial<Record<Biqpod.Types.CssC
 
 export declare function useCopyState<T>(initData: T | (() => T)): State<T>;
 
-export declare function useDeviceType(): {
+export declare function useDeviceResolution(): {
     isMobile: boolean;
     isTablet: boolean;
     isDesktop: boolean;

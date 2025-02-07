@@ -332,9 +332,9 @@ export namespace Biqpod {
       product?: {
         name: string;
       } | null;
-      charge?: {
-        serviceId: string;
-      };
+      charge?: {};
+      path?: string | null;
+      serviceId?: string;
       meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
       mode?: "sandbox" | "live";
       createdAt?: number;

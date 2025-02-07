@@ -1,6 +1,6 @@
 import React from "react";
 import { ResizeView } from "@/components/ResizeView";
-import { setSettingValue, useDeviceType, useSettingValue, visibilityTemp } from "@/hooks";
+import { setSettingValue, useDeviceResolution, useSettingValue, visibilityTemp } from "@/hooks";
 import { useColorMerge } from "@/hooks";
 import { isSorted } from "@/utils/index";
 import { tw } from "@/utils";
@@ -19,7 +19,7 @@ export const LeftSide = ({ children, floorWindow, className, style = {}, ...prop
       visibilityTemp.setTemp("shadow-window", visibility && floorWindow);
     }
   }, [visibility, floorWindow]);
-  const { isMobile } = useDeviceType();
+  const { isMobile } = useDeviceResolution();
   return (
     <div className={tw("max-md:left-0 max-md:z-[200] max-md:absolute h-full", setting && "absolute left-0 z-[200]")}>
       <ResizeView

@@ -233,7 +233,7 @@ export function setFieldValue(fieldId: string, value: string) {
 export function removeField(fieldId: string) {
   fieldHooks.remove([fieldId]);
 }
-export function useDeviceType() {
+export function useDeviceResolution() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
@@ -635,8 +635,9 @@ export function initUser() {
   }, [currentUid.get]);
   useEffect(() => {
     if (currentUid.get) {
-      return getMainCloud()?.app.nosql.onDocSnapshot<Biqpod.Account.User>(["users", currentUid.get], (data) => {
-        setTemp("user-info", data ? { ...data, uid: currentUid.get } : null);
+      return getMainCloud()?.app.nosql.onDocSnapshot<Biqpod.Account.User>(["users", currentUid.get], async (data) => {
+        const pin = currentUid.get ? await getMainCloud()?.app.nosql.getDoc<{ value: string }>(["users", currentUid.get, "private", "pin"]) : null;
+        setTemp("user-info", data ? { ...data, uid: currentUid.get, pin } : null);
       });
     } else {
       setTemp("user-info", null);

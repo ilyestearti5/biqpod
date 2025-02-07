@@ -6,11 +6,6 @@ import { JSX as JSX_2 } from 'react/jsx-runtime';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { QueryStatus } from 'react-query';
 
-export declare interface A<T, L> {
-    state: L;
-    data: T[];
-}
-
 export declare function Anchor({ className, style, ...props }: AnchorProps): JSX_2.Element;
 
 export declare type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
@@ -361,9 +356,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {
-                serviceId: string;
-            };
+            charge?: {};
+            path?: string | null;
+            serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
             mode?: "sandbox" | "live";
             createdAt?: number;
@@ -1004,6 +999,11 @@ export declare interface DataBaseManagmentListProps {
     }>;
 }
 
+export declare interface DataStateContainer<T, L = T> {
+    state?: L;
+    data?: T[];
+}
+
 export declare function DateFeild({ state, config, id }: DateFeildProps): JSX_2.Element;
 
 export declare type DateFeildProps = FeildGeneralProps<SettingValueType["date"] | undefined, SettingConfig["date"]>;
@@ -1187,15 +1187,15 @@ declare interface ImageProps extends Omit<default_2.DetailedHTMLProps<default_2.
     alt?: any;
 }
 
-export declare function InfinityScroll<T, L>({ onUpdate, onScroll, render, onLoading, updateWhere, onDone, onError, className, onDataChange, initData, initState, ...props }: InfinityScrollProps<T, L>): JSX_2.Element;
+export declare function InfinityScroll<T, L>({ onUpdate, onScroll, render, onLoading, updateWhere, onDone, onError, className, onDataChange, initData, initState, noData, ...props }: InfinityScrollProps<T, L>): JSX_2.Element;
 
-export declare interface InfinityScrollProps<T, L> extends ReactElement {
+export declare interface InfinityScrollProps<T, L = T> extends ReactElement {
     render: (data: T, index: number) => JSX.Element;
     onUpdate: (options: {
         data: T[];
         state?: L;
         setState: (info: L) => void;
-    }) => A<T, L> | Promise<A<T, L>>;
+    }) => DataStateContainer<T, L> | Promise<DataStateContainer<T, L>>;
     onDone?: () => void;
     onLoading?: () => JSX.Element | undefined;
     onError?: () => JSX.Element | undefined;
@@ -1203,6 +1203,7 @@ export declare interface InfinityScrollProps<T, L> extends ReactElement {
     initState?: L;
     initData?: T[];
     updateWhere?: number | Function;
+    noData?: JSX.Element;
 }
 
 export declare interface InnerTextProps extends TranslateProps {

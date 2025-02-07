@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Field as FeildType, fieldHooks } from "@/data/system/field.model";
 import { TextArea, TextAreaProps } from "../TextArea";
 import { tw } from "@/utils";
@@ -35,8 +35,8 @@ export function Feild({
   const value = fieldHooks.getOneFeild(inputName, "value");
   const selection = fieldHooks.getOneFeild(inputName, "selection");
   const hists = fieldHooks.useOneFeild(inputName, "history");
-  const colorMerge = useColorMerge();
   const focused = useCopyState(false);
+  const colorMerge = useColorMerge();
   useMemoDelay(
     () => {
       if (!acceptHistory && !value) {
@@ -55,11 +55,11 @@ export function Feild({
   );
   initNewFeild(inputName);
   //
-  React.useEffect(() => {
+  useEffect(() => {
     fieldHooks.setOneFeild(inputName, "controls", controls || {});
   }, [controls, inputName]);
   const position = useCopyState<Omit<DOMRect, "toJSON"> | null>(null);
-  React.useEffect(() => {
+  useEffect(() => {
     if (focused.get) {
       setTemp("input.focused", inputName);
       setTemp("input.position", position.get);
@@ -68,14 +68,12 @@ export function Feild({
       setTemp("input.position", null);
     }
   }, [focused.get, position]);
-
   useEffect(() => {
     return () => {
       setTemp("input.focused", null);
       setTemp("input.position", null);
     };
   }, []);
-
   return (
     <ChangableComponent
       onContentChange={({ x, y, left, right, bottom, top, width, height }) => {

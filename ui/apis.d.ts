@@ -348,9 +348,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {
-                serviceId: string;
-            };
+            charge?: {};
+            path?: string | null;
+            serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
             mode?: "sandbox" | "live";
             createdAt?: number;
@@ -887,6 +887,10 @@ declare type CloudFunction<R, P = any> = (data: P) => Promise<R>;
 
 export declare type CloudSelection<T extends object> = Biqpod.Cloud.Database.NoSQL.Selection<T>;
 
+export declare interface DevCloudProps {
+    port?: number;
+}
+
 declare interface FileProps extends default_2.OpenDialogOptions {
     nullable: boolean;
     visibility: Partial<Record<"upload" | "clearAll" | "emptyMessage" | "fileName", boolean>>;
@@ -925,6 +929,24 @@ export declare function getUserFunction<R, P = any>(name: string, mode?: boolean
 declare interface IconProps {
     icon?: FontAwesomeIconProps["icon"];
     iconClassName?: ReactElement["className"];
+}
+
+export declare function initAppwriteCloud(props: InitAppwriteCloudProps): void;
+
+export declare interface InitAppwriteCloudProps {
+    projectId: string;
+    databaseId: string;
+    resetPasswordUrl: string;
+    buckId: string;
+}
+
+export declare function initDevelopmentCloud({ port }: DevCloudProps): ClientCloud;
+
+export declare function initFirebaseCloud(options: FirebaseOptions): ClientCloud;
+
+export declare interface InitFirebaseProps {
+    appId: string;
+    measurementId: string;
 }
 
 export declare function initMyCloud({ functions, ...options }: InitMyCloudProps): ClientCloud;

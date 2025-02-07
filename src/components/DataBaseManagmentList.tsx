@@ -1,5 +1,5 @@
 import React from "react";
-import { useColorMerge, useDeviceType } from "@/hooks";
+import { useColorMerge, useDeviceResolution } from "@/hooks";
 import { fieldHooks } from "@/data/system/field.model";
 import { execCommand } from "@/data/system/command.model";
 import { include, setFocused, tw } from "@/utils";
@@ -71,7 +71,7 @@ export function DataBaseManagmentList({ data }: DataBaseManagmentListProps) {
     slotHooks.setOneFeild("cmds/list", "submited", null);
   }, [submitedItem, info]);
   const colorMerge = useColorMerge();
-  const { isMobile } = useDeviceType();
+  const { isMobile } = useDeviceResolution();
   return (
     <div
       className="relative py-1 max-md:h-full"

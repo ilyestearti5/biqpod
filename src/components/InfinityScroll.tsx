@@ -1,15 +1,15 @@
-import React from "react";
+import { useEffect } from "react";
 import { useCopyState, useIdleStatus } from "@/hooks";
 import { Scroll } from "./Scroll";
 import { tw } from "@/utils";
 import { ReactElement } from "@/types";
-export interface A<T, L> {
-  state: L;
-  data: T[];
+export interface DataStateContainer<T, L = T> {
+  state?: L;
+  data?: T[];
 }
-export interface InfinityScrollProps<T, L> extends ReactElement {
+export interface InfinityScrollProps<T, L = T> extends ReactElement {
   render: (data: T, index: number) => JSX.Element;
-  onUpdate: (options: { data: T[]; state?: L; setState: (info: L) => void }) => A<T, L> | Promise<A<T, L>>;
+  onUpdate: (options: { data: T[]; state?: L; setState: (info: L) => void }) => DataStateContainer<T, L> | Promise<DataStateContainer<T, L>>;
   onDone?: () => void;
   onLoading?: () => JSX.Element | undefined;
   onError?: () => JSX.Element | undefined;
@@ -17,6 +17,7 @@ export interface InfinityScrollProps<T, L> extends ReactElement {
   initState?: L;
   initData?: T[];
   updateWhere?: number | Function;
+  noData?: JSX.Element;
 }
 export function InfinityScroll<T, L>({
   onUpdate,
@@ -30,10 +31,14 @@ export function InfinityScroll<T, L>({
   onDataChange,
   initData = [],
   initState,
+  noData,
   ...props
 }: InfinityScrollProps<T, L>) {
   const prevState = useCopyState<L | undefined>(initState);
   const data = useCopyState<T[]>(initData);
+  useEffect(() => {
+    data.set(initData);
+  }, [initData]);
   const { status } = useIdleStatus(async () => {
     const result = onUpdate({
       state: prevState.get,
@@ -43,20 +48,20 @@ export function InfinityScroll<T, L>({
       data: data.get,
     });
     const { data: newData, state } = result instanceof Promise ? await result : result;
-    if (!newData.length) {
+    if (!newData?.length) {
       onDone?.();
     }
     prevState.set(state);
     data.set((prev) => {
-      return [...prev, ...newData];
+      return [...prev, ...newData!];
     });
   }, [prevState.get, data.get]);
-  React.useEffect(() => {
+  useEffect(() => {
     onDataChange?.(data.get);
   }, [data.get]);
-  React.useEffect(() => {
+  useEffect(() => {
     status.set("idle");
-  }, [onUpdate]);
+  }, []);
   return (
     <Scroll
       className={tw("flex flex-col", className)}
@@ -74,6 +79,7 @@ export function InfinityScroll<T, L>({
       })}
       {status.get == "loading" && onLoading?.()}
       {status.get == "error" && onError?.()}
+      {status.get == "success" && !data.get.length && noData}
     </Scroll>
   );
 }
