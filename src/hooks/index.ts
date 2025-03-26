@@ -5,7 +5,7 @@ import { viewHooks } from "@/data/system/views.model";
 import { ToastType, toastHooks } from "@/data/system/toasts.model";
 import { TextAreaProps } from "@/components/TextArea";
 import { settingHooks, SettingIds } from "@/data/system/settings.model";
-import { setTemp, getTemp, useTemp, getTempFromStore } from "@/reducers/Object/object.slice";
+import { setTemp, getTemp, useTemp } from "@/reducers/Object/object.slice";
 import { getMainCloud } from "@/apis/server.config";
 import { QueryStatus } from "react-query";
 import { NotificationType, notifayHooks } from "@/data/system/notifications.model";
@@ -615,6 +615,13 @@ export function onState<T extends object | string | number | boolean | null>(sta
   return store.subscribe(callback);
 }
 export { store };
+export const useChangedSyncedSettings = () => {
+  const allSettings = useChangedSetting();
+  const result = useMemo(() => {
+    return allSettings.filter(({ synced = false }) => synced);
+  }, [allSettings]);
+  return result;
+};
 export function initUser() {
   const loading = useTemp<boolean>("user-is-loading");
   const currentUid = useCopyState<Nothing | string>(null);
@@ -644,7 +651,7 @@ export function initUser() {
     }
   }, [currentUid.get]);
   const settingDownloaded = useCopyState(false);
-  const allSettings = settingHooks.getAll();
+  const allSettings = useChangedSyncedSettings();
   useAsyncEffect(async () => {
     if (currentUid.get && !settingDownloaded.get) {
       const mainCloud = getMainCloud();
@@ -660,8 +667,8 @@ export function initUser() {
   useAsyncEffect(async () => {
     if (currentUid.get && settingDownloaded.get && allSettings.length) {
       const mainCloud = getMainCloud();
-      const ref = ["users", currentUid.get, "private", "settings"];
       if (mainCloud) {
+        const ref = ["users", currentUid.get, "private", "settings"];
         let data: Record<string, any> = {};
         allSettings.forEach(({ settingId, value }) => {
           data[settingId] = value;
@@ -777,12 +784,22 @@ export async function setTheme(themeId: string) {
     colorHooks.upsert(jsonContent);
   }
 }
+export const getFieldValue = (fieldId: string) => {
+  const value = fieldHooks.getOneFeild(fieldId, "value");
+  return value;
+};
 export type size = "px" | "rem" | "em" | "vh" | "vw" | "vmin" | "vmax" | "%";
 export interface BottomSheetOptions {
   force?: boolean;
   id?: string;
   min?: number | `${number}${size}`;
   max?: number | `${number}${size}`;
+  overscroll?: boolean;
+}
+export interface PopupOptions {
+  id?: string;
+  force?: boolean;
+  type?: "blur" | "down";
 }
 export class JSXElement {
   static list: Record<string, JSX.Element> = {};
@@ -790,16 +807,49 @@ export class JSXElement {
     this.list[id] = element;
   }
 }
-export function showBottomSheet(element: JSX.Element, { force = false, id: newId = nanoid(), min = `${80}%`, max = `${80}%` }: BottomSheetOptions = {}) {
+export function showBottomSheet(element: JSX.Element, { force = false, id: newId = nanoid(), min = `${80}%`, max = `${80}%`, overscroll = false }: BottomSheetOptions = {}) {
   if (!force) {
-    const id = getTempFromStore<string>("bottomSheet.id");
-    if (id) {
+    const bottomSheet = viewTemps.getTempFromStore<BottomSheetOptions>("bottomSheet");
+    if (bottomSheet?.id) {
       throw "Bottom Sheet Opend Before";
     }
   }
   JSXElement.save(newId, element);
-  viewTemps.setTemp("bottomSheet", { id: newId, min, max });
+  viewTemps.setTemp("bottomSheet", { id: newId, min, max, overscroll });
 }
-export function closeBottomSheet() {
+export function closeBottomSheet(id?: string) {
   viewTemps.setTemp("bottomSheet", null);
+  if (id) {
+    delete JSXElement.list[id];
+  }
+}
+export function showPopup(element: JSX.Element, options: PopupOptions = {}) {
+  const { force = false, type = "down", id: newId = nanoid() } = options;
+  if (!force) {
+    const popup = viewTemps.getTempFromStore<PopupOptions>("popup");
+    if (popup?.id) {
+      throw "Popup Opend Before";
+    }
+  }
+  JSXElement.save(newId, element);
+  viewTemps.setTemp("popup", { id: newId, type });
+}
+export function closePopup(id?: string) {
+  viewTemps.setTemp("popup", null);
+  if (id) {
+    delete JSXElement.list[id];
+  }
+}
+export const setCookie = (name: string, value: string) => {
+  document.cookie = `${name}=${value || ""}; path=/`;
+};
+export function getCookie(name: string): string | null {
+  const cookies = document.cookie.split("; ");
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.split("=");
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+  return null;
 }

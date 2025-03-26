@@ -6,7 +6,7 @@ import { Button } from "@/components/Button";
 import { Input } from "../Input";
 import { FeildGeneralProps, SettingConfig } from "@/types";
 export type RegexpFeildProps = FeildGeneralProps<string | undefined, SettingConfig["regexp"]>;
-// render RegExp Feild Prop
+// render RegExp Field Prop
 function RegexpFeild({ state, id }: RegexpFeildProps) {
   const value = useCopyState("");
   React.useEffect(() => {

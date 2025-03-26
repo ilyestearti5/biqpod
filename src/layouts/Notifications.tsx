@@ -54,10 +54,10 @@ export function Notifications() {
         }
       }}
       className={tw(
-        `right-[10px] bottom-[10px] z-[1000000000000] fixed border border-transparent border-solid rounded-xl w-1/2 max-md:w-4/5 transition-[transform,border-radius,right,bottom,width,height] duration-300 overflow-hidden`,
-        !fullScreen.get && "max-md:w-[calc(100%-20px)]",
+        `right-[10px] bottom-[10px] z-[1000000000000] fixed border border-transparent border-solid rounded-xl overflow-hidden transition-[transform,border-radius,right,bottom,width,min-height] duration-500`,
+        !fullScreen.get && "max-md:w-[calc(100%-20px)] min-h-[0%] w-1/2",
         !fullScreen.get && !visibility && "translate-x-[100%]",
-        fullScreen.get && "w-full h-full rounded-[0px] bottom-[0px] right-[0px]",
+        fullScreen.get && "w-full min-h-full rounded-[0px] bottom-[0px] right-[0px]",
       )}
       style={{
         ...colorMerge({
@@ -98,7 +98,7 @@ export function Notifications() {
               }}
               className="mr-2"
             >
-              {!notes && `(${notifaysIds.length})`}
+              {(!notes || fullScreen.get) && `(${notifaysIds.length})`}
             </span>
             <Translate content="notifications" />
           </h3>
@@ -144,15 +144,15 @@ export function Notifications() {
           </div>
         </div>
       </div>
-      {Boolean(notifaysIds.length) && notes && <Line />}
+      {((Boolean(notifaysIds.length) && notes) || fullScreen.get) && <Line />}
       <Focus
         focusId="notifications"
         ignoreOutline={!!focusedNotifay}
         className={tw(
           `flex flex-col rounded-ee-xl rounded-es-xl max-h-[80vh] overflow-hidden`,
           isAnimation && "duration-300 transition-[max-height]",
-          fullScreen.get && "max-h-[100vh]",
           !notes && "max-h-[0vh]",
+          fullScreen.get && "max-h-[100vh]",
         )}
       >
         <Scroll>

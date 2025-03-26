@@ -1,210 +1,290 @@
-import { Biqpod } from "@/types";
-import { ClientCloud } from "..";
+import { ClientCloud, toPath } from "..";
+import { nanoid } from "@reduxjs/toolkit";
 export interface DevCloudProps {
   port?: number;
-}
-async function toBase64Url(input: string | Blob | ArrayBuffer | Uint8Array): Promise<string> {
-  if (typeof input === "string") {
-    return base64UrlEncode(Buffer.from(input, "utf-8"));
-  }
-  if (input instanceof ArrayBuffer) {
-    return base64UrlEncode(Buffer.from(new Uint8Array(input)));
-  }
-  if (input instanceof Uint8Array) {
-    return base64UrlEncode(Buffer.from(input));
-  }
-  if (typeof Blob !== "undefined" && input instanceof Blob) {
-    const arrayBuffer = await input.arrayBuffer();
-    return base64UrlEncode(Buffer.from(new Uint8Array(arrayBuffer)));
-  }
-  throw new Error("Unsupported input type");
-}
-function base64UrlEncode(buffer: Buffer): string {
-  return buffer
-    .toString("base64")
-    .replace(/\+/g, "-") // Replace '+' with '-'
-    .replace(/\//g, "_") // Replace '/' with '_'
-    .replace(/=+$/, ""); // Remove trailing '='
 }
 export function initDevelopmentCloud({ port = 7985 }: DevCloudProps) {
   const devCloud = new ClientCloud("development");
   const getToken = async (): Promise<string | null> => {
     return localStorage.getItem("user-token");
   };
-  const sendRequest = async (service: string, name: string, params: Record<string, any>) => {
-    const baseUrl = "http://localhost:" + port;
-    const url = new URL(baseUrl);
-    url.pathname = "/" + service + " /" + name;
-    for (const param in params) {
-      url.searchParams.set(param, String(params[param]));
-    }
-    const response = await fetch(url);
+  const saveToken = async (token: string | null) => {
+    token ? localStorage.setItem("user-token", token) : localStorage.removeItem("user-token");
+  };
+  const getBaseUri = () => new URL("http://localhost:" + port);
+  const sendRequest = async (path: string, init: RequestInit = {}) => {
+    const url = getBaseUri();
+    url.pathname = path;
+    const response = await fetch(url, init);
     return await response.json();
   };
   // auth
+  devCloud.set("auth", "createUserWithEmailAndPassword", async (email, password) => {
+    await sendRequest("/auth/create-user-with-email-and-password", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  });
+  devCloud.set("auth", "deleteUser", async () => {
+    const token = await getToken();
+    if (token) {
+      await sendRequest("/auth/delete-user", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+  });
+  devCloud.set("auth", "signOut", async () => {
+    // update indexed db
+    await saveToken(null);
+  });
+  devCloud.set("auth", "generateToken", async () => {
+    const token = await getToken();
+    if (!token) {
+      return null;
+    }
+    const { token: newToken } = await sendRequest("/auth/generateToken", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return newToken;
+  });
+  devCloud.set("auth", "signInWithEmailAndPassword", async (email: string, password: string) => {
+    const { token } = await sendRequest("/auth/sign-in-with-email-and-password", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    await saveToken(token);
+  });
   devCloud.set("auth", "getCurrentAuth", async () => {
     const token = await getToken();
     if (!token) {
       return null;
     }
-    const { uid } = await sendRequest("auth", "getByToken", {
-      token,
+    const { user } = await sendRequest("/auth/me", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-    if (typeof uid !== "string") {
-      throw "Error Getting UID";
-    }
-    return uid;
+    return user?.uid;
   });
-  devCloud.set("auth", "signOut", async () => {
-    // update indexed db
-    localStorage.set(null);
-  });
-  devCloud.set("auth", "deleteUser", async () => {
-    const token = await getToken();
-    if (!token) {
-      throw "No User Login";
-    }
-    await sendRequest("auth", "delete", {
-      token,
-    });
-  });
-  devCloud.set("auth", "generateToken", async () => {
-    const token = await getToken();
-    if (!token) {
-      throw "Token Not Found";
-    }
-    const { token: result } = await sendRequest("auth", "generateToken", {
-      token,
-      type: "token",
-    });
-    return result;
-  });
-  devCloud.set("auth", "resetPassword", async () => {
-    const currentUid = await devCloud.app.auth.getCurrentAuth();
-    // login of getting the password reset email
-    currentUid?.toString();
-    await devCloud.app.auth.signOut();
-  });
+  devCloud.set("auth", "resetPassword", async () => {});
   devCloud.set("auth", "confirmPasswordReset", async () => {});
   devCloud.set("auth", "onAuthStateChanged", (callback) => {
-    let savedToken: string | null = null;
+    var token: string | null = null;
+    var isFirst = true;
     const timer = setInterval(async () => {
-      const token = await getToken();
-      if (token !== savedToken) {
-        const uid = await devCloud.app.auth.getCurrentAuth();
-        callback(uid);
-        savedToken = token;
+      const newToken = await getToken();
+      if (token !== newToken || isFirst) {
+        token = newToken;
+        isFirst = false;
+        callback(await devCloud.app.auth.getCurrentAuth());
       }
-    }, 500);
+    }, 2000);
     return () => {
       clearInterval(timer);
     };
   });
-  devCloud.set("auth", "createUserWithEmailAndPassword", async (email, password) => {
-    await sendRequest("auth", "signin", {
-      email,
-      password,
-      type: "email",
-    });
-  });
   devCloud.set("auth", "signInWithCustomToken", async (token) => {
-    const { uid } = await sendRequest("auth", "getByToken", {
-      token,
+    const { user } = await sendRequest("/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-    if (!uid) {
-      throw "Error Getting UID";
-    }
-  });
-  devCloud.set("auth", "signInWithEmailAndPassword", async (email: string, password: string) => {
-    const { token } = await sendRequest("auth", "generateToken", {
-      email,
-      password,
-      type: "password",
-    });
-    localStorage.setItem("user-token", token);
-  });
-  devCloud.set("auth", "setUserData", async () => {
-    const uid = await devCloud.app.auth.getCurrentAuth();
-    if (!uid) {
-      return null;
-    }
-    const userData = await devCloud.app.nosql.getDoc<Biqpod.Account.User>(["users", uid]);
-    return userData;
+    await saveToken(token);
+    return user?.uid;
   });
   // database
   devCloud.set("nosql", "getCollections", async (path) => {
-    const { data } = await sendRequest("nosql", "getCollections", {
-      path,
+    const { data } = await sendRequest("/nosql/getCollections", {
+      body: JSON.stringify({
+        path: toPath(path),
+      }),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return data;
   });
   devCloud.set("nosql", "createDoc", async (path, content) => {
-    await sendRequest("nosql", "create", {
-      path,
-      data: content,
+    await sendRequest("/nosql/create", {
+      method: "POST",
+      body: JSON.stringify({
+        path: toPath(path),
+        data: content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("nosql", "upsertDoc", async (path, content) => {
-    await sendRequest("nosql", "upsert", {
-      path,
-      data: content,
+    await sendRequest("/nosql/upsert", {
+      method: "PUT",
+      body: JSON.stringify({
+        path: toPath(path),
+        data: content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("nosql", "updateDoc", async (path, content) => {
-    await sendRequest("nosql", "update", {
-      path,
-      data: content,
+    await sendRequest("/nosql/update", {
+      method: "PUT",
+      body: JSON.stringify({
+        path: toPath(path),
+        data: content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("nosql", "deleteDoc", async (path) => {
-    await sendRequest("nosql", "delete", {
-      path,
+    await sendRequest("/nosql/delete", {
+      method: "DELETE",
+      body: JSON.stringify({
+        path: toPath(path),
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("nosql", "getDoc", async (path) => {
-    const { data } = await sendRequest("nosql", "getDoc", {
-      path,
+    console.log(path);
+    const { data } = await sendRequest("/nosql/getDoc", {
+      method: "POST",
+      body: JSON.stringify({
+        path: toPath(path),
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return data;
   });
   devCloud.set("nosql", "getDocs", async (path, selection) => {
-    const { data } = await sendRequest("nosql", "getDocs", {
-      path,
-      selection,
+    const { data } = await sendRequest("/nosql/getDocs", {
+      method: "POST",
+      body: JSON.stringify({
+        path: toPath(path),
+        selection,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return data;
   });
-  devCloud.set("nosql", "onDocSnapshot", () => {
-    return () => {};
+  devCloud.set("nosql", "onDocSnapshot", (path, callback) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const id = nanoid();
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ path: toPath(path), type: "document", id }));
+    };
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      callback(data);
+    };
+    return () => {
+      ws.close();
+    };
   });
-  devCloud.set("nosql", "onCollectionSnapshot", () => {
-    return () => {};
+  devCloud.set("nosql", "onCollectionSnapshot", (path, callback) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const id = nanoid();
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ path: toPath(path), type: "collection", id }));
+    };
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      callback(data);
+    };
+    return () => {
+      ws.close();
+    };
   });
-  devCloud.set("nosql", "onAutoSnapshot", () => {
-    return () => {};
+  devCloud.set("nosql", "onAutoSnapshot", (path, callback) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const id = nanoid();
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ path: toPath(path), type: "auto", id }));
+    };
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      callback(data);
+    };
+    return () => {
+      ws.close();
+    };
   });
   // storage
   devCloud.set("storage", "createFile", async (path, content) => {
-    await sendRequest("storage", "createFile", {
-      path,
-      content: await toBase64Url(content),
+    await sendRequest("/storage/createFile", {
+      method: "POST",
+      body: JSON.stringify({
+        path,
+        content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("storage", "upsertFile", async (path, content) => {
-    await sendRequest("storage", "upsertFile", {
-      path,
-      content: await toBase64Url(content),
+    await sendRequest("/storage/createFile", {
+      method: "POST",
+      body: JSON.stringify({
+        path,
+        content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("storage", "updateFile", async (path, content) => {
-    await sendRequest("storage", "updateFile", {
-      path,
-      content: await toBase64Url(content),
+    await sendRequest("/storage/updateFile", {
+      method: "POST",
+      body: JSON.stringify({
+        path,
+        content,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("storage", "deleteFile", async (path) => {
-    await sendRequest("storage", "deleteFile", {
-      path,
+    await sendRequest("/storage/deleteFile", {
+      method: "POST",
+      body: JSON.stringify({
+        path,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   });
   devCloud.set("storage", "getFileContent", async (path) => {
@@ -215,14 +295,26 @@ export function initDevelopmentCloud({ port = 7985 }: DevCloudProps) {
     return fetch(url).then((s) => s.blob());
   });
   devCloud.set("storage", "getFiles", async (path) => {
-    const { files = [] } = await sendRequest("storage", "getFiles", {
-      path,
+    const { files } = await sendRequest("/storage/getFiles", {
+      method: "GET",
+      body: JSON.stringify({
+        path,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return files;
   });
   devCloud.set("storage", "getDownloadURL", async (path) => {
-    const { url } = await sendRequest("storage", "getDownloadURL", {
-      path,
+    const { url } = await sendRequest("/storage/getDownloadURL", {
+      method: "POST",
+      body: JSON.stringify({
+        path,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return url;
   });

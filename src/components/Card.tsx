@@ -7,7 +7,7 @@ export const Card = ({ className, style, ...props }: CardProps) => {
   return (
     <div
       {...props}
-      className={twMerge("flex flex-col shadow-lg border border-transparent border-solid rounded-2xl w-1/2", className)}
+      className={twMerge("flex flex-col shadow-lg border border-transparent border-solid rounded-2xl", className)}
       style={{
         ...colorMerge({
           backgroundColor: "secondary.background",

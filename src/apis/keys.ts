@@ -130,10 +130,12 @@ export default {
     {
       command: "view.leftSide.toggle",
       value: "control+b",
+      repeation: false,
     },
     {
       command: "view.rightSide.toggle",
       value: "control+alt+b",
+      repeation: false,
     },
     {
       command: "view.settings.show",
@@ -364,6 +366,16 @@ export default {
       value: "escape",
       when: "state.object.data.view['bottomSheet']",
       repeation: false,
+    },
+    {
+      command: "feedback/send",
+      value: "enter",
+      when: "focused == 'feedback-message'",
+    },
+    {
+      command: "feedback/send",
+      value: "control+enter",
+      when: "focused == 'feedback-message'",
     },
   ],
 };

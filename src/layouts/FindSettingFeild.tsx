@@ -1,6 +1,6 @@
 import React from "react";
 import { viewHooks } from "@/data/system/views.model";
-import { Feild } from "../components/Fields/Field";
+import { Field } from "../components/Fields/Field";
 import { transformCase } from "@/utils/index";
 import { getTemp } from "@/reducers/Object/object.slice";
 import { Translate, useTranslate } from "@/components/Translate";
@@ -37,7 +37,7 @@ export function FindSettingFeild() {
       }}
     >
       <div className="relative w-full">
-        <Feild
+        <Field
           selectWhenFocusIn
           inputName="findConfigurations-local"
           placeholder={placeholder}

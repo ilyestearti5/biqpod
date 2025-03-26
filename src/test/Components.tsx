@@ -4,11 +4,11 @@ import {
   BooleanFeild,
   Button,
   CardWait,
-  CircleLoading,
   DateFeild,
+  EmptyComponent,
   EnumFeild,
   FastList,
-  Feild,
+  Field,
   FileFeild,
   FilterFeild,
   FullField,
@@ -65,7 +65,7 @@ export const FieldCode = () => {
   }, [langsTranslations]);
   const colorMerge = useColorMerge();
   return (
-    <Feild
+    <Field
       className="h-[200px]"
       heighlight={[
         // {
@@ -88,7 +88,7 @@ export const FieldCode = () => {
           reg: /[0-9]{4}\.[0-9]{2}\.[0-9]{2}/im,
           render: (text) => (
             <span
-              className="rounded-ee-lg rounded-ss-lg italic outline outline-1 outline-offset-1"
+              className="rounded-ss-lg rounded-ee-lg outline outline-1 outline-offset-1 italic"
               style={{
                 ...colorMerge("secondary", {
                   outlineColor: "gray.opacity.toLight",
@@ -146,13 +146,18 @@ export const EnumFieldCode = () => {
   return (
     <EnumFeild
       config={{
-        list: range(0, 100).map((num) => {
-          return {
-            value: num.toString(),
-            content: "Number " + num,
-            desc: "Choise `Number` " + num,
-          };
-        }),
+        list: "abcdefghijklmnopqrstuvwxyz"
+          .split("")
+          .map((c) => {
+            return range(5).map((i) => c.repeat(i + 1));
+          })
+          .flat()
+          .map((c) => {
+            return {
+              value: c.toString(),
+              content: "`" + c + "`",
+            };
+          }),
         search: true,
       }}
       id="enum-field"
@@ -165,8 +170,30 @@ export const PasswordFieldCode = () => {
   return <PasswordFeild state={passwordFieldState} id="password-field" />;
 };
 export const NumberFieldCode = () => {
-  const numberFieldState = useCopyState<number | undefined | null>(3);
-  return <NumberFeild state={numberFieldState} id="number-field" />;
+  const numberFieldState = useCopyState<number | undefined | null>(null);
+  const autoChange = useCopyState<boolean | null>(false);
+  return (
+    <div className="flex flex-col items-center-center gap-2">
+      <div>
+        <BooleanFeild
+          id="using"
+          state={autoChange}
+          config={{
+            onActive: "Auto Change",
+            onDisactive: "Manual Change",
+            style: "checkbox",
+          }}
+        />
+      </div>
+      <NumberFeild
+        state={numberFieldState}
+        config={{
+          autoChange: !!autoChange.get,
+        }}
+        id="number-field"
+      />
+    </div>
+  );
 };
 export const RangeFieldCode = () => {
   const rangeFieldState = useCopyState<number | Nothing>(2);
@@ -197,7 +224,7 @@ export const RangeFieldCode = () => {
   );
 };
 export const FileFieldCode = () => {
-  const fileFieldState = useCopyState<string[] | null>(null);
+  const fileFieldState = useCopyState<string[] | Nothing>(null);
   return (
     <FileFeild
       config={{
@@ -276,7 +303,7 @@ export const FilterFieldCode = () => {
   );
 };
 export const ArrayFieldCode = () => {
-  const arrayFieldState = useCopyState<string[] | null>(null);
+  const arrayFieldState = useCopyState<string[] | Nothing>(null);
   return (
     <ArrayFeild
       state={arrayFieldState}
@@ -296,7 +323,7 @@ export const DateFieldCode = () => {
   return <DateFeild state={dateFieldState} id="date-field" />;
 };
 export const ImageFieldCode = () => {
-  const imageFieldState = useCopyState<string | null>(null);
+  const imageFieldState = useCopyState<string | Nothing>(null);
   return (
     <ImageFeild
       state={imageFieldState}
@@ -428,9 +455,15 @@ export const InfinityScrollCode = () => {
         }}
         className="flex-none"
         onLoading={() => (
-          <div className="flex justify-center p-2">
-            <CircleLoading />
-          </div>
+          <EmptyComponent>
+            {range(10).map((i) => {
+              return (
+                <div key={i}>
+                  <CardWait className="h-[50px]" />
+                </div>
+              );
+            })}
+          </EmptyComponent>
         )}
         render={(data, index) => {
           return (
@@ -455,8 +488,10 @@ export const DatePickerCode = () => {
   return (
     <Button
       onClick={async () => {
-        const { time } = await openDatePicker({});
-        showToast(time.toString());
+        const time = await openDatePicker({});
+        if (time) {
+          showToast(time.toString());
+        }
       }}
     >
       <Translate content="open date picker" />

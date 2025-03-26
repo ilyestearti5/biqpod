@@ -2,7 +2,6 @@ import React from "react";
 import { CircleTip } from "@/components/CircleTip";
 import { handelShadowColor, showToast, useCopyState } from "@/hooks";
 import { useColorMerge } from "@/hooks";
-
 import { openDuringNotifay } from "@/data/system/notifications.model";
 import { openDialog } from "@/functions/web-utils";
 import { allIcons } from "@/apis";
@@ -33,6 +32,7 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
             const url = URL.createObjectURL(blob);
             state.set(url);
           } catch (error) {}
+          handleStopRecording();
         };
         recorder.start();
         mediaRecorder.set(recorder);
@@ -55,6 +55,7 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
   }, []);
   const handleStopRecording = React.useCallback(() => {
     mediaRecorder.get?.stop();
+    mediaRecorder.get?.stream.getTracks().forEach((track) => track.stop()); // Stop all tracks
   }, [mediaRecorder.get]);
   React.useEffect(() => {
     return () => {
@@ -123,11 +124,11 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
             ]),
           }),
         }}
-        className={tw("inline-flex bottom-[90%] absolute inset-x-0 justify-center items-center p-1 rounded-full text-xs transition-transform scale-0", date !== null && "scale-100")}
+        className={tw("inline-flex bottom-[90%] absolute inset-x-0 justify-center items-center p-1 rounded-full text-xs scale-0 transition-transform", date !== null && "scale-100")}
       >
         {date}
       </div>
-      <div className={tw("flex gap-1 mr-0 w-0 h-0 transition-[transform,margin,width] duration-300 scale-0", state.get && "mr-1 w-full scale-100 h-full")}>
+      <div className={tw("flex gap-1 mr-0 w-0 h-0 scale-0 transition-[transform,margin,width] duration-300", state.get && "mr-1 w-full scale-100 h-full")}>
         <CircleTip
           icon={allIcons.solid.faXmark}
           onClick={async () => {
@@ -167,7 +168,7 @@ export function RecorderFeild({ id, state }: RecorderFeildProps) {
               }
             }
             isRecording.set((s) => !s);
-            if (isRecording.get) {
+            if (!isRecording.get) {
               handleStopRecording();
             } else {
               handleStartRecording();

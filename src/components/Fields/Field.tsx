@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Field as FeildType, fieldHooks } from "@/data/system/field.model";
+import { Field as FieldType, fieldHooks } from "@/data/system/field.model";
 import { TextArea, TextAreaProps } from "../TextArea";
 import { tw } from "@/utils";
 import { setTemp, useColorMerge } from "@/hooks";
@@ -9,14 +9,14 @@ export interface FeildProps extends TextAreaProps {
   inputName: string;
   selectWhenFocusIn?: boolean;
   help?: any;
-  controls?: FeildType["controls"];
+  controls?: FieldType["controls"];
   controlsPosition?: "top" | "bottom";
   maxRows?: number;
   minRows?: number;
   acceptHistory?: boolean;
   propositions?: string[];
 }
-export function Feild({
+export function Field({
   inputName,
   selectWhenFocusIn,
   placeholder,
@@ -116,44 +116,6 @@ export function Feild({
         id={inputName}
         {...props}
       />
-      {/* {focused.get && Boolean(controlsArray.length) && (
-        <div
-          className={tw(
-            `right-0 z-[100000000000000000000000000000000000000] absolute my-1 border border-transparent border-solid rounded-md w-fit max-w-full text-xs`,
-            controlsPosition == "top" ? "bottom-full" : "top-full",
-          )}
-          style={{
-            ...colorMerge("primary.background", {
-              borderColor: "borders",
-            }),
-          }}
-        >
-          <JoinComponentBy
-            list={controlsArray.map(({ content, type }, index) => {
-              const icon = type == "err" ? faWarning : faCheck;
-              return (
-                <div key={index} className="flex items-center gap-x-2 p-2">
-                  <FontAwesomeIcon
-                    style={{
-                      ...colorMerge(
-                        type == "err" && {
-                          color: "warning.text",
-                        },
-                        type == "succ" && {
-                          color: "success.text",
-                        },
-                      ),
-                    }}
-                    icon={icon}
-                  />
-                  {content && <MarkDown value={content} />}
-                </div>
-              );
-            })}
-            joinComponent={<Line />}
-          />
-        </div>
-      )} */}
     </ChangableComponent>
   );
 }

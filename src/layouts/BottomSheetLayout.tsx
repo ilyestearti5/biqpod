@@ -1,33 +1,28 @@
-import React from "react";
+import { createRef, useEffect, useMemo } from "react";
 import { EmptyComponent } from "../components/EmptyComponent";
-import { JSXElement, size, useColorMerge, useCopyState, viewTemps } from "@/hooks";
+import { BottomSheetOptions, JSXElement, useColorMerge, useCopyState, viewTemps } from "@/hooks";
 import { mergeObject, tw } from "@/utils";
 import { Line } from "../components/Line";
 import { ChangableComponent } from "../components/PositionView";
 import { Scroll } from "@/components";
-export interface BottomSheetLayoutProps {
-  min?: number | `${number}${size}`;
-  max?: number | `${number}${size}`;
-  id?: string;
-}
 export const BottomSheetLayout = () => {
-  const info = viewTemps.useTemp<BottomSheetLayoutProps>("bottomSheet");
+  const info = viewTemps.useTemp<BottomSheetOptions>("bottomSheet");
   const colorMerge = useColorMerge();
   const transformState = useCopyState<null | number>(null);
-  const id = React.useMemo(() => info.get?.id, [info.get?.id]);
-  React.useEffect(() => {
+  const id = useMemo(() => info.get?.id, [info.get?.id]);
+  useEffect(() => {
     if (id) {
       transformState.set(0);
     }
   }, [id]);
-  const element = React.useMemo(() => {
+  const element = useMemo(() => {
     return id ? JSXElement.list[id] : <EmptyComponent />;
   }, [id]);
   const height = useCopyState<null | number>(null);
   const start = useCopyState(false);
   const isMove = useCopyState(false);
   const touchMove = useCopyState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!start.get) {
       return;
     }
@@ -59,8 +54,8 @@ export const BottomSheetLayout = () => {
       document.removeEventListener("mouseup", up);
     };
   }, [start.get]);
-  const eleRef = React.createRef<HTMLDivElement>();
-  React.useEffect(() => {
+  const eleRef = createRef<HTMLDivElement>();
+  useEffect(() => {
     const scrollBarThumb = eleRef.current;
     if (scrollBarThumb) {
       const handleTouchMove = (e: TouchEvent) => {
@@ -80,18 +75,68 @@ export const BottomSheetLayout = () => {
   }, [eleRef]);
   return (
     <EmptyComponent>
-      {id && (
-        <div
-          className="fixed inset-0"
-          style={{
-            ...colorMerge("shadow.color"),
-          }}
-          onClick={() => {
-            info.set(null);
-            transformState.set(10000);
-          }}
-        />
-      )}
+      <div
+        className={tw("fixed inset-0 opacity-0 pointer-events-none", ![isMove.get, touchMove.get].some(Boolean) && "transition-opacity duration-300", id && "pointer-events-auto opacity-50")}
+        style={{
+          ...colorMerge("shadow.color"),
+        }}
+        // for phone
+        onTouchStart={(e) => {
+          const { clientY } = e.touches[0];
+          const callback = (event: TouchEvent) => {
+            touchMove.set(true);
+            const { clientY: y } = event.touches[0];
+            transformState.set(y - clientY);
+          };
+          const callbackPointerUp = () => {
+            touchMove.set(false);
+            const value = transformState.get;
+            if (value) {
+              if (value >= (height.get ?? 0) / 3) {
+                transformState.set(10000);
+                info.set(null);
+              } else {
+                transformState.set(0);
+              }
+            }
+            document.removeEventListener("touchend", callbackPointerUp);
+            document.removeEventListener("touchmove", callback);
+          };
+          document.addEventListener("touchend", callbackPointerUp);
+          document.addEventListener("touchmove", callback, {
+            passive: false,
+          });
+        }}
+        // for desktop
+        onPointerDown={(e) => {
+          const { clientY } = e;
+          const callback = (event: MouseEvent) => {
+            isMove.set(true);
+            const { clientY: y } = event;
+            transformState.set(y - clientY);
+          };
+          const callbackPointerUp = () => {
+            isMove.set(false);
+            const value = transformState.get;
+            if (value) {
+              if (value >= (height.get ?? 0) / 3) {
+                transformState.set(10000);
+                info.set(null);
+              } else {
+                transformState.set(0);
+              }
+            }
+            document.removeEventListener("pointerup", callbackPointerUp);
+            document.removeEventListener("mousemove", callback);
+          };
+          document.addEventListener("pointerup", callbackPointerUp);
+          document.addEventListener("mousemove", callback);
+        }}
+        onClick={() => {
+          info.set(null);
+          transformState.set(10000);
+        }}
+      />
       <ChangableComponent
         onContentChange={(props) => {
           height.set(props.height);
@@ -105,18 +150,12 @@ export const BottomSheetLayout = () => {
               typeof transformState.get == "number" && {
                 transform: `translateY(${Math.max(transformState.get, 0)}px)`,
               },
-            // info.get?.min != undefined && {
-            //   minHeight: info.get?.min,
-            // },
-            // info.get?.max != undefined && {
-            //   maxHeight: info.get?.max,
-            // },
           ),
         }}
         className={tw(
-          `bottom-0 z-[1000] fixed inset-x-0 flex flex-col flex-none border-x shadow-lg border-t border-transparent border-solid rounded-se-3xl rounded-ss-3xl transform translate-y-full overflow-hidden`,
-          id && "translate-y-0",
-          !isMove.get && "transition-transform duration-300",
+          `bottom-0 z-[1000] fixed inset-x-0 flex flex-col flex-none shadow-lg border-x border-t border-transparent border-solid rounded-ss-3xl rounded-se-3xl overflow-hidden translate-y-full transform`,
+          id && "translate-y-[0%]",
+          ![isMove.get, touchMove.get].some(Boolean) && "transition-transform duration-300",
         )}
       >
         <div
@@ -152,7 +191,7 @@ export const BottomSheetLayout = () => {
             className="z-[1000] flex justify-center items-center h-[28px]"
           >
             <div
-              className="rounded-full w-[70px] h-1.5"
+              className="rounded-full w-[70px] h-3"
               style={{
                 ...colorMerge("gray.opacity.2"),
               }}

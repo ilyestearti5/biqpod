@@ -1,12 +1,12 @@
 import { allIcons } from "@/apis";
-import { BlurOverlay, Card, CircleTip, Line, Button, Translate, Tabs, MultiScreenPage, EmptyComponent } from "@/components";
-import { useCopyState, useColorMerge, ColorIds, useTemp, getTemp, setTemp } from "@/hooks";
+import { BlurOverlay, Card, CircleTip, Line, Button, Translate, Tabs, MultiScreenPage, EmptyComponent, Field } from "@/components";
+import { useCopyState, useColorMerge, ColorIds, setFieldValue, dateTimeTemp } from "@/hooks";
 import { Nothing } from "@/types";
 import { isSorted, range, tw } from "@/utils";
-import React from "react";
+import React, { useEffect } from "react";
 export const DateLayout = () => {
-  const timeId = useTemp<string>("date-layout-time.id");
-  const initTime = getTemp<number>("date-layout-time.init");
+  const timeId = dateTimeTemp.useTemp<string>("id");
+  const initTime = dateTimeTemp.getTemp<number>("init");
   const selectedTime = useCopyState<{ hour: number | null; minute: number | null }>({ hour: null, minute: null });
   React.useEffect(() => {
     if (timeId.get) {
@@ -50,8 +50,8 @@ export const DateLayout = () => {
   const radius = mode.get === "hours" ? 120 : 120; // Outer circle radius for hours/minutes
   // Calculate the position of the hand pointing to the selected hour or minute
   const colorMerge = useColorMerge();
-  const dayState = useCopyState<Nothing | string>("am");
-  const afterState = useCopyState<Nothing | string>("0");
+  const dayState = useCopyState<Nothing | string>(null);
+  const afterState = useCopyState<Nothing | string>(null);
   const handPosition = React.useMemo<{
     x: number;
     y: number;
@@ -81,9 +81,26 @@ export const DateLayout = () => {
       colorId: isSorted(a, selectedValue, b) ? "primary" : "gray.opacity",
     };
   }, [afterState.get, dayState.get, selectedTime.get, totalItems, mode.get]);
+  useEffect(() => {
+    if (!dayState.get) {
+      dayState.set("0");
+    }
+    if (!afterState.get) {
+      afterState.set("0");
+    }
+  }, [dayState.get, afterState.get]);
+  const showTimer = useCopyState(false);
+  useEffect(() => {
+    if (!showTimer.get) {
+      const hour = selectedTime.get.hour;
+      const min = selectedTime.get.minute;
+      setFieldValue("change-h", hour == null ? "" : hour.toString());
+      setFieldValue("change-m", min == null ? "" : min.toString());
+    }
+  }, [showTimer.get, selectedTime.get]);
   return (
     <BlurOverlay hidden={!timeId.get}>
-      <Card className="flex flex-col max-md:rounded-none w-1/2 max-md:w-full max-md:h-full">
+      <Card className="max-md:rounded-none w-1/2 max-md:w-full max-md:h-[100vh] overflow-hidden">
         <div className="flex justify-between items-center gap-2 p-2">
           <h1 className="text-3xl">
             <Translate content="Date" />
@@ -93,15 +110,14 @@ export const DateLayout = () => {
               icon={allIcons.solid.faXmark}
               onClick={() => {
                 if (initTime && timeId.get) {
-                  setTemp("date-layout-time.canceled", true);
-                  setTemp("date-layout-time.result", initTime);
+                  dateTimeTemp.setTemp("canceled", true);
                 }
               }}
             />
           </div>
         </div>
         <Line />
-        <div className="flex justify-center items-center w-full h-full">
+        <div className={tw("flex justify-center items-center w-full h-[0px] max-md:h-[0%] overflow-hidden transition-[height] duration-500", showTimer.get && "h-[300px] max-md:h-[100%]")}>
           <svg width="300" height="300" className="relative">
             {/* Clock hand */}
             {handPosition !== null && (
@@ -121,6 +137,7 @@ export const DateLayout = () => {
                   y1="150"
                   x2={handPosition.x + 30} // Adjust hand length for visual balance
                   y2={handPosition.y + 30}
+                  className="transition-[x1,x2,y1,y2] duration-500"
                   style={{
                     ...colorMerge({
                       stroke: handPosition.colorId,
@@ -133,10 +150,8 @@ export const DateLayout = () => {
             {/* Display hours/minutes in a circular layout */}
             {timeArray.map((value, index) => {
               const { x, y } = getPosition(index, totalItems, 120); // Adjust outer radius
-
               const dayS = dayState.get || "0";
               const afterS = afterState.get || "0";
-
               const isSomthing = (mode.get === "hours" && selectedTime.get.hour === +dayS + value) || (mode.get === "minutes" && selectedTime.get.minute === +afterS + value);
               return (
                 <g
@@ -193,40 +208,63 @@ export const DateLayout = () => {
           </svg>
         </div>
         <Line />
-        <div className="p-3 text-5xl text-center select-none">
-          <span tabIndex={1} className="cursor-pointer">
-            <span
-              style={{
-                ...colorMerge(
-                  mode.get == "hours" && {
-                    color: "primary",
-                  },
-                ),
-              }}
+        <div className={tw("relative flex justify-center items-center p-3 h-[20%] text-5xl transition-[height] duration-500 select-none", !showTimer.get && "h-[100%]")}>
+          <div className="flex items-center gap-x-2 cursor-pointer">
+            <Field
+              inputName="change-h"
+              inputMode="numeric"
               onClick={() => {
                 mode.set("hours");
               }}
-              className={tw(mode.get == "hours" && "font-bold")}
-            >
-              {selectedTime.get.hour == null ? "--" : selectedTime.get.hour >= 10 ? selectedTime.get.hour : `0${selectedTime.get.hour}`}
-            </span>
-            :
-            <span
-              style={{
-                ...colorMerge(
-                  mode.get == "minutes" && {
-                    color: "primary",
-                  },
-                ),
+              onInput={(e) => {
+                const value = +e.currentTarget.value;
+                if (value >= 0 && value <= 12) {
+                  selectedTime.set({ ...selectedTime.get, hour: value });
+                } else {
+                  setFieldValue("change-h", "12");
+                  e.currentTarget.value = "12";
+                }
               }}
+              className="py-3 w-[80px] text-5xl text-center cursorpointer"
+              maxLength={2}
+              placeholder="--"
+            />
+            :
+            <Field
+              inputName="change-m"
+              inputMode="numeric"
               onClick={() => {
                 mode.set("minutes");
               }}
-              className={tw(mode.get == "minutes" && "font-bold")}
-            >
-              {selectedTime.get.minute == null ? "--" : selectedTime.get.minute >= 10 ? selectedTime.get.minute : `0${selectedTime.get.minute}`}
-            </span>
-          </span>
+              onInput={(e) => {
+                const value = +e.currentTarget.value;
+                if (value >= 0 && value <= 59) {
+                  selectedTime.set({ ...selectedTime.get, minute: value });
+                  if (value < 20) {
+                    afterState.set("0");
+                  } else if (value < 40) {
+                    afterState.set("20");
+                  } else {
+                    afterState.set("40");
+                  }
+                } else {
+                  setFieldValue("change-m", "59");
+                  e.currentTarget.value = "59";
+                }
+              }}
+              className="py-3 w-[80px] text-5xl text-center cursorpointer"
+              maxLength={2}
+              placeholder="--"
+            />
+          </div>
+          <div className="top-1/2 right-4 absolute -translate-y-1/2 transform">
+            <CircleTip
+              icon={allIcons.solid.faClock}
+              onClick={() => {
+                showTimer.set((s) => !s);
+              }}
+            />
+          </div>
         </div>
         <Line />
         <div>
@@ -275,7 +313,7 @@ export const DateLayout = () => {
         <Line />
         <div className="flex gap-1 p-2">
           <Button
-            className="capitalize"
+            className="p-4"
             style={{
               ...colorMerge("gray.opacity", {
                 color: "text.color",
@@ -291,13 +329,10 @@ export const DateLayout = () => {
             <Translate content="clear" />
           </Button>
           <Button
-            className="capitalize"
+            className="p-4"
             onClick={() => {
-              const time = new Date();
-              typeof selectedTime.get?.hour == "number" && time.setHours(selectedTime.get.hour);
-              typeof selectedTime.get?.minute == "number" && time.setMinutes(selectedTime.get.minute);
-              setTemp("date-layout-time.canceled", false);
-              setTemp("date-layout-time.result", time.getTime());
+              const time = `${selectedTime.get.hour}:${selectedTime.get.minute}`;
+              dateTimeTemp.setTemp("result", time);
             }}
           >
             <Translate content="set" />

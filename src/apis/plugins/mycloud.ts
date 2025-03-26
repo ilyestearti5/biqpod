@@ -39,7 +39,7 @@ import {
   Firestore,
 } from "firebase/firestore";
 import { getStorage, ref, uploadString, uploadBytes, deleteObject, getDownloadURL, listAll } from "firebase/storage";
-import { ClientCloud, getIsDev, queryTest, toPath, Path } from "..";
+import { ClientCloud, getIsDev, queryTest, toPath, Path } from "../";
 import { mergeArray } from "@/utils";
 import { Biqpod, CloudFunction } from "@/types";
 type Uri = (functionId: string) => string | URL;
@@ -75,7 +75,7 @@ export const generateQuery = <T extends object>(db: Firestore, path: Path, selec
   );
   return query(ref, ...fullQuery);
 };
-interface Data {
+interface AiData {
   messages?: {
     role: "user" | "assistant";
     content: string;
@@ -100,7 +100,7 @@ export function initMyCloud({
   });
   const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
   const apiKey = "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"; // Replace with your actual key or set it as an environment variable.
-  const askAi = async (data: Data) => {
+  const askAi = async (data: AiData) => {
     return await fetch(groqUrl, {
       method: "POST",
       headers: {
@@ -112,7 +112,7 @@ export function initMyCloud({
       return response.json();
     });
   };
-  const defaultData: Data = {
+  const defaultData: AiData = {
     messages: [],
     model: "llama3-70b-8192",
     temperature: 1,
@@ -193,8 +193,10 @@ export function initMyCloud({
     await confirmPasswordReset(auth, obb, password);
   });
   myCloud.set("auth", "onAuthStateChanged", (callback) => {
-    const un = onAuthStateChanged(auth, (user) => {
-      callback(user?.uid || null);
+    const un = onAuthStateChanged(auth, async (user) => {
+      try {
+        callback(user?.uid || null);
+      } catch {}
     });
     return () => {
       un();
@@ -205,6 +207,7 @@ export function initMyCloud({
   });
   myCloud.set("auth", "signInWithCustomToken", async (token) => {
     await signInWithCustomToken(auth, token);
+    // sso for biqpod.com domain
   });
   myCloud.set("auth", "signInWithEmailAndPassword", async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
@@ -377,6 +380,20 @@ export function initMyCloud({
       ],
     });
     return response?.choices[0]?.message?.content;
+  });
+  myCloud.set("ai", "sendMessage", async (msg) => {
+    const response = await askAi({
+      messages: [
+        {
+          role: "user",
+          content: msg,
+        },
+      ],
+    });
+    const message = response?.choices[0]?.message?.content;
+    return {
+      message,
+    };
   });
   return myCloud;
 }

@@ -1,12 +1,12 @@
 import React from "react";
 import { enumTemp, onState, useColorMerge } from "@/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { useCopyState } from "@/hooks";
 import { nanoid } from "@reduxjs/toolkit";
 import { ChangableComponent } from "../PositionView";
 import { FullFieldGeneralProps } from "@/types";
 import { MarkDown } from "../MarkDown";
+import { allIcons } from "@/apis";
 export type EnumFeildProps = FullFieldGeneralProps<"enum">;
 //
 export const slotId = "enum/list";
@@ -77,7 +77,7 @@ export function EnumFeild({ config = {}, id, state }: EnumFeildProps) {
       <div className="flex justify-center items-center gap-2 w-full">
         <MarkDown value={choised?.content || choised?.value || config.placeholder || "no option choised"} />
       </div>
-      {config.expandIcon !== false && Boolean(config.list?.length) && <FontAwesomeIcon icon={complexeId == selectedId ? faAngleUp : faAngleDown} />}
+      {config.expandIcon !== false && Boolean(config.list?.length) && <FontAwesomeIcon icon={complexeId == selectedId ? allIcons.solid.faAngleUp : allIcons.solid.faAngleDown} />}
     </ChangableComponent>
   );
 }

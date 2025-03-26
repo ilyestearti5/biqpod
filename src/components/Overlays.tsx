@@ -1,6 +1,6 @@
 import { handelGradientColor, useColorMerge } from "@/hooks";
 import { tw } from "@/utils";
-import React from "react";
+import React, { useEffect } from "react";
 import { delay } from "@/utils/index";
 import { useSettingValue } from "@/hooks";
 import { useAsyncEffect, useCopyState } from "@/hooks";
@@ -9,11 +9,11 @@ export interface OverlaysProps extends ReactElement {
   onLoadContent?: () => void;
   animted?: boolean;
 }
-export function DownOverlay({ hidden, animted, className, style, children, onLoadContent, onTransitionEnd, ...props }: OverlaysProps) {
+export function DownOverlay({ hidden, onBlur, animted, className, style, children, onLoadContent, onTransitionEnd, ...props }: OverlaysProps) {
   const colorMerge = useColorMerge();
   const isAnimation = typeof animted == "boolean" ? animted : useSettingValue("preferences/animation.boolean");
   const hiddenTransition = useCopyState(hidden);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!hidden) {
       hiddenTransition.set(false);
     }
@@ -49,9 +49,9 @@ export function DownOverlay({ hidden, animted, className, style, children, onLoa
     </div>
   );
 }
-export function BlurOverlay({ className, animted, style, hidden, onLoadContent, children, onTransitionEnd, ...props }: OverlaysProps) {
+export function BlurOverlay({ className, onBlur, animted, style, hidden, onLoadContent, children, onTransitionEnd, ...props }: OverlaysProps) {
   const hiddenTransition = useCopyState(hidden);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!hidden) {
       hiddenTransition.set(false);
     }
@@ -69,7 +69,7 @@ export function BlurOverlay({ className, animted, style, hidden, onLoadContent, 
     <div
       ref={elementRf}
       className={tw(
-        `z-[100000000000000000] fixed inset-0 flex justify-center items-center bg-opacity-40 scale-100`,
+        `z-[100000000000000000000000000000] fixed inset-0 flex justify-center items-center bg-opacity-40 scale-100`,
         isAnimation && "transition-[opacity,transform] duration-300",
         hidden && `pointer-events-none opacity-0 transform scale-0`,
         !hidden && `opacity-100`,

@@ -1,15 +1,14 @@
-import React from "react";
+import { createRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/Button";
 import { execAction, useAction } from "@/data/system/actions.model";
 import { mergeObject, setFocused, tw } from "@/utils";
-
 import { Translate } from "../Translate";
 import { useColorMerge, useCopyState } from "@/hooks";
 import { Input } from "../Input";
 import { FeildGeneralProps, SettingConfig } from "@/types";
 export type NumberFeildProps = FeildGeneralProps<number | undefined | null, SettingConfig["number"]>;
 export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof state.get != "number") {
       return;
     }
@@ -19,14 +18,15 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
       state.set(config.min);
     }
   }, [config.max, config.min, state.get]);
-  const value = useCopyState(String(state.get));
-  const elementRef = React.createRef<HTMLInputElement>();
-  React.useEffect(() => {
+  const value = useCopyState(state.get != null && !isNaN(state.get) ? String(state.get) : "");
+  const elementRef = createRef<HTMLInputElement>();
+  const focused = useCopyState(false);
+  useEffect(() => {
     if (elementRef.current) {
       elementRef.current.value = state.get?.toString() || "";
     }
   }, [state.get, elementRef]);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!+value.get) {
       const ele = document.getElementById(id) as HTMLInputElement | null;
       ele?.select();
@@ -38,7 +38,11 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
       if (idState == id) {
         if (value.get.length) {
           const val = +value.get;
-          state.set(val);
+          if (!isNaN(val)) {
+            state.set(val);
+          } else {
+            state.set(null);
+          }
         } else {
           state.set(null);
         }
@@ -60,19 +64,18 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
     },
     [state.get, elementRef, id],
   );
-  React.useEffect(() => {
+  useEffect(() => {
     if (config.autoChange) {
       execAction("number.changeState", id);
     }
   }, [value.get, config.autoChange]);
-  const focused = useCopyState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     focused.set(false);
     return () => {
       focused.set(false);
     };
   }, []);
-  const showButton = React.useMemo(() => {
+  const showButton = useMemo(() => {
     return !config.autoChange && state.get != +value.get;
   }, [config.autoChange, state.get, value.get]);
   const colorMerge = useColorMerge();
@@ -120,14 +123,14 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
               value.set(state.get?.toString() || "");
             }
           }}
-          value={value.get}
+          value={isNaN(+value.get) ? "" : value.get}
           onValueChange={value.set}
         />
       </div>
       {showButton && (
         <div className="flex gap-1">
           <Button
-            className="py-1"
+            className="py-1 rounded-full"
             onClick={() => {
               execAction("number.cancelChangeState", id);
             }}
@@ -140,7 +143,7 @@ export function NumberFeild({ state, config = {}, id }: NumberFeildProps) {
             <Translate content="cancel" />
           </Button>
           <Button
-            className="py-1"
+            className="py-1 rounded-full"
             onClick={() => {
               execAction("number.changeState", id);
             }}

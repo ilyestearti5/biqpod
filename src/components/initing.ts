@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { colorHooks } from "@/data/system/colors.model";
 import { getColor, setTemp, useAction, useSettingValue } from "@/hooks";
@@ -12,7 +12,7 @@ export function initConfigurations(more?: () => void) {
   const mainText = colorHooks.getOne("text.color");
   const bgSelectedColor = colorHooks.getOne("bg.selection");
   const textSelectedColor = colorHooks.getOne("text.selection");
-  React.useEffect(() => {
+  useEffect(() => {
     // toggle attribute named data-dark=true/false
     if (isDark == undefined) {
       return;
@@ -22,7 +22,7 @@ export function initConfigurations(more?: () => void) {
       document.body.removeAttribute("data-dark");
     };
   }, [isDark]);
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDark == undefined) {
       return;
     }
@@ -70,7 +70,7 @@ export function initConfigurations(more?: () => void) {
     }
   }, [mainBackground, mainText, isDark]);
   const font = useSettingValue("preferences/font.enum");
-  React.useEffect(() => {
+  useEffect(() => {
     if (font) {
       document.body.style.fontFamily = font;
     }
@@ -90,20 +90,19 @@ export function initConfigurations(more?: () => void) {
     };
   }, [isDark, bgSelectedColor, textSelectedColor, font]);
   const allColors = colorHooks.getAll();
-  React.useEffect(() => {
-    if (isDark) {
-      const element = document.createElement("style");
-      const textColors = allColors
-        .map((color) => {
-          return `--biqpod-${color.colorId.split(".").join("-")}: ${getColor(isDark, color)};`;
-        })
-        .join("\n");
-      element.textContent = `:root { ${textColors} }`;
-      document.head.append(element);
-      return () => {
-        element.remove();
-      };
-    }
+  useEffect(() => {
+    const element = document.createElement("style");
+    const textColors = allColors
+      .map((color) => {
+        return `--biqpod-${color.colorId.split(".").join("-")}: ${getColor(isDark ?? false, color)};`;
+      })
+      .join("\n");
+    element.innerHTML = `:root { ${textColors} }`;
+    element.id = "biqpod-colors";
+    document.head.append(element);
+    return () => {
+      element.remove();
+    };
   }, [allColors, isDark]);
   useAction(
     "focus",
@@ -113,7 +112,7 @@ export function initConfigurations(more?: () => void) {
     [],
   );
   const setting = useSettingValue("developer/seeComponent.boolean");
-  React.useEffect(() => {
+  useEffect(() => {
     if (!setting) {
       return;
     }
@@ -138,7 +137,7 @@ export function initConfigurations(more?: () => void) {
     };
   }, [setting]);
   // desc: for check connection
-  React.useEffect(() => {
+  useEffect(() => {
     function callback() {
       setTemp("local.isOnLine", navigator.onLine);
     }
@@ -154,7 +153,7 @@ export function initConfigurations(more?: () => void) {
     };
   }, []);
   // desc: for get local ip adress
-  React.useEffect(() => {
+  useEffect(() => {
     const handel = (e: KeyboardEvent) => {
       if (!e.repeat) {
         setModifier("Shift", e.getModifierState("Shift"));

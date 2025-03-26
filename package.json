@@ -5,6 +5,7 @@
     "url": "https://github.com/ilyestearti5"
   },
   "dependencies": {
+    "@capacitor-community/camera-preview": "^7.0.0",
     "@capacitor/android": "^6.1.2",
     "@capacitor/app": "^6.0.1",
     "@capacitor/browser": "^6.0.2",
@@ -19,12 +20,15 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@zxing/browser": "^0.1.5",
     "appwrite": "^14.0.1",
     "axios": "^1.7.2",
+    "cpx": "^1.5.0",
     "date-fns": "^3.3.1",
     "electron": "^33.3.1",
     "eslint-plugin-react": "^7.37.3",
     "firebase": "^10.12.5",
+    "framer-motion": "^12.4.10",
     "globals": "^15.14.0",
     "google-translate-api": "^2.3.0",
     "groq": "^3.70.0",
@@ -32,6 +36,7 @@
     "js-cookie": "^3.0.5",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "minimatch": "^10.0.1",
     "pouchdb-upsert": "^2.2.0",
     "qrcode": "^1.5.3",
     "quagga-scanner": "^0.13.0",
@@ -101,6 +106,7 @@
     "build.ui": "tsc && vite build --mode lib",
     "build.web": "tsc && vite build --mode web",
     "build": "npm run build.web && npm run build.lib",
+    "git.copy": "cpx \"./src/**/*\" \"./dist\"",
     "compile": "tsc && echo \"no problems has ben detected\"",
     "deploy": "firebase deploy --only hosting",
     "dev": "vite",
@@ -108,7 +114,8 @@
     "format": "prettier --write ./src",
     "lint": "eslint --fix ./src --config .eslintrc.cjs",
     "pree2e": "vite build --mode=test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build.repo": "node ./commands/build-repo.js lib"
   },
   "publisher": "Biq Bod Team",
   "version": "0.0.0"

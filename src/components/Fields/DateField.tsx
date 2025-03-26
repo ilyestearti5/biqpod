@@ -1,5 +1,5 @@
 import React from "react";
-import { useCopyState } from "@/hooks";
+import { openDatePicker, useCopyState } from "@/hooks";
 import { useColorMerge } from "@/hooks";
 import { Tip } from "@/components/Tip";
 import { Shortcut, tw } from "@/utils";
@@ -55,6 +55,16 @@ export function DateFeild({ state, config = {}, id }: DateFeildProps) {
         id={id}
         style={{
           backgroundColor: "transparent",
+        }}
+        onClick={async (e) => {
+          if (config.format === "time") {
+            e.preventDefault();
+            const time = await openDatePicker({});
+            e.currentTarget.blur();
+            if (time) {
+              state.set(time.time);
+            }
+          }
         }}
         type={config.format && ["date", "time", "month"].includes(config.format) ? config.format : "datetime-local"}
         value={state.get ?? undefined}

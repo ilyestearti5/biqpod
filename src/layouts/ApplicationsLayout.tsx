@@ -1,13 +1,14 @@
-import React from "react";
+import { useEffect } from "react";
 import { closeApplications, useColorMerge, useTemp, viewTemps } from "@/hooks";
 import { Card, CircleTip, ClickedView, DownOverlay, Line, Scroll, Translate } from "@/components";
 import { allIcons, getMainCloud } from "@/apis";
 import { ProjectConfig } from "@/types";
+import { Link } from "react-router-dom";
 // Example usage
 export const ApplicationsLayout = () => {
   const visibility = viewTemps.getTemp("applications");
   const apps = useTemp<ProjectConfig[]>("list.applications");
-  React.useEffect(() => {
+  useEffect(() => {
     return getMainCloud()?.app.nosql.onCollectionSnapshot<ProjectConfig>("projects", (props) => {
       apps.set(
         props.map(({ id, data }) => {
@@ -39,9 +40,9 @@ export const ApplicationsLayout = () => {
         <Scroll>
           <div className="flex flex-wrap justify-center gap-2 p-2">
             {apps.get && !apps.get.length && <Translate content="no project's detected" />}
-            {apps.get?.map(({ label, imageUrl }, index) => {
+            {apps.get?.map(({ label, imageUrl, site }, index) => {
               return (
-                <a className="inline-block max-md:w-full" target="_blank" key={index} rel="noreferrer">
+                <Link to={site || "/"} className="inline-block max-md:w-full" target="_blank" key={index}>
                   <Card className="w-full overflow-hidden">
                     <ClickedView className="flex max-md:flex-row flex-col max-md:items-center w-full">
                       <div className="flex justify-center items-center p-3">
@@ -60,11 +61,11 @@ export const ApplicationsLayout = () => {
                         <Line />
                       </span>
                       <div className="p-3">
-                        <p className="text-center text-xl max-md:text-md">{label}</p>
+                        <p className="max-md:text-md text-xl text-center">{label}</p>
                       </div>
                     </ClickedView>
                   </Card>
-                </a>
+                </Link>
               );
             })}
           </div>

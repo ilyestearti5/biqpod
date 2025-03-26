@@ -1,10 +1,10 @@
-import { bq as i, bn as b, t as o, bo as e, bm as t, aC as p, bp as n } from "./SeparatedComponents-Bmlqc6Z8.mjs";
+import { c2 as i, b$ as e, ax as o, c0 as b, bv as t, bd as c, c1 as d } from "./SeparatedComponents-DPehn4JG.mjs";
 export {
   i as defineTable,
-  b as isAndroid,
+  e as isAndroid,
   o as isDesktop,
-  e as isIos,
+  b as isIos,
   t as isMobile,
-  p as isWeb,
-  n as startApplication
+  c as isWeb,
+  d as startApplication
 };

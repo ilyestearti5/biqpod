@@ -10,10 +10,10 @@ export interface TabsProps extends ReactElement {
   buttonClassName?: string;
   state: State<string | Nothing>;
   tabs?: { label: string; value: string; icon?: IconProps["icon"] }[];
-  hideLabelWhereSmalled?: boolean;
   direction?: "vertical" | "horizontal";
+  contentClassName?: string;
 }
-export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal", hideLabelWhereSmalled = true, buttonClassName, className, style, ...props }: TabsProps) => {
+export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal", buttonClassName, contentClassName, className, style, ...props }: TabsProps) => {
   const colorMerge = useColorMerge();
   React.useEffect(() => {
     if (state.get === undefined && defaultValue) {
@@ -50,7 +50,11 @@ export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal",
           return (
             <span>
               <Button
-                className={tw("sm:px-7 sm:py-4 rounded-full w-fit max-sm:w-[40px] max-sm:h-[40px] text-xs", direction == "vertical" && "w-full", buttonClassName)}
+                className={tw(
+                  "sm:px-7 sm:py-4 rounded-full w-fit max-sm:w-[40px] max-sm:h-[40px] text-xs transition-[background,color] duration-500",
+                  direction == "vertical" && "w-full",
+                  buttonClassName,
+                )}
                 style={{
                   ...colorMerge(
                     !isActive && "transparent",
@@ -65,7 +69,7 @@ export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal",
                   state.set(value);
                 }}
               >
-                <span className={tw(hideLabelWhereSmalled && "max-sm:hidden")}>{label}</span>
+                <span className={contentClassName}>{label}</span>
               </Button>
             </span>
           );

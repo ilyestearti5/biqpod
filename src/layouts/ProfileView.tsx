@@ -5,7 +5,7 @@ import { openDialog, openMenu } from "@/functions/web-utils";
 import { execAction, isLoading, isSuccess, useAction } from "@/data/system/actions.model";
 import { delay, mergeArray, setFocused, tw } from "@/utils";
 import { checkFormByFeilds, fieldHooks, useUser, showToast, useColorMerge, useCopyState, handelShadowColor } from "@/hooks";
-import { Anchor, AsyncComponent, BlurOverlay, Button, Card, CircleLoading, CircleTip, EmptyComponent, Feild, Icon, JoinComponentBy, Line, MultiScreenPage, Scroll, Translate } from "@/components";
+import { Anchor, AsyncComponent, BlurOverlay, Button, Card, CircleLoading, CircleTip, EmptyComponent, Field, Icon, JoinComponentBy, Line, MultiScreenPage, Scroll, Translate } from "@/components";
 import { allIcons, getMainCloud } from "@/apis";
 import googleSrc from "@/assets/google.png";
 import facebookSrc from "@/assets/facebook.png";
@@ -177,15 +177,16 @@ export const SignupPage = () => {
             <label className="block mb-2 capitalize">
               <Translate content="email" /> :{" "}
             </label>
-            <Feild
+            <Field
               controls={{
                 [emailRegExp]: {
                   err: "Invalid email",
                   succ: "Valid email",
                 },
               }}
-              placeholder="@exmple.somthing"
+              placeholder="@exmple.com"
               inputName="signupUseremail"
+              className="max-md:text-xl"
               propositions={email && !email.match(emailRegExp) ? ["gmail.com", "yahoo.com", "icloud.com"].map((mailComps) => email + "@" + mailComps) : []}
             />
           </div>
@@ -193,19 +194,19 @@ export const SignupPage = () => {
             <label className="block mb-2 capitalize">
               <Translate content="password" />
             </label>
-            <Password placeholder="********" id="user-password" state={passwordState} />
+            <Password className="max-md:text-xl" placeholder="********" id="user-password" state={passwordState} />
           </div>
           <div className="mb-4">
             <label className="block mb-2 capitalize">
               <Translate content="confirm password" />
             </label>
-            <Password placeholder="********" id="user-password-confirm" state={passwordConfirmState} />
+            <Password className="max-md:text-xl" placeholder="********" id="user-password-confirm" state={passwordConfirmState} />
           </div>
           <Button icon={signUpIsLoading ? allIcons.solid.faRotate : undefined} iconClassName={tw("animate-spin")} type="submit" className="py-2 rounded-md">
             <Translate content="signup" />
           </Button>
         </form>
-        <p className="mt-8 text-center text-sm capitalize">
+        <p className="mt-8 text-sm text-center capitalize">
           <span
             style={{
               ...colorMerge({
@@ -252,11 +253,15 @@ export const LoginPage = () => {
     "login",
     async () => {
       if (!email) {
-        showToast("Email is required", "error");
+        showToast("Email is required", "error", {
+          id: "login-email-required",
+        });
         return;
       }
       if (!passwordState.get) {
-        showToast("Password must be at least 6 characters", "error");
+        showToast("Password must be at least 6 characters", "error", {
+          id: "login-password-required",
+        });
         return;
       }
       await getMainCloud()?.app.auth.signInWithEmailAndPassword(email, passwordState.get);
@@ -332,15 +337,17 @@ export const LoginPage = () => {
               <label className="block mb-2 capitalize">
                 <Translate content="email" /> :{" "}
               </label>
-              <Feild
+              <Field
                 controls={{
                   [emailRegExp]: {
                     err: "Invalid email",
                     succ: "Valid email",
                   },
                 }}
+                disabled={isLoadingLogin}
                 inputName="loginUseremail"
                 placeholder="@exmple.com"
+                className="max-md:text-xl"
                 propositions={email && !email.includes("@") ? [email + "@gmail.com"] : []}
               />
             </div>
@@ -348,7 +355,7 @@ export const LoginPage = () => {
               <label className="block mb-2 capitalize">
                 <Translate content="password" />
               </label>
-              <Password placeholder="********" state={passwordState} />
+              <Password disabled={isLoadingLogin} className="max-md:text-xl" placeholder="********" state={passwordState} />
             </div>
             <Button type="submit" iconClassName={tw(isLoadingLogin && "animate-spin")} icon={isLoadingLogin ? allIcons.solid.faRotate : undefined} className="py-2">
               <Translate content="login" />
@@ -373,7 +380,7 @@ export const LoginPage = () => {
                     onMouseLeave={() => {
                       providerHovered.set(null);
                     }}
-                    className={tw("flex justify-center items-center w-[50px] h-[50px]", image && "rounded-none")}
+                    className={tw("flex justify-center items-center w-[50px] max-md:w-[30px] h-[50px] max-md:h-[30px]", image && "rounded-none")}
                     onClick={async () => {
                       choisenProvider.set(provider);
                       await execAction("sign-in-provider");
@@ -386,7 +393,7 @@ export const LoginPage = () => {
               );
             })}
           </div>
-          <p className="text-center text-sm">
+          <p className="text-sm text-center">
             <span
               style={{
                 ...colorMerge({
@@ -402,7 +409,7 @@ export const LoginPage = () => {
                 e.preventDefault();
                 setTemp("focusedLoginView", 1);
               }}
-              className="capitalize"
+              className={tw("capitalize", isLoadingLogin && "pointer-events-none")}
             >
               <Translate content="sign up" />
             </Anchor>
@@ -444,7 +451,14 @@ export const ProfileContent = ({ children = "" }: ProfileContentProps) => {
             {!user?.photo && <Icon icon={allIcons.solid.faUser} />}
           </div>
           <div className="max-sm:flex max-sm:flex-col max-sm:justify-cente">
-            <h1 className="text-2xl">{user?.nickname || "No Name"}</h1>
+            <h1
+              className="text-2xl cursor-pointer"
+              onClick={async () => {
+                user?.uid && (await navigator.clipboard.writeText(user?.uid));
+              }}
+            >
+              {user?.nickname || "No Name"}
+            </h1>
             {user?.email && (
               <div className="flex items-center gap-2">
                 <Icon icon={allIcons.solid.faEnvelope} />
@@ -549,7 +563,7 @@ export const ProfileView = ({ children }: ProfileViewProps) => {
             </EmptyComponent>
           );
         }}
-        loading={<CircleLoading className="top-1/2 left-1/2 absolute transform -translate-x-1/2 -translate-y-1/2" />}
+        loading={<CircleLoading className="top-1/2 left-1/2 absolute -translate-x-1/2 -translate-y-1/2 transform" />}
       />
     </div>
   );

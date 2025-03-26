@@ -1,43 +1,31 @@
-import { Tip } from "@/components/Tip";
+import React, { useEffect } from "react";
 import { Line } from "@/components/Line";
-import { TitleView } from "@/components/TitleView";
-import { useSettingValue, handelShadowColor, useColorMerge } from "@/hooks";
+import { handelShadowColor, setSettingValue, useColorMerge, useSettingValue } from "@/hooks";
 import { mergeObject, tw } from "@/utils";
 import { useModifier } from "@/reducers/Global/keyboard.slice";
 import { settingHooks } from "@/data/system/settings.model";
-import React from "react";
-import { fieldHooks, initNewFeilds, useCopyState, useEffectDelay } from "@/hooks";
-import { CircleTip, Translate } from "@/components";
-import { Biqpod, ReactElement } from "@/types";
+import { fieldHooks, initNewFeilds, useCopyState } from "@/hooks";
+import { Button, ButtonProps, CircleTip, ClickedView, Translate } from "@/components";
+import { Biqpod } from "@/types";
 import { allIcons } from "@/apis";
-export interface KeyboardButtonProps extends ReactElement<HTMLSpanElement> {
+export interface KeyboardButtonProps extends ButtonProps {
   isActive?: boolean;
 }
 export const KeyboardButton = ({ isActive, className, ...props }: KeyboardButtonProps) => {
   const colorMerge = useColorMerge();
   return (
-    <span
-      className={tw(`inline-flex justify-center items-center gap-2 border border-transparent border-solid rounded-md min-w-[100px] h-[35px]`)}
+    <Button
+      className={tw(`w-full min-w-[30px] h-[35px] text-xl`)}
       style={{
         ...colorMerge(
-          "secondary.background",
+          "primary.background",
           {
             borderColor: "borders",
+            color: "text.color",
           },
           isActive && "primary",
           isActive && {
             color: "primary.content",
-          },
-          {
-            boxShadow: handelShadowColor([
-              {
-                colorId: "shadow.color",
-                y: 4,
-                x: 0,
-                blur: 10,
-                size: 4,
-              },
-            ]),
           },
         ),
       }}
@@ -91,7 +79,6 @@ export const dataKeyboard = [
     { normal: "n", shift: "N", alt: "," },
   ],
 ];
-const duration = 200;
 export const KeyboardView = () => {
   const colorMerge = useColorMerge();
   const shiftKey = useCopyState(false);
@@ -114,24 +101,33 @@ export const KeyboardView = () => {
     x: 0,
     y: 0,
   });
-  const startAnimation = useCopyState(false);
-  useEffectDelay(
-    () => {
-      startAnimation.get && startAnimation.set(false);
-    },
-    [startAnimation.get],
-    duration,
-  );
   initNewFeilds(["keyboard-view"]);
   const value = fieldHooks.useOneFeild("keyboard-view", "value");
-  const position = useCopyState<Biqpod.Types.Axis>({ x: 0, y: innerHeight - 300 });
+  const position = useCopyState<Biqpod.Types.Axis>({ x: 0, y: 0 });
   const keyboardViewVisibility = useSettingValue("visibility/keyboard.boolean");
+  const isFull = useSettingValue("keyboard/full.boolean");
+  const elementRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (keyboardViewVisibility && elementRef.current) {
+      position.set({
+        x: (innerWidth - elementRef.current.clientWidth) / 2,
+        y: (innerHeight - elementRef.current.clientHeight) / 2,
+      });
+    }
+  }, [keyboardViewVisibility]);
+  const startMove = useCopyState(false);
   return (
     <div
-      hidden={!keyboardViewVisibility}
-      className="z-[100000000000000000000000000000] fixed flex flex-col border border-transparent border-solid rounded-xl w-1/2 max-md:w-2/3 h-[300px] overflow-hidden"
+      className={tw(
+        "z-[100000000000000000000000000000] fixed flex flex-col border border-transparent border-solid rounded-xl h-[300px] overflow-hidden translate-y-[0vh] select-none",
+        !startMove.get && "transition-[transform,left,top,right,width,bottom] duration-300",
+        startMove.get && "cursor-grabbing",
+        !keyboardViewVisibility && "translate-y-[100vh]",
+        !isFull && "w-1/2 max-md:w-2/3",
+        isFull && "top-[calc(100vh-300px)] left-[0px] w-full",
+      )}
       style={{
-        ...colorMerge("primary.background", {
+        ...colorMerge("secondary.background", {
           borderColor: "borders",
           boxShadow: handelShadowColor([
             {
@@ -144,102 +140,143 @@ export const KeyboardView = () => {
           ]),
         }),
         ...mergeObject(
-          position.get && {
-            left: `${position.get.x}px`,
-            top: `${position.get.y}px`,
-          },
+          position.get &&
+            !isFull && {
+              left: `${position.get.x}px`,
+              top: `${position.get.y}px`,
+            },
         ),
       }}
     >
-      <div className="flex justify-between items-center p-2">
-        <div>
-          <Tip
-            onPointerDown={() => {
-              const mouseMoveCall = (e: MouseEvent) => {
-                position.set({
-                  x: e.pageX,
-                  y: e.pageY,
-                });
-              };
-              document.addEventListener("mousemove", mouseMoveCall);
-              const callback = () => {
-                document.removeEventListener("pointerup", callback);
-                document.removeEventListener("mousemove", mouseMoveCall);
-              };
-              document.addEventListener("pointerup", callback);
-            }}
-            icon={allIcons.solid.faGripVertical}
-            className="cursor-grab"
-          />
-        </div>
-        <div className="propositions">
-          {value.get ? (
-            <pre
-              className="px-2 py-1 border border-transparent border-solid rounded-md font-[inherit]"
-              style={{
-                ...colorMerge("secondary.background", {
-                  borderColor: "borders",
-                }),
-              }}
-            >
-              {value.get}
-            </pre>
-          ) : (
-            <div className="px-2 py-1 capitalize">
-              <span>
-                <Translate content="empty value" />
-              </span>
-            </div>
-          )}
-        </div>
-        <TitleView
-          title="close view"
-          position={{
-            x: "left",
-          }}
-        >
-          <CircleTip
-            onClick={() => {
-              settingHooks.setOneFeild("visibility/keyboard.boolean", "value", false);
-            }}
-            icon={allIcons.solid.faXmark}
-          />
-        </TitleView>
-      </div>
-      <Line />
-      <div className="flex justify-center items-stretch h-full overflow-hidden">
-        <div className="w-fit">
-          <div className="flex flex-col flex-1 justify-center items-center gap-1 p-2 h-full overflow-hidden">
-            {[
-              {
-                name: "shift",
-                state: shiftKey,
-              },
-              {
-                name: "alt gr",
-                state: altKey,
-              },
-              {
-                name: "control",
-                state: controlKey,
-              },
-            ].map(({ state, name }, i) => {
-              return (
-                <KeyboardButton
-                  key={i}
-                  isActive={state.get}
-                  onPointerDown={() => {
-                    state.set((s) => !s);
+      <ClickedView
+        ref={elementRef}
+        onTouchStart={(p) => {
+          if (isFull) {
+            return;
+          }
+          startMove.set(true);
+          const rect = p.currentTarget.getBoundingClientRect();
+          var x = p.touches[0].clientX - rect.left;
+          var y = p.touches[0].clientY - rect.top;
+          const callback = (e: TouchEvent) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const { clientX, clientY } = touch;
+            position.set({
+              x: clientX - x,
+              y: clientY - y,
+            });
+          };
+          document.addEventListener("touchmove", callback);
+          const doneAll = () => {
+            document.removeEventListener("touchmove", callback);
+            document.removeEventListener("touchend", doneAll);
+            startMove.set(false);
+          };
+          document.addEventListener("touchend", doneAll);
+        }}
+        onMouseDown={(p) => {
+          if (isFull) {
+            return;
+          }
+          const rect = p.currentTarget.getBoundingClientRect();
+          var x = p.clientX - rect.left;
+          var y = p.clientY - rect.top;
+          startMove.set(true);
+          const callback = (e: MouseEvent) => {
+            e.preventDefault();
+            const { clientX, clientY } = e;
+            position.set({
+              x: clientX - x,
+              y: clientY - y,
+            });
+          };
+          document.addEventListener("mousemove", callback);
+          const doneAll = () => {
+            startMove.set(false);
+            document.removeEventListener("mousemove", callback);
+            document.removeEventListener("mouseup", doneAll);
+          };
+          document.addEventListener("mouseup", doneAll);
+        }}
+        className="flex items-center p-1 px-3 h-[70px]"
+      >
+        <div className="flex justify-between items-center cursor-pointer">
+          <div />
+          <div aria-label="copy">
+            {value.get ? (
+              <div
+                className="inline-flex items-center gap-2 px-2 py-1 border border-transparent border-solid rounded-md font-[inherit]"
+                style={{
+                  ...colorMerge("primary.background", {
+                    borderColor: "borders",
+                  }),
+                }}
+              >
+                <span>{value.get}</span>
+                <CircleTip
+                  icon={allIcons.regular.faCopy}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(value.get || "");
                   }}
-                >
-                  {name}
-                </KeyboardButton>
-              );
-            })}
+                />
+              </div>
+            ) : (
+              <div className="px-2 py-1 capitalize">
+                <span>
+                  <Translate content="-" />
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center">
+            <CircleTip
+              onClick={() => {
+                setSettingValue("keyboard/full.boolean", !isFull);
+              }}
+              icon={isFull ? allIcons.solid.faCompress : allIcons.solid.faExpand}
+            />
+            <CircleTip
+              onClick={() => {
+                settingHooks.setOneFeild("visibility/keyboard.boolean", "value", false);
+              }}
+              icon={allIcons.solid.faXmark}
+            />
           </div>
         </div>
+      </ClickedView>
+      <Line />
+      <div className="flex justify-center items-stretch w-full h-full overflow-hidden">
+        <div className="flex flex-col justify-center items-center gap-1 p-2 w-fit h-full overflow-hidden">
+          {[
+            {
+              name: "shift",
+              state: shiftKey,
+            },
+            {
+              name: "alt gr",
+              state: altKey,
+            },
+            {
+              name: "control",
+              state: controlKey,
+            },
+          ].map(({ state, name }, i) => {
+            return (
+              <KeyboardButton
+                key={i}
+                isActive={state.get}
+                onPointerDown={() => {
+                  state.set((s) => !s);
+                }}
+              >
+                {name}
+              </KeyboardButton>
+            );
+          })}
+        </div>
         <div
-          className="relative flex flex-col justify-between gap-3 border-x p-2 border-transparent border-solid h-full overflow-hidden"
+          className="relative flex flex-col flex-1 justify-between gap-3 p-2 border-x border-transparent border-solid w-full h-full overflow-hidden"
           style={{
             ...colorMerge({
               borderColor: "borders",
@@ -253,26 +290,8 @@ export const KeyboardView = () => {
               x: x - left,
               y: y - top,
             });
-            startAnimation.set(true);
           }}
         >
-          {clickedPosition.get && (
-            <span
-              className={tw(
-                `opacity-0 blur-xl transition-[opacity] duration-[${duration}] absolute pointer-events-none inline-block w-[100px] h-[100px] transform -translate-x-1/2 -translate-y-1/2 rounded-full`,
-                startAnimation.get && "opacity-100",
-              )}
-              style={{
-                ...colorMerge("gray.opacity"),
-                ...mergeObject(
-                  clickedPosition.get && {
-                    left: `${clickedPosition.get.x}px`,
-                    top: `${clickedPosition.get.y}px`,
-                  },
-                ),
-              }}
-            />
-          )}
           <div className="flex flex-col gap-3">
             {dataKeyboard.map((list, i) => {
               return (
@@ -282,8 +301,8 @@ export const KeyboardView = () => {
                       <KeyboardButton
                         onPointerDown={() => {
                           const v = shiftKey.get ? c.shift : altKey.get ? c.alt : c.normal;
-                          // v && value.set((string) => string?.concat(v) || v);
-                          // !forceShiftGlobalState.get && shiftKey.get && shiftKey.set(false);
+                          v && value.set((string) => string?.concat(v) || v);
+                          !forceShiftGlobalState.get && shiftKey.get && shiftKey.set(false);
                           const element = document.activeElement;
                           if (element && (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) {
                             element.value = element.value.concat(v);
@@ -319,35 +338,33 @@ export const KeyboardView = () => {
             children={"space"}
           />
         </div>
-        <div className="w-fit">
-          <div className="flex flex-col flex-1 justify-center items-center gap-1 p-2 w-[20px] h-full overflow-hidden">
-            {[
-              {
-                name: "backspace",
-                onClick() {
-                  value.set((s) => s?.slice(0, -1));
-                },
+        <div className="flex flex-col justify-center items-center gap-1 p-2 w-fit h-full overflow-hidden">
+          {[
+            {
+              name: "backspace",
+              onClick() {
+                value.set((s) => s?.slice(0, -1));
               },
-              {
-                name: "clean",
-                onClick() {
-                  value.set("");
-                },
+            },
+            {
+              name: "clean",
+              onClick() {
+                value.set("");
               },
-            ].map(({ onClick, name }, i) => {
-              return (
-                <KeyboardButton
-                  key={i}
-                  className="w-full max-lg:w-full"
-                  onPointerDown={() => {
-                    onClick?.();
-                  }}
-                >
-                  {name}
-                </KeyboardButton>
-              );
-            })}
-          </div>
+            },
+          ].map(({ onClick, name }, i) => {
+            return (
+              <KeyboardButton
+                key={i}
+                className="w-full max-lg:w-full"
+                onPointerDown={() => {
+                  onClick?.();
+                }}
+              >
+                {name}
+              </KeyboardButton>
+            );
+          })}
         </div>
       </div>
     </div>

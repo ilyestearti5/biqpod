@@ -202,6 +202,9 @@ export declare function addCommand(command: Command, keys: Omit<Key, "command">[
 
 export declare function addNewWord(text: string, langs: Record<string, string>): void;
 
+declare const alert_2: (config: Omit<DialogProps, "buttons">) => Promise<void>;
+export { alert_2 as alert }
+
 export declare function back(slotId: SlotType["slotId"]): {
     type: string;
     payload: string | undefined;
@@ -301,6 +304,11 @@ declare namespace Biqpod {
             icon?: IconProps["icon"];
             features?: string[];
         }
+        interface Marchant {
+            location: [number, number];
+            name: string;
+            photo: string;
+        }
     }
     namespace CSM {
         interface ExperationDate {
@@ -325,6 +333,7 @@ declare namespace Biqpod {
             label?: string;
             photo?: string;
             status?: string;
+            uid: string;
         }
         interface Extension {
             id: string;
@@ -408,6 +417,7 @@ declare namespace Biqpod {
                 type?: "product" | "service";
                 product?: Prod;
                 service?: Service;
+                initCount?: number;
             }
             interface Account {
                 id: string;
@@ -499,6 +509,7 @@ declare namespace Biqpod {
             firstname?: string | null;
             email?: string | null;
             password?: string | null;
+            verified?: boolean;
         }
         interface AccountChargeBy {
             id?: string;
@@ -530,7 +541,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {};
+            charge?: {
+                serviceId: string;
+            };
             path?: string | null;
             serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
@@ -579,6 +592,64 @@ declare namespace Biqpod {
             file?: string;
         }
     }
+    namespace Paycard {
+        interface Card {
+            name: string;
+            photo: string;
+            enabled: boolean;
+            createdAt: number;
+            prices?: Record<Currency["name"], Price>;
+        }
+        interface Price {
+            buyer: number;
+            saller: number;
+        }
+        interface Code {
+            id: string;
+            code: string;
+            card: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: Reference["id"][];
+        }
+        interface Reference {
+            id: string;
+            code: string;
+            amount: number;
+            currency: string;
+            used: string;
+            card: string;
+            refCode: string;
+            withDrawId?: string;
+        }
+        interface Withdraw {
+            id: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: string[];
+            rip: string;
+            readed?: boolean;
+        }
+        interface Currency {
+            createdAt: number;
+            photo: string;
+            name: string;
+            type: "crypto" | "fiat";
+        }
+    }
+    namespace Help {
+        type Roles = "admin" | "developer" | "user";
+        interface ChatMessage {
+            user?: string;
+            message: string;
+            time: number;
+            role: Roles;
+            photo?: string;
+            projectId?: string;
+        }
+    }
     namespace Global {
         type BoundingBox = [string, string, string, string];
         interface Address {
@@ -611,7 +682,7 @@ declare namespace Biqpod {
         }
     }
     namespace Types {
-        type Data = "string" | "boolean" | "number" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
+        type Data = "string" | "boolean" | "number" | "color" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
         type Axis = {
             x: number;
             y: number;
@@ -642,6 +713,9 @@ declare namespace Biqpod {
                 date: Partial<{
                     format: "date" | "time" | "month" | "datetime-local";
                     goToCurrent: boolean;
+                }>;
+                color: Partial<{
+                    propositions: string[];
                 }>;
                 pin: Partial<{
                     length: number;
@@ -693,6 +767,7 @@ declare namespace Biqpod {
                         err?: string;
                     }> | undefined;
                     addText: string;
+                    separator: string;
                 }>;
                 filter: Partial<{
                     list: {
@@ -736,19 +811,20 @@ declare namespace Biqpod {
                 string: null | string;
                 boolean: null | boolean;
                 number: null | number;
-                array: null | string[];
+                array: Nothing | string[];
                 enum: Nothing | string;
-                file: null | string[];
+                file: Nothing | string[];
                 filter: Nothing | string[];
                 password: null | string;
                 object: null | Record<string, string>;
                 date: null | string;
                 regexp: null | string;
-                audio: null | string;
+                audio: Nothing | string;
                 pin: Nothing | string;
-                image: null | string;
+                image: Nothing | string;
                 range: Nothing | number;
                 between: null | [number, number];
+                color: Nothing | string;
             }
             interface Type<T extends keyof Config = keyof Config> {
                 settingId: `${string}.${T}`;
@@ -761,6 +837,7 @@ declare namespace Biqpod {
                 deperacted?: boolean;
                 def?: Value[T];
                 readonly?: boolean;
+                synced?: boolean;
             }
         }
         interface Lang extends Record<string, string> {
@@ -897,6 +974,7 @@ declare namespace Biqpod {
             createdAt?: number;
             imageUrl?: string;
             id: string;
+            site?: string;
         }
     }
 }
@@ -906,6 +984,7 @@ export declare interface BottomSheetOptions {
     id?: string;
     min?: number | `${number}${size}`;
     max?: number | `${number}${size}`;
+    overscroll?: boolean;
 }
 
 declare type CameraResult<T extends keyof FullCameraResult> = FullCameraResult[T];
@@ -937,11 +1016,13 @@ export declare const checkStatus: (action?: Nothing | Action | Action["status"],
 
 export declare function closeApplications(): void;
 
-export declare function closeBottomSheet(): void;
+export declare function closeBottomSheet(id?: string): void;
 
 export declare function closeFrame(): void;
 
 export declare function closeNotifays(): void;
+
+export declare function closePopup(id?: string): void;
 
 export declare function closeProfile(): void;
 
@@ -1929,6 +2010,13 @@ declare const data: {
         }[];
         label: string;
     };
+    "feedback/send": {
+        commands: {
+            payload: string[];
+            type: string;
+        }[];
+        label: string;
+    };
 };
 
 declare const data_2: {
@@ -1936,6 +2024,7 @@ declare const data_2: {
         def: boolean;
         desc: string;
         name: string;
+        synced: boolean;
     };
     "preferences/fastScrollKey.enum": {
         config: {
@@ -1953,10 +2042,12 @@ declare const data_2: {
                 content: string;
                 value: string;
             }[];
+            search: boolean;
         };
         def: string;
         desc: string;
         name: string;
+        synced: boolean;
     };
     "preferences/toastTime.number": {
         config: {
@@ -1991,6 +2082,17 @@ declare const data_2: {
         def: string;
         desc: string;
         name: string;
+        synced: boolean;
+    };
+    "keyboard/full.boolean": {
+        def: boolean;
+        desc: string;
+        name: string;
+        private: boolean;
+        synced: boolean;
+        config: {
+            style: string;
+        };
     };
     "visibility/configurations.boolean": {
         def: boolean;
@@ -2005,10 +2107,6 @@ declare const data_2: {
     "visibility/headerNotifays.boolean": {
         def: boolean;
         name: string;
-        private: boolean;
-    };
-    "visibility/keyPanding/form.boolean": {
-        def: boolean;
         private: boolean;
     };
     "visibility/leftSide.boolean": {
@@ -2043,6 +2141,7 @@ declare const data_2: {
         def: boolean;
         desc: string;
         name: string;
+        synced: boolean;
     };
     "window/lang.enum": {
         config: {
@@ -2054,6 +2153,7 @@ declare const data_2: {
         def: string;
         desc: string;
         name: string;
+        synced: boolean;
     };
     "preferences/scrollAnimation.boolean.boolean": {
         def: boolean;
@@ -2081,6 +2181,7 @@ declare const data_2: {
         desc: string;
         def: boolean;
     };
+    "developer/insertColor.color": {};
 };
 
 declare const data_3: {
@@ -2092,6 +2193,12 @@ declare const data_3: {
         light: string;
     };
     "bottom-sheeet.background": {};
+    danger: {
+        default: string;
+    };
+    success: {
+        default: string;
+    };
     "black.opacity": {
         dark: string;
         light: string;
@@ -2241,7 +2348,9 @@ declare const data_3: {
     "submit.background": {
         default: string;
     };
-    "submit.color": {};
+    "submit.color": {
+        default: string;
+    };
     "success.text": {
         default: string;
     };
@@ -2310,14 +2419,15 @@ declare const data_4: {
 
 export declare interface DatePickerTimeOptions {
     properties: ["year", "month", "minutes", "hours", "seconds", "milliseconds"];
-    init: number | Date;
+    init?: number | Date;
 }
 
 export declare interface DatePickerTimeResult {
-    time: number;
-    canceled: boolean;
+    time: string;
     id: string;
 }
+
+export declare const dateTimeTemp: Temp;
 
 export declare function defineKeys(command: CommandIds | string, keys: Omit<Key, "command">[]): void;
 
@@ -2572,6 +2682,10 @@ declare interface FullCameraResult {
 declare type FullStateManagment = ReturnType<typeof store.getState>;
 
 export declare function getColor(isDark: boolean, color: Color): string | undefined;
+
+export declare function getCookie(name: string): string | null;
+
+export declare const getFieldValue: (fieldId: string) => string | undefined;
 
 export declare const getImageFileType: (filePath: string) => string;
 
@@ -3624,7 +3738,13 @@ export declare function onState<T extends object | string | number | boolean | n
 
 export declare function openCamera<T extends keyof FullCameraResult>(type: T): Promise<CameraResult<T>>;
 
-export declare const openDatePicker: (config: Partial<DatePickerTimeOptions>) => Promise<DatePickerTimeResult>;
+export declare const openColorPicker: ({ init, x: left, y: top }: OpenColorPickerOptions) => Promise<string>;
+
+export declare interface OpenColorPickerOptions extends Partial<Biqpod.Types.Axis> {
+    init?: string;
+}
+
+export declare const openDatePicker: (config: Partial<DatePickerTimeOptions>) => Promise<DatePickerTimeResult | null>;
 
 export declare function openDialog(props: DialogProps): Promise<default_2.MessageBoxReturnValue>;
 
@@ -3655,6 +3775,14 @@ declare interface OpenPathConfig extends default_2.OpenDialogOptions {
 export declare const passwordTemp: Temp;
 
 export declare const pathTemps: Temp;
+
+export declare const playAudio: (src: string) => Promise<void>;
+
+export declare interface PopupOptions {
+    id?: string;
+    force?: boolean;
+    type?: "blur" | "down";
+}
 
 export declare const positionsEntity: EntityAdapter<Biqpod.System.Positions, EntityId>;
 
@@ -3912,6 +4040,8 @@ declare interface SendTelProps {
 
 export declare function setColorFor(colorId: ColorIds | string, value: string, theme?: "default" | "dark" | "light"): void;
 
+export declare const setCookie: (name: string, value: string) => void;
+
 export declare function setDarkColor(colorId: ColorIds | string, value: string): void;
 
 export declare function setDefaultColor(colorId: ColorIds | string, value: string): void;
@@ -3953,7 +4083,7 @@ export declare const settingHooks: {
     add(data: Record<EntityId, Setting> | Setting[]): void;
     upsert(data: Record<EntityId, Setting> | Setting[]): void;
     getOne(id: EntityId): {
-        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.color` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
         name?: string | undefined;
         desc?: string | undefined;
         private?: boolean | undefined;
@@ -3988,11 +4118,14 @@ export declare const settingHooks: {
             }[];
             extra: string[][];
         }> | Partial<{
+            propositions: string[];
+        }> | Partial<{
             controls: Record<string, {
                 succ?: string;
                 err?: string;
             }> | undefined;
             addText: string;
+            separator: string;
         }> | Partial<{
             position: "bottom" | "left" | "top" | "right";
             list: {
@@ -4039,11 +4172,12 @@ export declare const settingHooks: {
         deperacted?: boolean | undefined;
         def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
         readonly?: boolean | undefined;
+        synced?: boolean | undefined;
     } | undefined;
     setOne(id: EntityId, changes: Partial<Setting>): void;
     setWriteStatus(status?: "ready" | QueryStatus): void;
     useOne(id: EntityId): State<    {
-    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.color` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
     name?: string | undefined;
     desc?: string | undefined;
     private?: boolean | undefined;
@@ -4078,11 +4212,14 @@ export declare const settingHooks: {
     }[];
     extra: string[][];
     }> | Partial<{
+    propositions: string[];
+    }> | Partial<{
     controls: Record<string, {
     succ?: string;
     err?: string;
     }> | undefined;
     addText: string;
+    separator: string;
     }> | Partial<{
     position: "bottom" | "left" | "top" | "right";
     list: {
@@ -4129,9 +4266,10 @@ export declare const settingHooks: {
     deperacted?: boolean | undefined;
     def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
     readonly?: boolean | undefined;
+    synced?: boolean | undefined;
     } | undefined>;
     getOneFeild<F extends keyof Setting>(recordId: EntityId, field: F): ({
-        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+        settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.color` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
         name?: string | undefined;
         desc?: string | undefined;
         private?: boolean | undefined;
@@ -4166,11 +4304,14 @@ export declare const settingHooks: {
             }[];
             extra: string[][];
         }> | Partial<{
+            propositions: string[];
+        }> | Partial<{
             controls: Record<string, {
                 succ?: string;
                 err?: string;
             }> | undefined;
             addText: string;
+            separator: string;
         }> | Partial<{
             position: "bottom" | "left" | "top" | "right";
             list: {
@@ -4217,10 +4358,11 @@ export declare const settingHooks: {
         deperacted?: boolean | undefined;
         def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
         readonly?: boolean | undefined;
+        synced?: boolean | undefined;
     }[F] & ({} | null)) | undefined;
     setOneFeild<F extends keyof Setting>(id: EntityId, field: F, value: Setting[F]): void;
     useOneFeild<F extends keyof Setting>(recordeId: EntityId, field: F): State<({
-    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
+    settingId: `${string}.string` | `${string}.number` | `${string}.boolean` | `${string}.object` | `${string}.filter` | `${string}.color` | `${string}.array` | `${string}.enum` | `${string}.file` | `${string}.password` | `${string}.date` | `${string}.regexp` | `${string}.audio` | `${string}.pin` | `${string}.image` | `${string}.range` | `${string}.between`;
     name?: string | undefined;
     desc?: string | undefined;
     private?: boolean | undefined;
@@ -4255,11 +4397,14 @@ export declare const settingHooks: {
     }[];
     extra: string[][];
     }> | Partial<{
+    propositions: string[];
+    }> | Partial<{
     controls: Record<string, {
     succ?: string;
     err?: string;
     }> | undefined;
     addText: string;
+    separator: string;
     }> | Partial<{
     position: "bottom" | "left" | "top" | "right";
     list: {
@@ -4306,6 +4451,7 @@ export declare const settingHooks: {
     deperacted?: boolean | undefined;
     def?: string | number | boolean | Record<string, string> | string[] | [number, number] | null | undefined;
     readonly?: boolean | undefined;
+    synced?: boolean | undefined;
     }[F] & ({} | null)) | undefined>;
     getOneFeilds<F extends keyof Setting>(id: EntityId, fields: F[]): (F extends infer T extends keyof Setting ? { [key in T]: Setting[F]; } : never) | undefined;
     getAll(): Setting[];
@@ -4458,13 +4604,15 @@ export declare function setY(origin?: TitleInitState["y"]): void;
 
 export declare function showApplications(): void;
 
-export declare function showBottomSheet(element: JSX.Element, { force, id: newId, min, max }?: BottomSheetOptions): void;
+export declare function showBottomSheet(element: JSX.Element, { force, id: newId, min, max, overscroll }?: BottomSheetOptions): void;
 
 export declare function showFrame(src: string | URL, id?: string): string;
 
 export declare function showNotification({ ...notification }: Partial<NotificationType>): void;
 
 export declare function showPdf(content: null | string): void;
+
+export declare function showPopup(element: JSX.Element, options?: PopupOptions): void;
 
 export declare function showProfile(): void;
 
@@ -5440,6 +5588,8 @@ export declare function useAsyncEffect(callback: () => Promise<void>, deps?: any
 export declare function useAsyncMemo<T>(callback: () => Promise<T>, deps?: any[], cleanUp?: (deps: any[]) => void): T | null;
 
 export declare function useChangedSetting(): Setting[];
+
+export declare const useChangedSyncedSettings: () => Setting[];
 
 export declare function useColorMerge<T extends Partial<Record<Biqpod.Types.CssColorKeys, ColorIds | ReturnColorHandelFunction>>>(): (...args: (Nothing | ColorIds | T)[]) => Partial<Record<keyof T, string>>;
 

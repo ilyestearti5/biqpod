@@ -8,7 +8,7 @@ import { Button } from "@/components/Button";
 import { Translate } from "../Translate";
 import { FeildGeneralProps, SettingConfig } from "@/types";
 export type StringFeildProps = FeildGeneralProps<string | undefined, SettingConfig["string"]>;
-// String Feild Rendering
+// String Field Rendering
 export function StringFeild({ state, config = {}, id }: StringFeildProps) {
   initNewFeild(`${id}:input`);
   const value = fieldHooks.useOneFeild(`${id}:input`, "value");

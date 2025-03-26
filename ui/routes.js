@@ -1,10 +1,11 @@
-import { u as o, a as f, g as y, j as l, b as i, C as m, E as p, c as w, d as x } from "./SeparatedComponents-Bmlqc6Z8.mjs";
-import { d as u } from "./index-CWt5yMKi.mjs";
+import { u as n, a as f, g as y, j as l, b as i, C as m, E as p, c as w } from "./SeparatedComponents-DPehn4JG.mjs";
+import { d as u } from "./index-D9iOCOId.mjs";
 import d from "react";
-const L = ({ onAuthSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) }) => {
-  const r = new URLSearchParams(location.search).get("token"), a = o(), t = f(async () => {
-    var c;
-    await u(1200), r && await ((c = y()) == null ? void 0 : c.app.auth.signInWithCustomToken(r));
+import { getUserFunction as x } from "./apis.js";
+const R = ({ onAuthSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) }) => {
+  const r = new URLSearchParams(location.search).get("token"), a = n(), t = f(async () => {
+    var o;
+    await u(1200), r && await ((o = y()) == null ? void 0 : o.app.auth.signInWithCustomToken(r));
   }, [r]);
   return d.useEffect(() => {
     a && (e == null || e(a));
@@ -12,10 +13,10 @@ const L = ({ onAuthSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) })
     t && /* @__PURE__ */ i(m, { circleClassName: "border-4 w-[50px] h-[50px]" }),
     a && (typeof s == "function" ? /* @__PURE__ */ i(s, { user: a }) : s)
   ] });
-}, R = ({ onPayoutSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) }) => {
-  const r = new URLSearchParams(location.search).get("payout_id"), a = o(), t = w(null), c = f(async () => {
+}, N = ({ onPayoutSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) }) => {
+  const r = new URLSearchParams(location.search).get("payout_id"), a = n(), t = w(null), o = f(async () => {
     if (await u(1200), r && a) {
-      const n = await x("payout-get"), h = await (n == null ? void 0 : n({
+      const c = await x("payout-get"), h = await (c == null ? void 0 : c({
         payoutId: r
       }));
       t.set(h);
@@ -24,11 +25,11 @@ const L = ({ onAuthSuccess: e, successComponent: s = /* @__PURE__ */ i(p, {}) })
   return d.useEffect(() => {
     t.get && (e == null || e(t.get));
   }, [t.get]), /* @__PURE__ */ l("div", { className: "flex justify-center items-center h-full", children: [
-    c && /* @__PURE__ */ i(m, { circleClassName: "border-4 w-[50px] h-[50px]" }),
+    o && /* @__PURE__ */ i(m, { circleClassName: "border-4 w-[50px] h-[50px]" }),
     t.get && (typeof s == "function" ? /* @__PURE__ */ i(s, { payout: t.get }) : s)
   ] });
 };
 export {
-  L as AuthRoute,
-  R as PayoutRoute
+  R as AuthRoute,
+  N as PayoutRoute
 };

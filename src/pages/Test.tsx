@@ -39,6 +39,7 @@ import {
   showSetting,
   showToast,
   useColorMerge,
+  useSettingValue,
   useUser,
   visibilityTemp,
 } from "@/hooks";
@@ -126,6 +127,8 @@ export function Test() {
     };
     return result;
   }, []);
+  const leftSide = useSettingValue("visibility/leftSide.boolean");
+
   return (
     <EmptyComponent>
       <Switch>
@@ -211,21 +214,30 @@ export function Test() {
         </Route>
         <Route path="/">
           <Header>
-            <h1 className="w-full text-center capitalize">
-              <Translate content="click in the link to see your account" /> {user && "(" + user.nickname + ")"}
-              <Anchor
-                onClick={(e) => {
-                  e.preventDefault();
-                  showProfile();
+            <div className="flex justify-between items-center p-2 w-full">
+              <CircleTip
+                icon={allIcons.solid.faBars}
+                onClick={() => {
+                  setSettingValue("visibility/leftSide.boolean", !leftSide);
                 }}
-              >
-                <Icon icon={faLink} iconClassName="mr-1 ml-2" />
-                <Translate content="here" />
-              </Anchor>
-            </h1>
+              />
+              <div className="md:hidden" />
+              <h1 className="max-md:hidden w-full text-center capitalize">
+                <Translate content="click in the link to see your account" /> {user && "(" + user.nickname + ")"}
+                <Anchor
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showProfile();
+                  }}
+                >
+                  <Icon icon={faLink} iconClassName="mr-1 ml-2" />
+                  <Translate content="here" />
+                </Anchor>
+              </h1>
+            </div>
           </Header>
           <Window>
-            <LeftSide className="rounded-ee-[20px] rounded-se-[20px]" floorWindow>
+            <LeftSide floorWindow>
               Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum cumque inventore ratione delectus aliquam
               provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum ipsum explicabo, in voluptas voluptatum
               cumque inventore ratione delectus aliquam provident quae error quisquam mollitia eaque? Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit, esse impedit eveniet iure nostrum
@@ -465,7 +477,7 @@ export function Test() {
                         <Button
                           onClick={async () => {
                             await openDialog({
-                              message: "This is a dialog",
+                              message: "This is a dialog message and i write more text for make it truncated from the main view of dialog layout",
                               title: "Dialog",
                               type: "info",
                               buttons: ["Ok"],
@@ -756,7 +768,7 @@ export function Test() {
                 <div className="h-[500px]" />
               </div>
             </InnerWindow>
-            <RightSide className="rounded-es-[30px] rounded-ss-[30px]" floorWindow />
+            <RightSide floorWindow />
           </Window>
         </Route>
       </Switch>

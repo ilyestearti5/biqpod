@@ -1,20 +1,26 @@
-import React from "react";
+import React, { useEffect, forwardRef } from "react";
 import { useColorMerge, useCopyState, handelShadowColor } from "@/hooks";
-import { mergeObject, tw, range } from "@/utils";
+import { mergeObject, tw } from "@/utils";
 import { ReactElement } from "@/types";
-export interface ClickedViewProps extends ReactElement {}
-export const ClickedView = ({ children, className, style, onPointerDown, onPointerLeave, onPointerUp, onMouseEnter, onMouseLeave, ...props }: ClickedViewProps) => {
+
+export interface ClickedViewProps extends ReactElement {
+  ref?: React.Ref<HTMLDivElement>;
+}
+
+export const ClickedView = forwardRef<HTMLDivElement, ClickedViewProps>(({ children, className, style, onPointerDown, onPointerLeave, onPointerUp, onMouseEnter, onMouseLeave, ...props }, ref) => {
   const colorMerge = useColorMerge();
   const focused = useCopyState(false);
   const active = useCopyState(false);
   const hover = useCopyState(false);
-  React.useEffect(() => {
+
+  useEffect(() => {
     return () => {
       focused.set(false);
       active.set(false);
       hover.set(false);
     };
   }, []);
+
   const fullStyle = React.useMemo(() => {
     return {
       ...colorMerge(
@@ -30,8 +36,10 @@ export const ClickedView = ({ children, className, style, onPointerDown, onPoint
       ),
     };
   }, [colorMerge, focused.get, handelShadowColor]);
+
   return (
     <div
+      ref={ref}
       onFocus={() => {
         focused.set(true);
       }}
@@ -61,21 +69,18 @@ export const ClickedView = ({ children, className, style, onPointerDown, onPoint
       style={{
         ...mergeObject<React.CSSProperties>(fullStyle, style),
       }}
-      className={tw("relative w-full transition-[transform] overflow-hidden select-none btn", className)}
+      className={tw("relative w-full overflow-hidden transition-[transform] select-none btn", className)}
       {...props}
     >
-      {range(1, 3).map((index) => {
-        return (
-          <i
-            key={index}
-            className="btn_bg"
-            style={{
-              ...colorMerge("opacity"),
-            }}
-          />
-        );
-      })}
+      <i
+        className="btn_bg"
+        style={{
+          ...colorMerge("opacity"),
+        }}
+      />
       <div className="w-full h-full btn-content">{children}</div>
     </div>
   );
-};
+});
+
+ClickedView.displayName = "ClickedView";

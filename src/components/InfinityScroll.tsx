@@ -36,9 +36,6 @@ export function InfinityScroll<T, L>({
 }: InfinityScrollProps<T, L>) {
   const prevState = useCopyState<L | undefined>(initState);
   const data = useCopyState<T[]>(initData);
-  useEffect(() => {
-    data.set(initData);
-  }, [initData]);
   const { status } = useIdleStatus(async () => {
     const result = onUpdate({
       state: prevState.get,

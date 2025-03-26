@@ -12,7 +12,7 @@ export function LineLoading() {
       }}
     >
       <div
-        className={tw(`left-0 absolute h-full transform animate-loading`)}
+        className={tw(`left-0 absolute h-full animate-loading transform`)}
         style={{
           ...colorMerge({
             background: handelGradientColor("to right", "transparent", "primary"),
@@ -20,7 +20,7 @@ export function LineLoading() {
         }}
       />
       <div
-        className={tw(`right-0 absolute h-full transform animate-loading`)}
+        className={tw(`right-0 absolute h-full animate-loading transform`)}
         style={{
           ...colorMerge({
             background: handelGradientColor("to right", "primary", "transparent"),
@@ -33,11 +33,12 @@ export function LineLoading() {
 interface CircleLoadingProps extends ReactElement {
   circleClassName?: string;
 }
-export const CircleLoading = ({ className, circleClassName, ...props }: CircleLoadingProps) => {
+export const CircleLoading = ({ className, circleClassName, children, ...props }: CircleLoadingProps) => {
   const colorMerge = useColorMerge();
   return (
     <span>
       <span className={tw("inline-flex relative justify-center items-center w-[25px] h-[25px] text-xs", className)} {...props}>
+        {children}
         <span
           className={tw("inline-block absolute border-[2px] border-transparent border-solid rounded-full w-full h-full animate-spin", circleClassName)}
           style={{
@@ -92,7 +93,7 @@ export const CardWait = ({ className, children, ...props }: CardWaitProps) => {
         style={{
           ...colorMerge("gray.opacity"),
         }}
-        className="absolute inset-[10px] rounded-xl animate-pulse overflow-hidden"
+        className="absolute inset-0 animate-pulse"
       >
         <div
           className="absolute w-2/3 h-full animate-move-right"

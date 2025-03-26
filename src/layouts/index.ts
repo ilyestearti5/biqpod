@@ -35,3 +35,4 @@ export * from "./Layouts";
 export * from "./CongratulationsLayout";
 export * from "./ApplicationsLayout";
 export * from "./ControlsLayout";
+export * from "./Help";

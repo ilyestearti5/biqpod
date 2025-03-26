@@ -1,7 +1,5 @@
-import React from "react";
-import { ResizeView } from "@/components/ResizeView";
-import { setSettingValue, useColorMerge, useDeviceResolution, visibilityTemp } from "@/hooks";
-import { isSorted } from "@/utils/index";
+import { useEffect } from "react";
+import { useColorMerge, visibilityTemp } from "@/hooks";
 import { tw } from "@/utils";
 import { useSettingValue } from "@/hooks";
 import { SideProps } from "./LeftSide";
@@ -10,36 +8,27 @@ const rightSideVisibility = "visibility/rightSide.boolean";
 export const RightSide = ({ children, floorWindow, className, style = {}, ...props }: SideProps) => {
   const visibility = useSettingValue(rightSideVisibility);
   const colorMerge = useColorMerge();
-  const setting = useSettingValue("sides/viewPosition.boolean");
-  React.useEffect(() => {
-    if (floorWindow) {
-      visibilityTemp.setTemp("shadow-window", visibility && floorWindow);
-    }
+  useEffect(() => {
+    visibilityTemp.setTemp("shadow-window", visibility && floorWindow);
   }, [visibility, floorWindow]);
-  const { isMobile } = useDeviceResolution();
   return (
-    <div className={tw("max-md:right-0 max-md:z-50 max-md:absolute h-full", setting && "absolute right-0 z-50")}>
-      <ResizeView
-        className={tw(`z-[10000000000000000] flex flex-col border-transparent border-l border-solid h-full overflow-hidden`, !visibility && "border-l-0", className)}
-        hidden={!visibility}
-        max={() => Math.max(window.innerWidth / 3, 350)}
-        min={isMobile ? () => (innerWidth * 5) / 6 : 200}
-        position="left"
-        temp="rightSide.currentWidth"
-        handelResize={({ size }) => {
-          const s = isSorted(150, size);
-          s != visibility && setSettingValue(rightSideVisibility, s);
-        }}
-        style={{
-          ...colorMerge("secondary.background", {
-            borderColor: "borders",
-          }),
-          ...style,
-        }}
-        {...props}
-      >
-        <Scroll>{children}</Scroll>
-      </ResizeView>
+    <div
+      style={{
+        ...colorMerge("secondary.background", {
+          borderColor: "borders",
+        }),
+        ...style,
+      }}
+      className={tw(
+        "right-0 z-[2000] fixed max-md:w-[calc(100%*11/12)] max-lg:w-3/4 lg:w-1/3 h-full overflow-hidden transition-transform translate-x-[100%] duration-700",
+        visibility && "translate-x-[0%]",
+        `flex flex-col border-transparent border-r border-solid h-full overflow-hidden`,
+        !visibility && "border-l-0",
+        className,
+      )}
+      {...props}
+    >
+      <Scroll>{children}</Scroll>
     </div>
   );
 };

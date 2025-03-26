@@ -5,7 +5,7 @@ import { execAction, useAction } from "@/data/system/actions.model";
 import { faPen, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Field as FeildProps, fieldHooks } from "@/data/system/field.model";
 import { useColorMerge } from "@/hooks";
-import { Feild } from "./Fields/Field";
+import { Field } from "./Fields/Field";
 import { CircleTip } from "@/components/CircleTip";
 export interface UpdateDataProps {
   inputName: string;
@@ -52,13 +52,13 @@ export function UpdateData({ inputName, defaultContent, value, setValue, visibil
   }, [inputContent, controls]);
   const colorMerge = useColorMerge();
   return (
-    <div className="p-2 group">
+    <div className="group p-2">
       <div className="flex items-center gap-1">
         <h1 className="truncate" hidden={!!visibility}>
           {value || defaultContent}
         </h1>
         {visibility && (
-          <Feild
+          <Field
             placeholder={placeholder}
             controls={controls}
             className="p-1"

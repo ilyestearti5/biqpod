@@ -30,7 +30,7 @@ export function Header({ children }: HeaderProps) {
   const colorMerge = useColorMerge();
   // desc: window focused
   const windowFocused = getTemp<boolean>("window.isFocused");
-  const animation = useSettingValue("preferences/animation.boolean");
+  const isAnimated = useSettingValue("preferences/animation.boolean");
   // desc: header bar style
   const styles = React.useMemo(() => {
     return colorMerge(windowFocused ? "primary.background" : "secondary.background", {
@@ -48,32 +48,30 @@ export function Header({ children }: HeaderProps) {
   }, [colorMerge, windowFocused]);
   // Render Component
   return (
-    <div className="top-0 z-[10000000000000000000000000000000000000] absolute inset-x-0">
-      <div
-        onClick={() => {
-          settingHooks.setOneFeild(headerVisibility, "value", !visibility);
-        }}
-        title={visibility ? "hide header bar" : "open header bar"}
-        className={tw(
-          `top-full left-1/2 z-10 absolute flex justify-center items-center shadow-2xl border-transparent border-solid rounded-ee-lg rounded-es-lg w-[300px] -translate-x-1/2 cursor-pointer overflow-hidden`,
-          animation && `transition-[height] duration-200`,
-          !showIcon.get || !shift ? "h-[0px]" : "border-b border-x h-[30px]",
-        )}
-        style={styles}
-      >
-        <FontAwesomeIcon icon={visibility ? faChevronUp : faChevronDown} />
-      </div>
-      <div
-        className={tw(
-          "relative box-content flex justify-between items-center border-transparent border-b border-solid h-[0px] overflow-hidden",
-          visibility && "h-[50px]",
-          animation && "transition-[height]",
-        )}
-        style={{
-          ...styles,
-        }}
-      >
-        {children}
+    <div className={tw("z-[10000000000000000000000000000000000000] relative transition-[height] duration-500", visibility ? "h-[50px]" : "h-[0px]")}>
+      <div className={tw("h-[50px] translate-y-[-0px]", !visibility && "translate-y-[-50px]", isAnimated && "transition-transform duration-500")}>
+        <div
+          onClick={() => {
+            settingHooks.setOneFeild(headerVisibility, "value", !visibility);
+          }}
+          title={visibility ? "hide header bar" : "open header bar"}
+          className={tw(
+            `top-full left-1/2 z-10 absolute flex justify-center items-center shadow-2xl border-transparent border-solid rounded-ee-lg rounded-es-lg w-[300px] overflow-hidden -translate-x-1/2 cursor-pointer`,
+            isAnimated && `transition-[height] duration-700`,
+            !showIcon.get || !shift ? "h-[0px]" : "border-b border-x h-[30px]",
+          )}
+          style={styles}
+        >
+          <FontAwesomeIcon icon={visibility ? faChevronUp : faChevronDown} />
+        </div>
+        <div
+          className={tw("box-content relative flex justify-between items-center border-transparent border-b border-solid h-[50px] overflow-hidden")}
+          style={{
+            ...styles,
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

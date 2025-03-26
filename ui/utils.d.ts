@@ -126,6 +126,11 @@ declare namespace Biqpod {
             icon?: IconProps["icon"];
             features?: string[];
         }
+        interface Marchant {
+            location: [number, number];
+            name: string;
+            photo: string;
+        }
     }
     namespace CSM {
         interface ExperationDate {
@@ -150,6 +155,7 @@ declare namespace Biqpod {
             label?: string;
             photo?: string;
             status?: string;
+            uid: string;
         }
         interface Extension {
             id: string;
@@ -233,6 +239,7 @@ declare namespace Biqpod {
                 type?: "product" | "service";
                 product?: Prod;
                 service?: Service;
+                initCount?: number;
             }
             interface Account {
                 id: string;
@@ -324,6 +331,7 @@ declare namespace Biqpod {
             firstname?: string | null;
             email?: string | null;
             password?: string | null;
+            verified?: boolean;
         }
         interface AccountChargeBy {
             id?: string;
@@ -355,7 +363,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {};
+            charge?: {
+                serviceId: string;
+            };
             path?: string | null;
             serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
@@ -404,6 +414,64 @@ declare namespace Biqpod {
             file?: string;
         }
     }
+    namespace Paycard {
+        interface Card {
+            name: string;
+            photo: string;
+            enabled: boolean;
+            createdAt: number;
+            prices?: Record<Currency["name"], Price>;
+        }
+        interface Price {
+            buyer: number;
+            saller: number;
+        }
+        interface Code {
+            id: string;
+            code: string;
+            card: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: Reference["id"][];
+        }
+        interface Reference {
+            id: string;
+            code: string;
+            amount: number;
+            currency: string;
+            used: string;
+            card: string;
+            refCode: string;
+            withDrawId?: string;
+        }
+        interface Withdraw {
+            id: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: string[];
+            rip: string;
+            readed?: boolean;
+        }
+        interface Currency {
+            createdAt: number;
+            photo: string;
+            name: string;
+            type: "crypto" | "fiat";
+        }
+    }
+    namespace Help {
+        type Roles = "admin" | "developer" | "user";
+        interface ChatMessage {
+            user?: string;
+            message: string;
+            time: number;
+            role: Roles;
+            photo?: string;
+            projectId?: string;
+        }
+    }
     namespace Global {
         type BoundingBox = [string, string, string, string];
         interface Address {
@@ -436,7 +504,7 @@ declare namespace Biqpod {
         }
     }
     namespace Types {
-        type Data = "string" | "boolean" | "number" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
+        type Data = "string" | "boolean" | "number" | "color" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
         type Axis = {
             x: number;
             y: number;
@@ -467,6 +535,9 @@ declare namespace Biqpod {
                 date: Partial<{
                     format: "date" | "time" | "month" | "datetime-local";
                     goToCurrent: boolean;
+                }>;
+                color: Partial<{
+                    propositions: string[];
                 }>;
                 pin: Partial<{
                     length: number;
@@ -518,6 +589,7 @@ declare namespace Biqpod {
                         err?: string;
                     }> | undefined;
                     addText: string;
+                    separator: string;
                 }>;
                 filter: Partial<{
                     list: {
@@ -561,19 +633,20 @@ declare namespace Biqpod {
                 string: null | string;
                 boolean: null | boolean;
                 number: null | number;
-                array: null | string[];
+                array: Nothing | string[];
                 enum: Nothing | string;
-                file: null | string[];
+                file: Nothing | string[];
                 filter: Nothing | string[];
                 password: null | string;
                 object: null | Record<string, string>;
                 date: null | string;
                 regexp: null | string;
-                audio: null | string;
+                audio: Nothing | string;
                 pin: Nothing | string;
-                image: null | string;
+                image: Nothing | string;
                 range: Nothing | number;
                 between: null | [number, number];
+                color: Nothing | string;
             }
             interface Type<T extends keyof Config = keyof Config> {
                 settingId: `${string}.${T}`;
@@ -586,6 +659,7 @@ declare namespace Biqpod {
                 deperacted?: boolean;
                 def?: Value[T];
                 readonly?: boolean;
+                synced?: boolean;
             }
         }
         interface Lang extends Record<string, string> {
@@ -722,6 +796,7 @@ declare namespace Biqpod {
             createdAt?: number;
             imageUrl?: string;
             id: string;
+            site?: string;
         }
     }
 }

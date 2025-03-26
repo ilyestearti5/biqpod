@@ -1,7 +1,7 @@
 import { Temp } from "./Temp";
 export const pathTemps = new Temp("path");
 export const windowTemps = new Temp("window");
-export const viewTemps = new Temp("view");
+export const viewTemps = new Temp("views");
 export const toastTemps = new Temp("toast");
 export const dialogTemps = new Temp("dialog");
 export const loadingTemp = new Temp("loading");
@@ -17,4 +17,5 @@ export const recaptchaTemp = new Temp("recaptcha");
 export const iframeTemp = new Temp("iframe");
 export const enumTemp = new Temp("enum");
 export const resizeTemp = new Temp("resize");
+export const dateTimeTemp = new Temp("dateTime");
 export { Temp };

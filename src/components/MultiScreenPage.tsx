@@ -1,27 +1,22 @@
 import { tw } from "@/utils";
 import { Scroll } from "./Scroll";
 import React from "react";
-interface MultiScreenPageProps {
+import { ReactElement } from "@/types";
+interface MultiScreenPageProps extends ReactElement {
   pages?: JSX.Element[];
   focused?: number;
 }
-export function MultiScreenPage({ pages = [], focused = 0 }: MultiScreenPageProps) {
+export function MultiScreenPage({ pages = [], focused = 0, style, className, ...props }: MultiScreenPageProps) {
   const FocusedPage = React.useMemo(() => pages[focused], [pages, focused]);
   return (
     <div
-      className={tw(`
-        h-full
-        flex
-        absolute
-        inset-y-0
-        transition-[left]
-        duration-300
-        overflow-hidden
-      `)}
+      className={tw(`absolute inset-y-0 flex h-full overflow-hidden transition-[left] duration-300`, className)}
       style={{
         width: `${100 * pages.length}%`,
         left: `${-100 * focused}%`,
+        ...style,
       }}
+      {...props}
     >
       <div
         className="h-full"

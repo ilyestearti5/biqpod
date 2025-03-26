@@ -127,6 +127,11 @@ declare namespace Biqpod {
             icon?: IconProps["icon"];
             features?: string[];
         }
+        interface Marchant {
+            location: [number, number];
+            name: string;
+            photo: string;
+        }
     }
     namespace CSM {
         interface ExperationDate {
@@ -151,6 +156,7 @@ declare namespace Biqpod {
             label?: string;
             photo?: string;
             status?: string;
+            uid: string;
         }
         interface Extension {
             id: string;
@@ -234,6 +240,7 @@ declare namespace Biqpod {
                 type?: "product" | "service";
                 product?: Prod;
                 service?: Service;
+                initCount?: number;
             }
             interface Account {
                 id: string;
@@ -325,6 +332,7 @@ declare namespace Biqpod {
             firstname?: string | null;
             email?: string | null;
             password?: string | null;
+            verified?: boolean;
         }
         interface AccountChargeBy {
             id?: string;
@@ -356,7 +364,9 @@ declare namespace Biqpod {
             product?: {
                 name: string;
             } | null;
-            charge?: {};
+            charge?: {
+                serviceId: string;
+            };
             path?: string | null;
             serviceId?: string;
             meta?: Record<string, Biqpod.Types.Type | Biqpod.Types.Type[]>;
@@ -405,6 +415,64 @@ declare namespace Biqpod {
             file?: string;
         }
     }
+    namespace Paycard {
+        interface Card {
+            name: string;
+            photo: string;
+            enabled: boolean;
+            createdAt: number;
+            prices?: Record<Currency["name"], Price>;
+        }
+        interface Price {
+            buyer: number;
+            saller: number;
+        }
+        interface Code {
+            id: string;
+            code: string;
+            card: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: Reference["id"][];
+        }
+        interface Reference {
+            id: string;
+            code: string;
+            amount: number;
+            currency: string;
+            used: string;
+            card: string;
+            refCode: string;
+            withDrawId?: string;
+        }
+        interface Withdraw {
+            id: string;
+            user: string;
+            createdAt: number;
+            status: "pending" | "accepted" | "rejected";
+            refs: string[];
+            rip: string;
+            readed?: boolean;
+        }
+        interface Currency {
+            createdAt: number;
+            photo: string;
+            name: string;
+            type: "crypto" | "fiat";
+        }
+    }
+    namespace Help {
+        type Roles = "admin" | "developer" | "user";
+        interface ChatMessage {
+            user?: string;
+            message: string;
+            time: number;
+            role: Roles;
+            photo?: string;
+            projectId?: string;
+        }
+    }
     namespace Global {
         type BoundingBox = [string, string, string, string];
         interface Address {
@@ -437,7 +505,7 @@ declare namespace Biqpod {
         }
     }
     namespace Types {
-        type Data = "string" | "boolean" | "number" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
+        type Data = "string" | "boolean" | "number" | "color" | "array" | "enum" | "file" | "filter" | "password" | "object" | "date" | "regexp" | "audio" | "pin" | "image" | "range" | "between";
         type Axis = {
             x: number;
             y: number;
@@ -468,6 +536,9 @@ declare namespace Biqpod {
                 date: Partial<{
                     format: "date" | "time" | "month" | "datetime-local";
                     goToCurrent: boolean;
+                }>;
+                color: Partial<{
+                    propositions: string[];
                 }>;
                 pin: Partial<{
                     length: number;
@@ -519,6 +590,7 @@ declare namespace Biqpod {
                         err?: string;
                     }> | undefined;
                     addText: string;
+                    separator: string;
                 }>;
                 filter: Partial<{
                     list: {
@@ -562,19 +634,20 @@ declare namespace Biqpod {
                 string: null | string;
                 boolean: null | boolean;
                 number: null | number;
-                array: null | string[];
+                array: Nothing | string[];
                 enum: Nothing | string;
-                file: null | string[];
+                file: Nothing | string[];
                 filter: Nothing | string[];
                 password: null | string;
                 object: null | Record<string, string>;
                 date: null | string;
                 regexp: null | string;
-                audio: null | string;
+                audio: Nothing | string;
                 pin: Nothing | string;
-                image: null | string;
+                image: Nothing | string;
                 range: Nothing | number;
                 between: null | [number, number];
+                color: Nothing | string;
             }
             interface Type<T extends keyof Config = keyof Config> {
                 settingId: `${string}.${T}`;
@@ -587,6 +660,7 @@ declare namespace Biqpod {
                 deperacted?: boolean;
                 def?: Value[T];
                 readonly?: boolean;
+                synced?: boolean;
             }
         }
         interface Lang extends Record<string, string> {
@@ -723,11 +797,12 @@ declare namespace Biqpod {
             createdAt?: number;
             imageUrl?: string;
             id: string;
+            site?: string;
         }
     }
 }
 
-export declare function BlurOverlay({ className, animted, style, hidden, onLoadContent, children, onTransitionEnd, ...props }: OverlaysProps): JSX_2.Element;
+export declare function BlurOverlay({ className, onBlur, animted, style, hidden, onLoadContent, children, onTransitionEnd, ...props }: OverlaysProps): JSX_2.Element;
 
 export declare function BooleanFeild({ state, config, id }: BooleanFeildProps): JSX_2.Element;
 
@@ -735,7 +810,7 @@ export declare type BooleanFeildProps = FullFieldGeneralProps<"boolean">;
 
 export declare function Button({ children, leftIcon, rightIcon, topIcon, bottomIcon, className, icon, style, iconClassName, onPointerDown, onPointerLeave, onPointerUp, onMouseEnter, onMouseLeave, ...props }: ButtonProps): JSX_2.Element;
 
-export declare type ButtonProps = default_2.DetailedHTMLProps<default_2.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & IconProps & Partial<Record<`${"left" | "top" | "right" | "bottom"}Icon`, IconProps["icon"]>>;
+export declare type ButtonProps = React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & IconProps & Partial<Record<`${"left" | "top" | "right" | "bottom"}Icon`, IconProps["icon"]>>;
 
 export declare const Card: ({ className, style, ...props }: CardProps) => JSX_2.Element;
 
@@ -765,7 +840,7 @@ export declare interface ChangableComponentProps extends default_2.DetailedHTMLP
     onElement?(element: HTMLElement): void;
 }
 
-export declare const CircleLoading: ({ className, circleClassName, ...props }: CircleLoadingProps) => JSX_2.Element;
+export declare const CircleLoading: ({ className, circleClassName, children, ...props }: CircleLoadingProps) => JSX_2.Element;
 
 declare interface CircleLoadingProps extends ReactElement {
     circleClassName?: string;
@@ -776,9 +851,10 @@ export declare function CircleTip({ children, className, icon, style, iconClassN
 export declare interface CircleTipProps extends ClickProps<HTMLButtonElement> {
 }
 
-export declare const ClickedView: ({ children, className, style, onPointerDown, onPointerLeave, onPointerUp, onMouseEnter, onMouseLeave, ...props }: ClickedViewProps) => JSX_2.Element;
+export declare const ClickedView: default_2.ForwardRefExoticComponent<Omit<ClickedViewProps, "ref"> & default_2.RefAttributes<HTMLDivElement>>;
 
 export declare interface ClickedViewProps extends ReactElement {
+    ref?: default_2.Ref<HTMLDivElement>;
 }
 
 declare interface ClickProps<T> extends ReactElement<T>, IconProps {
@@ -813,6 +889,12 @@ declare const data: {
         light: string;
     };
     "bottom-sheeet.background": {};
+    danger: {
+        default: string;
+    };
+    success: {
+        default: string;
+    };
     "black.opacity": {
         dark: string;
         light: string;
@@ -962,7 +1044,9 @@ declare const data: {
     "submit.background": {
         default: string;
     };
-    "submit.color": {};
+    "submit.color": {
+        default: string;
+    };
     "success.text": {
         default: string;
     };
@@ -1010,7 +1094,7 @@ export declare type DateFeildProps = FeildGeneralProps<SettingValueType["date"] 
 
 export declare const dateToStringForInput: (date: Date, to?: SettingConfig["date"]["format"]) => string;
 
-export declare function DownOverlay({ hidden, animted, className, style, children, onLoadContent, onTransitionEnd, ...props }: OverlaysProps): JSX_2.Element;
+export declare function DownOverlay({ hidden, onBlur, animted, className, style, children, onLoadContent, onTransitionEnd, ...props }: OverlaysProps): JSX_2.Element;
 
 export declare const EmptyComponent: ({ children }: EmptyComponentProps) => JSX_2.Element;
 
@@ -1022,7 +1106,7 @@ export declare function EnumFeild({ config, id, state }: EnumFeildProps): JSX_2.
 
 export declare type EnumFeildProps = FullFieldGeneralProps<"enum">;
 
-export declare function FastList<T>({ focusId, itemSize, scrollWidth, slotId, render, handelSkip, data, maxHeight: max, countLastItems, overflow: { top, bottom }, ...props }: FastListProps<T>): JSX_2.Element;
+export declare function FastList<T>({ focusId, itemSize, scrollWidth, slotId, render, handelSkip, data, maxHeight: max, countLastItems, overflow: { top, bottom }, className, ...props }: FastListProps<T>): JSX_2.Element;
 
 export declare interface FastListItemProps<T> extends ReactElement {
     status: {
@@ -1041,7 +1125,7 @@ export declare interface FastListItemProps<T> extends ReactElement {
     };
 }
 
-export declare interface FastListProps<T> {
+export declare interface FastListProps<T> extends ReactElement {
     focusId: string;
     slotId: string;
     itemSize: number;
@@ -1062,8 +1146,6 @@ export declare interface FastListProps<T> {
     scrollWidth?: number;
 }
 
-export declare function Feild({ inputName, selectWhenFocusIn, placeholder, controlsPosition, className, value: _v, rows, style, controls, onFocus, onBlur, acceptHistory, propositions, ...props }: FeildProps): JSX_2.Element;
-
 declare interface FeildGeneralProps<T, C extends object> {
     id: string;
     state: State<T>;
@@ -1074,7 +1156,7 @@ export declare interface FeildProps extends TextAreaProps {
     inputName: string;
     selectWhenFocusIn?: boolean;
     help?: any;
-    controls?: Field["controls"];
+    controls?: Field_2["controls"];
     controlsPosition?: "top" | "bottom";
     maxRows?: number;
     minRows?: number;
@@ -1082,7 +1164,9 @@ export declare interface FeildProps extends TextAreaProps {
     propositions?: string[];
 }
 
-declare type Field = Biqpod.System.Field;
+export declare function Field({ inputName, selectWhenFocusIn, placeholder, controlsPosition, className, value: _v, rows, style, controls, onFocus, onBlur, acceptHistory, propositions, ...props }: FeildProps): JSX_2.Element;
+
+declare type Field_2 = Biqpod.System.Field;
 
 export declare function FileFeild({ state, config, id }: FileFeildProps): JSX_2.Element;
 
@@ -1163,6 +1247,14 @@ export declare interface FullFieldRecordProps<T extends keyof SettingValueType> 
 
 declare type FunctionComponentListItem<T> = (props: ListItemProps<T>) => JSX.Element;
 
+export declare const getDefaultIcons: () => Partial<Record<string, string | JSX.Element | ((props: {
+    blob: Blob;
+    url: FileInfoProps["url"];
+    uri: string;
+}) => JSX.Element | Promise<JSX.Element>)>>;
+
+export declare const getIconsFileField: () => Record<"ready" | QueryStatus, IconProp | undefined>;
+
 export declare const HorizontalLine: () => JSX_2.Element;
 
 export declare const Icon: ({ icon, iconClassName }: IconProps) => JSX_2.Element;
@@ -1173,8 +1265,6 @@ export declare interface IconProps {
 }
 
 export declare function Icons(): JSX_2.Element;
-
-export declare const iconsFileFeild: Record<QueryStatus | "ready", IconProps["icon"]>;
 
 declare function Image_2({ className, alt, src, children, style, ...props }: ImageProps): JSX_2.Element;
 export { Image_2 as Image }
@@ -1272,7 +1362,7 @@ export declare interface ListProps<T> {
 }
 
 export declare const Loadings: {
-    Circle: ({ className, circleClassName, ...props }: CircleLoadingProps) => JSX_2.Element;
+    Circle: ({ className, circleClassName, children, ...props }: CircleLoadingProps) => JSX_2.Element;
     Ball: ({ balls, ballClassName, ballStyle, icon, iconClassName }: BallLoadingProps) => JSX_2.Element;
     Cardio: () => JSX_2.Element;
 };
@@ -1287,9 +1377,9 @@ export declare const MaximizeActionIcon: ({ color }: SVGIconProps) => JSX_2.Elem
 
 export declare const MinimizeActionIcon: ({ color }: SVGIconProps) => JSX_2.Element;
 
-export declare function MultiScreenPage({ pages, focused }: MultiScreenPageProps): JSX_2.Element;
+export declare function MultiScreenPage({ pages, focused, style, className, ...props }: MultiScreenPageProps): JSX_2.Element;
 
-declare interface MultiScreenPageProps {
+declare interface MultiScreenPageProps extends ReactElement {
     pages?: JSX.Element[];
     focused?: number;
 }
@@ -1464,7 +1554,7 @@ export declare interface TabProps extends ClickProps<HTMLSpanElement> {
     isActive?: boolean;
 }
 
-export declare const Tabs: ({ state, defaultValue, tabs, direction, hideLabelWhereSmalled, buttonClassName, className, style, ...props }: TabsProps) => JSX_2.Element;
+export declare const Tabs: ({ state, defaultValue, tabs, direction, buttonClassName, contentClassName, className, style, ...props }: TabsProps) => JSX_2.Element;
 
 export declare interface TabsProps extends ReactElement {
     buttonClassName?: string;
@@ -1474,8 +1564,8 @@ export declare interface TabsProps extends ReactElement {
         value: string;
         icon?: IconProps["icon"];
     }[];
-    hideLabelWhereSmalled?: boolean;
     direction?: "vertical" | "horizontal";
+    contentClassName?: string;
 }
 
 export declare const TextAnimation: ({ content, time }: TextAnimationProps) => JSX_2.Element;
@@ -1491,7 +1581,7 @@ export declare type TextAreaHeighlightRenderProps = string | ((text: string) => 
 
 export declare interface TextAreaProps extends default_2.DetailedHTMLProps<default_2.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
     propositions?: string[];
-    selection?: Field["selection"];
+    selection?: Field_2["selection"];
     onSelectionChange?: (selection?: TextAreaProps["selection"]) => void;
     onValueChange?: (value: string) => any;
     tabSize?: number;
@@ -1582,7 +1672,7 @@ export declare interface UpdateDataProps {
     value: string;
     setValue: (value: string) => void;
     defaultContent: string;
-    controls?: Field["controls"];
+    controls?: Field_2["controls"];
     placeholder?: string;
 }
 

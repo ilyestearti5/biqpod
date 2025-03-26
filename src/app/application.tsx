@@ -1,6 +1,6 @@
 import settings from "@/apis/settings";
 import "@/scss/index.scss";
-import React from "react";
+import { StrictMode, useEffect } from "react";
 import { store } from "@/store";
 import { ClientCloud, getMainCloud } from "@/apis";
 import { Setting, settingHooks } from "@/data/system/settings.model";
@@ -23,9 +23,9 @@ export type MebePromise<T> = T | Promise<T>;
 export declare interface Cmd extends Command {
   keys: Omit<Key, "command">[];
 }
+type JSXOut = JSX.Element | (() => JSX.Element);
 export interface StartApplicationProps {
-  app: JSX.Element | (() => JSX.Element);
-  loading?: JSX.Element | (() => JSX.Element);
+  loading?: JSXOut;
   onPrepare?: () => MebePromise<
     | undefined
     | void
@@ -38,9 +38,11 @@ export interface StartApplicationProps {
   >;
   timeLoading?: number;
   isDev?: boolean;
+  projectId?: string;
 }
 export interface ApplicationProps {
   props: StartApplicationProps;
+  app: JSXOut;
 }
 export interface CallableComponentProps {
   render?: JSX.Element | (() => JSX.Element);
@@ -48,11 +50,22 @@ export interface CallableComponentProps {
 export const CallableComponent = ({ render: Render = <EmptyComponent /> }: CallableComponentProps) => {
   return typeof Render == "function" ? <Render /> : Render;
 };
-export const Application = ({ props }: ApplicationProps) => {
+export const Application = ({ props, app }: ApplicationProps) => {
   initConfigurations();
   initSystem();
   initUser();
-  React.useEffect(() => {
+  useEffect(() => {
+    setTemp("projectId", props.projectId);
+    settingHooks.setAll(
+      Object.entries(data).map(([key, props]: [string, any]) => {
+        return {
+          ...props,
+          settingId: key,
+          value: props.def,
+        };
+      }),
+    );
+    status.set("idle");
     if (isDesktop) {
       const { ipcRenderer } = require("electron");
       const callback = (_e: any, id: number) => {
@@ -64,19 +77,8 @@ export const Application = ({ props }: ApplicationProps) => {
       };
     }
   }, []);
-  React.useEffect(() => {
-    settingHooks.setAll(
-      Object.entries(data).map(([key, props]: [string, any]) => {
-        return {
-          ...props,
-          settingId: key,
-          value: props.def,
-        };
-      }),
-    );
-  }, []);
   const isDev = getTemp<boolean>("env.isDev");
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDev) {
       window.auth = getMainCloud()?.app.auth;
       window.cloud = ClientCloud;
@@ -120,13 +122,10 @@ export const Application = ({ props }: ApplicationProps) => {
     }
     setTemp("project", config);
   }, [props]);
-  React.useEffect(() => {
-    status.set("idle");
-  }, []);
   return (
-    <EmptyComponent>
+    <div className="fixed inset-0 flex flex-col w-full overflow-hidden">
       {["ready", "idle", "loading"].includes(status.get) && <CallableComponent render={props.loading} />}
-      {status.get == "success" && <CallableComponent render={props.app} />}
+      {status.get == "success" && <CallableComponent render={app} />}
       {status.get == "error" && (
         <div className="flex justify-center items-center w-full h-full">
           <Card className="flex flex-col items-center gap-2">
@@ -145,15 +144,15 @@ export const Application = ({ props }: ApplicationProps) => {
           </Card>
         </div>
       )}
-    </EmptyComponent>
+    </div>
   );
 };
-export const startApplication = async (props: StartApplicationProps) => {
+export const startApplication = async (app: JSXOut, props: StartApplicationProps) => {
   const rootElement = document.createElement("div");
   rootElement.classList.add("window");
   props = defaultObject(props, {
     loading: (
-      <div className="top-1/2 left-1/2 fixed transform -translate-x-1/2 -translate-y-1/2">
+      <div className="top-1/2 left-1/2 fixed -translate-x-1/2 -translate-y-1/2 transform">
         <CircleLoading circleClassName="w-[50px] h-[50px] border-4 " />
       </div>
     ),
@@ -164,11 +163,11 @@ export const startApplication = async (props: StartApplicationProps) => {
   // render react elements inside the rootElement
   const root = createRoot(rootElement);
   root.render(
-    <React.StrictMode>
+    <StrictMode>
       <Provider store={store}>
-        <Application props={props} />
+        <Application app={app} props={props} />
       </Provider>
-    </React.StrictMode>,
+    </StrictMode>,
   );
   return root;
 };

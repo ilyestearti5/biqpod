@@ -1,14 +1,14 @@
 import Electron from "electron";
 import { onceState, onState, settingEntitySelect, showToast } from "@/hooks";
-import { dialogTemps, menuTemp, progressTemp } from "@/reducers/Object/allTemps";
+import { dateTimeTemp, dialogTemps, menuTemp, progressTemp } from "@/reducers/Object/allTemps";
 import { nanoid } from "@reduxjs/toolkit";
 import { mapAsync } from "@/utils";
 import { isDesktop } from "@/app";
 import { getTempFromStore, setTemp } from "@/reducers/Object/object.slice";
 import { store } from "@/store";
-import { DialogProps, OpenMenuProps, OpenPathConfig, SendEmailProps, SendSmsProps, SendTelProps, SetProgressProps } from "@/types";
+import { Biqpod, DialogProps, OpenMenuProps, OpenPathConfig, SendEmailProps, SendSmsProps, SendTelProps, SetProgressProps } from "@/types";
 // desc
-export const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp", "tiff", "ico", "jfif"];
+export const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp", "tiff", "ico", "jfif", "pjpeg", "pjp", "avif", "apng", "heif", "heic", "flif", "jxl", "jpe", "jif", "jfi"];
 const callbacks: Map<string, (ev: Event) => void> = new Map();
 export function openDialog(props: DialogProps): Promise<Electron.MessageBoxReturnValue> {
   const isNative = typeof props.native == "boolean" ? props.native : !!settingEntitySelect.selectById(store.getState().settings, "ui/native.boolean")?.value;
@@ -199,38 +199,79 @@ export const confirm = async (config: Omit<DialogProps, "buttons">) => {
   const res = await openDialog({
     ...config,
     buttons: ["Yes", "No"],
+    defaultId: 0,
   });
   return res.response === 0;
 };
+export const alert = async (config: Omit<DialogProps, "buttons">) => {
+  await openDialog({
+    ...config,
+    buttons: ["Ok"],
+    defaultId: 0,
+  });
+};
 export interface DatePickerTimeOptions {
   properties: ["year", "month", "minutes", "hours", "seconds", "milliseconds"];
-  init: number | Date;
+  init?: number | Date;
 }
 export interface DatePickerTimeResult {
-  time: number;
-  canceled: boolean;
+  time: string;
   id: string;
 }
-export const openDatePicker = async (config: Partial<DatePickerTimeOptions>): Promise<DatePickerTimeResult> => {
+export const openDatePicker = async (config: Partial<DatePickerTimeOptions>): Promise<DatePickerTimeResult | null> => {
   const id = nanoid();
-  setTemp("date-layout-time.init", config.init instanceof Date ? config.init.getTime() : config.init);
-  setTemp("date-layout-time.id", id);
+  dateTimeTemp.setTemp("init", config.init instanceof Date ? config.init.getTime() : config.init);
+  dateTimeTemp.setTemp("id", id);
   return new Promise((res) => {
     const un = onState(
-      "date-layout-time.id",
+      "dateTime.id",
       (layoutId) => layoutId == id,
       (state) => {
-        const datePickerTimeState = getTempFromStore<{ result?: number; id: string; canceled?: boolean }>("date-layout-time", state);
-        if (typeof datePickerTimeState?.result == "number") {
+        const closeDatePicker = () => {
+          dateTimeTemp.setTemp("id", null);
+          dateTimeTemp.setTemp("canceled", null);
+          dateTimeTemp.setTemp("result", null);
+          un();
+        };
+        const datePickerTimeState = getTempFromStore<{ result?: string; id: string; canceled?: boolean }>("date-layout-time", state);
+        console.log(datePickerTimeState);
+        if (typeof datePickerTimeState?.result == "string") {
           res({
             id,
             time: datePickerTimeState.result,
-            canceled: datePickerTimeState.canceled || false,
           });
-          setTemp("date-layout-time", null);
-          un();
+        } else if (datePickerTimeState?.canceled) {
+          res(null);
+          closeDatePicker();
         }
       },
     );
+  });
+};
+export const playAudio = async (src: string) => {
+  const audio = document.createElement("audio");
+  audio.src = src;
+  await audio.play();
+};
+
+export interface OpenColorPickerOptions extends Partial<Biqpod.Types.Axis> {
+  init?: string;
+}
+
+export const openColorPicker = async ({ init = "#000000", x: left = 0, y: top = 0 }: OpenColorPickerOptions) => {
+  return new Promise<string>((res) => {
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = init;
+    input.style.position = "fixed";
+    input.className = "w-0 h-0 p-0 m-0";
+    document.appendChild(input);
+    input.style.left = `${left}px`;
+    input.style.top = `${top}px`;
+    input.onchange = () => {
+      res(input.value);
+      input.remove();
+    };
+    input.click();
   });
 };

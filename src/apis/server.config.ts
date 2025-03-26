@@ -10,7 +10,6 @@ export type Path = Biqpod.Cloud.Path;
 export type CloudSelection<T extends object> = Biqpod.Cloud.Database.NoSQL.Selection<T>;
 export interface AiMessage {
   message: string;
-  response: Blob;
 }
 export class ClientCloud {
   inited: Partial<Record<string, boolean>> = {};
@@ -106,7 +105,7 @@ export class ClientCloud {
       // rest of the functions methods
     },
     ai: {
-      sendMessage: async (_messages: (Blob | string)[]): Promise<AiMessage | null> => {
+      sendMessage: async (_messages: string): Promise<AiMessage | null> => {
         return null;
       },
       translate: async (_text: string, _to: string, _from?: string): Promise<string | null> => {

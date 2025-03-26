@@ -4,6 +4,7 @@ export default {
       def: true,
       desc: "animation in the preferences",
       name: "animation in preferences",
+      synced: true,
     },
     "preferences/fastScrollKey.enum": {
       config: {
@@ -79,10 +80,12 @@ export default {
             value: "system-ui",
           },
         ],
+        search: true,
       },
       def: "Outfit",
       desc: "change one between this fonts ${state.settings.entities['preferences/font.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
       name: "Font",
+      synced: true,
     },
     "preferences/toastTime.number": {
       config: {
@@ -128,6 +131,17 @@ export default {
       def: "top",
       desc: "the position of the toast is one between ${state.settings.entities['toast/position.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
       name: "toast position",
+      synced: true,
+    },
+    "keyboard/full.boolean": {
+      def: false,
+      desc: "full keyboard",
+      name: "full keyboard",
+      private: true,
+      synced: true,
+      config: {
+        style: "checkbox",
+      },
     },
     "visibility/configurations.boolean": {
       def: false,
@@ -142,10 +156,6 @@ export default {
     "visibility/headerNotifays.boolean": {
       def: false,
       name: "header panel notifications visibility",
-      private: true,
-    },
-    "visibility/keyPanding/form.boolean": {
-      def: false,
       private: true,
     },
     "visibility/leftSide.boolean": {
@@ -180,6 +190,7 @@ export default {
       def: false,
       desc: "switch between dark mode and light mode",
       name: "dark mode",
+      synced: true,
     },
     "window/lang.enum": {
       config: {
@@ -217,6 +228,7 @@ export default {
       def: "en",
       desc: "choise one of langs: ${state.settings.entities['window/lang.enum']?.config.list.map(({ content })=> '`' + content + '`').join(' , ')}",
       name: "language",
+      synced: true,
     },
     "preferences/scrollAnimation.boolean.boolean": {
       def: false,
@@ -244,5 +256,6 @@ export default {
       desc: "See Elements Components In Screen",
       def: false,
     },
+    "developer/insertColor.color": {},
   },
 };

@@ -12,12 +12,15 @@ import { EmptyComponent } from "../EmptyComponent";
 import { FullFieldGeneralProps } from "@/types";
 import { IconProps } from "../Icon";
 export type FileFeildProps = FullFieldGeneralProps<"file">;
-export const iconsFileFeild: Record<QueryStatus | "ready", IconProps["icon"]> = {
-  loading: allIcons.solid.faRotate,
-  error: allIcons.solid.faXmark,
-  success: allIcons.solid.faCheck,
-  ready: allIcons.solid.faFileUpload,
-  idle: undefined,
+export const getIconsFileField = () => {
+  const iconsFileFeild: Record<QueryStatus | "ready", IconProps["icon"]> = {
+    loading: allIcons.solid.faRotate,
+    error: allIcons.solid.faXmark,
+    success: allIcons.solid.faCheck,
+    ready: allIcons.solid.faFileUpload,
+    idle: undefined,
+  };
+  return iconsFileFeild;
 };
 export function FileFeild({ state, config = {}, id }: FileFeildProps) {
   const { emptyMessage = true, upload = true } = config.visibility || {};
@@ -82,13 +85,13 @@ export function FileFeild({ state, config = {}, id }: FileFeildProps) {
         }
       }}
     >
-      {!!state.get?.length && (
+      {state.get && !!state.get.length && (
         <EmptyComponent>
           <div className="flex flex-wrap gap-1 p-2 w-full">
             {state.get?.map((href, index) => {
               return (
                 <span
-                  className="inline-flex relative flex-col justify-between items-center rounded-xl cursor-pointer overflow-hidden group"
+                  className="group inline-flex relative flex-col justify-between items-center rounded-xl overflow-hidden cursor-pointer"
                   style={{
                     ...colorMerge("gray.opacity"),
                   }}
@@ -102,7 +105,7 @@ export function FileFeild({ state, config = {}, id }: FileFeildProps) {
                         {
                           label: "Remove",
                           click() {
-                            state.set((s) => s?.filter((file) => file != href) || null);
+                            state.set((s) => (s && s?.filter((file) => file != href)) || null);
                             status.set("ready");
                           },
                         },
@@ -126,7 +129,7 @@ export function FileFeild({ state, config = {}, id }: FileFeildProps) {
                       color: "white",
                     }}
                     onClick={() => {
-                      state.set((s) => s?.filter((file) => file != href) || null);
+                      state.set((s) => (s && s.filter((file) => file != href)) || null);
                       status.set("ready");
                     }}
                     icon={allIcons.solid.faXmark}
@@ -149,14 +152,14 @@ export function FileFeild({ state, config = {}, id }: FileFeildProps) {
         className="flex items-center gap-1 p-2 w-full cursor-pointer"
       >
         <div className="relative flex flex-wrap gap-1 w-full">
-          {!state.get?.length && (
+          {state.get && !state.get?.length && (
             <span hidden={!emptyMessage} className="capitalize">
               <Translate content="no files choised" />
             </span>
           )}
         </div>
         <div className="flex items-center gap-x-1">
-          <Tip hidden={!upload} id={id} iconClassName={tw(status.get == "loading" && "animate-spin")} icon={iconsFileFeild[status.get]} />
+          <Tip hidden={!upload} id={id} iconClassName={tw(status.get == "loading" && "animate-spin")} icon={getIconsFileField()[status.get]} />
         </div>
       </div>
     </div>

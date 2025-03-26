@@ -1,8 +1,8 @@
-import React from "react";
+import { useEffect, useMemo } from "react";
 import { handelShadowColor, useColorMerge } from "@/hooks";
 import { useCopyState } from "@/hooks";
 import { Icon, IconProps } from "./Icon";
-import { mergeObject, range, tw } from "@/utils";
+import { mergeObject, tw } from "@/utils";
 export type ButtonProps = React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> &
   IconProps &
   Partial<Record<`${"left" | "top" | "right" | "bottom"}Icon`, IconProps["icon"]>>;
@@ -27,14 +27,14 @@ export function Button({
   const focused = useCopyState(false);
   const active = useCopyState(false);
   const hover = useCopyState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       focused.set(false);
       active.set(false);
       hover.set(false);
     };
   }, []);
-  const fullStyle = React.useMemo(() => {
+  const fullStyle = useMemo(() => {
     return {
       ...colorMerge(
         "primary",
@@ -90,20 +90,15 @@ export function Button({
         ...colorMerge("primary"),
         ...mergeObject(fullStyle),
       }}
-      className={tw("relative px-3 py-2 rounded-md w-full capitalize transition-[transform,box-shadow] cursor-pointer overflow-hidden btn active:scale-95", className)}
+      className={tw("relative px-3 py-2 rounded-md w-full overflow-hidden capitalize active:scale-95 transition-[transform,box-shadow] cursor-pointer btn", className)}
       {...props}
     >
-      {range(1, 3).map((index) => {
-        return (
-          <i
-            key={index}
-            className="btn_bg"
-            style={{
-              ...colorMerge("opacity"),
-            }}
-          />
-        );
-      })}
+      <i
+        className="btn_bg"
+        style={{
+          ...colorMerge("opacity"),
+        }}
+      />
       <div className="flex flex-col flex-none justify-center items-center gap-2 btn-content">
         <Icon iconClassName={iconClassName} icon={topIcon} />
         <div className="flex justify-center items-center gap-2">

@@ -8,6 +8,12 @@ export default {
       light: "#000",
     },
     "bottom-sheeet.background": {},
+    danger: {
+      default: "#F33",
+    },
+    success: {
+      default: "#2ea043",
+    },
     "black.opacity": {
       dark: "#0006",
       light: "#0003",
@@ -157,7 +163,9 @@ export default {
     "submit.background": {
       default: "#9994",
     },
-    "submit.color": {},
+    "submit.color": {
+      default: "#fff",
+    },
     "success.text": {
       default: "#14B85B",
     },

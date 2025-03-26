@@ -15,26 +15,26 @@
 .resize-bar {
   &.left,
   &.right {
-    @apply cursor-e-resize inset-y-0 w-[3px];
+    @apply inset-y-0 w-[3px] cursor-e-resize;
   }
   &.top,
   &.bottom {
     @apply inset-x-0 h-[3px] cursor-n-resize;
   }
   &.left {
-    @apply rounded-ss-lg rounded-es-lg left-0;
+    @apply left-0 rounded-ss-lg rounded-es-lg;
   }
   &.right {
-    @apply rounded-ee-lg rounded-se-lg right-0;
+    @apply right-0 rounded-se-lg rounded-ee-lg;
   }
   &.top {
-    @apply rounded-ss-lg rounded-se-lg top-0;
+    @apply top-0 rounded-ss-lg rounded-se-lg;
   }
   &.bottom {
-    @apply rounded-es-lg rounded-ee-lg bottom-0;
+    @apply bottom-0 rounded-ee-lg rounded-es-lg;
   }
   .resize-overview {
-    @apply fixed inset-0 z-[10000000000000];
+    @apply z-[10000000000000] fixed inset-0;
   }
 }
 /* Hide the default increment and decrement arrows */
@@ -65,13 +65,16 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 ::-webkit-scrollbar {
-  @apply size-[0px] bg-transparent;
+  @apply size-[0px];
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-[var(--biqpod-gray-opacity-2)];
 }
 ::placeholder {
   @apply truncate;
 }
 * {
-  @apply outline-none border-none;
+  @apply border-none outline-none;
 }
 body {
   font-family: system-ui, sans-serif;
@@ -98,19 +101,19 @@ textarea {
   }
 }
 .row {
-  @apply flex items-center justify-between border border-solid border-transparent;
+  @apply flex justify-between items-center border border-transparent border-solid;
 }
 .menu {
-  @apply rounded-lg border border-solid border-transparent p-1 min-w-[350px]  absolute left-full top-0 ml-1 -mt-1 shadow-lg;
+  @apply top-0 left-full absolute shadow-lg -mt-1 ml-1 p-1 border border-transparent border-solid rounded-lg min-w-[350px];
 }
 .card {
-  @apply rounded-2xl lg:w-[500px] w-[400px] h-[300px] max-sm:w-full border-solid border-transparent border shadow-lg flex flex-col;
+  @apply flex flex-col shadow-lg border border-transparent border-solid rounded-2xl w-[400px] max-sm:w-full lg:w-[500px] h-[300px];
 }
 .array-field {
   .items {
     @apply flex flex-wrap gap-1 mb-2;
     .item {
-      @apply inline-flex gap-1 items-center border border-solid border-transparent rounded-md px-2 py-1;
+      @apply inline-flex items-center gap-1 px-2 py-1 border border-transparent border-solid rounded-md;
     }
   }
 }
@@ -118,12 +121,12 @@ video {
   @apply w-full h-full;
 }
 .col {
-  @apply p-[2px] relative w-full flex items-center gap-2 truncate;
+  @apply relative flex items-center gap-2 p-[2px] w-full truncate;
 }
 .scroll-view {
-  @apply relative w-full flex flex-col h-full overflow-hidden;
+  @apply relative flex flex-col w-full h-full overflow-hidden;
   .scroll-shadow-view {
-    @apply absolute inset-x-0 -top-[20px] h-[20px] transition-shadow duration-100 pointer-events-none z-[1000];
+    @apply -top-[20px] z-[1000] absolute inset-x-0 h-[20px] transition-shadow duration-100 pointer-events-none;
   }
 }
 .arrow {
@@ -141,7 +144,7 @@ a:focus {
   @apply outline outline-1 -outline-offset-1;
 }
 .styled-btn {
-  @apply relative w-[250px] h-[50px] flex items-center justify-center cursor-pointer;
+  @apply relative flex justify-center items-center w-[250px] h-[50px] cursor-pointer;
   &:active {
     @apply scale-95;
   }
@@ -182,7 +185,7 @@ a:focus {
     }
   }
   &:hover {
-    @apply tracking-[3px] text-white;
+    @apply text-white tracking-[3px];
     .styled-btn-content {
       .before {
         @apply skew-x-[45deg] translate-x-[200px] translate-y-[200px];
@@ -215,10 +218,10 @@ a:focus {
   &_bg {
     @apply absolute left-1/2 top-[90%] w-full h-0 block rounded-[50%] pt-[100%] scale-0;
     margin: -50% 0 0 -50%;
-    transition: transform 0.8s cubic-bezier(0.5, 1, 0.89, 1);
+    transition: transform 0.4s cubic-bezier(0.5, 1, 0.89, 1);
     @for $i from 1 through 3 {
       &:nth-of-type(#{$i}) {
-        transition-delay: 0.08s * (4 - $i);
+        transition-delay: 0.08s * ($i - 1);
       }
     }
     @mixin active-and-focus {
@@ -226,7 +229,7 @@ a:focus {
       transition: transform 0.4s ease-in-out;
       @for $i from 1 through 3 {
         &:nth-of-type(#{$i}) {
-          transition-delay: 0.08s * $i;
+          transition-delay: 0.08s * ($i - 1);
         }
       }
     }
@@ -290,7 +293,7 @@ a:focus {
   }
 }
 .confetti {
-  @apply absolute z-[1] top-[-10px] border-none;
+  @apply top-[-10px] z-[1] absolute border-none;
   &--animation-slow {
     animation: confetti-slow 2.25s linear 1 forwards;
   }
@@ -303,10 +306,10 @@ a:focus {
 }
 /* Checkmark */
 .checkmark-circle {
-  @apply relative w-[150px] h-[150px] inline-block mx-auto align-top;
+  @apply inline-block relative mx-auto w-[150px] h-[150px] align-top;
 }
 .checkmark-circle .background {
-  @apply absolute w-full h-full rounded-full;
+  @apply absolute rounded-full w-full h-full;
 }
 .checkmark-circle .checkmark {
   @apply rounded-[5px];
@@ -359,16 +362,16 @@ a {
 }
 .markdown {
   code {
-    @apply px-2 rounded-md inline-block text-sm;
+    @apply inline-block px-2 rounded-md text-sm;
   }
   table {
-    @apply border border-solid border-transparent my-2;
+    @apply my-2 border border-transparent border-solid;
     th {
       @apply text-left;
     }
     td,
     th {
-      @apply border border-solid border-transparent p-3;
+      @apply p-3 border border-transparent border-solid;
     }
     tr {
       @apply even:bg-opacity-10;

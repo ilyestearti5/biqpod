@@ -175,7 +175,7 @@ export function Commands() {
           }),
         }}
         className={tw(
-          `md:top-[37px] left-1/2 absolute shadow-lg border border-transparent border-solid rounded-xl max-md:rounded-none md:w-[max(50vw,400px)] max-md:w-full max-md:h-full transform -translate-x-1/2 overflow-hidden`,
+          `md:top-[37px] left-1/2 absolute flex flex-col shadow-lg border border-transparent border-solid rounded-xl max-md:rounded-none md:w-[max(50vw,400px)] max-md:w-full max-md:h-full overflow-hidden -translate-x-1/2 transform`,
         )}
       >
         <div className={tw("h-[0px] transition-[height]", commandId && "max-md:h-[50px] md:h-[40px]")}>

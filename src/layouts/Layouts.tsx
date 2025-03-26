@@ -18,12 +18,15 @@ import {
   ApplicationsLayout,
   BottomSheetLayout,
   ControlsLayout,
+  DateLayout,
+  Help,
 } from "@/layouts";
-export interface LayoutesProps {
+import { PopupLayout } from "./PopupLayout";
+export interface LayoutesOptions {
   children?: React.ReactNode;
   profileContent?: React.ReactNode;
 }
-export const Layoutes = ({ children, profileContent }: LayoutesProps) => {
+export const Layoutes = ({ children, profileContent }: LayoutesOptions) => {
   return (
     <EmptyComponent>
       {children}
@@ -41,11 +44,14 @@ export const Layoutes = ({ children, profileContent }: LayoutesProps) => {
       <Notifications />
       <Toasts />
       <DialogBoxLayout />
-      <MenuLayout />
       <TitleProvider />
       <DevReadingHTML />
+      <Help />
       <BottomSheetLayout />
+      <PopupLayout />
       <ControlsLayout />
+      <DateLayout />
+      <MenuLayout />
     </EmptyComponent>
   );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import { createRef, useCallback, useEffect, useMemo } from "react";
 import { Focus } from "@/components/Focus";
 import { mergeObject, tw, isSorted } from "@/utils";
 import { useSettingValue, useCopyState, handelShadowColor, useColorMerge, escape, initNewList, slotHooks } from "@/hooks";
@@ -20,7 +20,7 @@ export interface FastListItemProps<T> extends ReactElement {
     skip: (only: boolean, value: boolean) => void;
   };
 }
-export interface FastListProps<T> {
+export interface FastListProps<T> extends ReactElement {
   focusId: string;
   slotId: string;
   itemSize: number;
@@ -48,6 +48,7 @@ export function FastList<T>({
   maxHeight: max,
   countLastItems = 3,
   overflow: { top = 0, bottom = 0 } = { top: 0, bottom: 0 },
+  className,
   ...props
 }: FastListProps<T>) {
   // all config of slot list (length , submited , focused , selected , ...)
@@ -59,16 +60,16 @@ export function FastList<T>({
   // add slot if is not exists
   initNewList(slotId, data);
   // make the list length it is the data length and scroll to top
-  React.useEffect(() => {
+  useEffect(() => {
     slotHooks.setOneFeild(slotId, "length", data.length);
     if (!data.length) {
       escape(slotId);
     }
   }, [data]);
-  const Item = React.useMemo(() => {
+  const Item = useMemo(() => {
     return render;
   }, []);
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof focused != "number") {
       return;
     }
@@ -79,11 +80,11 @@ export function FastList<T>({
   // calculate height of the view element every 600 ms
   const scrollingUsingBar = useCopyState(false);
   // when focused changed the scrolling is not by bar
-  React.useEffect(() => {
+  useEffect(() => {
     scrollingUsingBar.set(false);
   }, [focused]);
   // check the focused item in the slot and scroll to it
-  React.useEffect(() => {
+  useEffect(() => {
     if ([scrollingUsingBar.get, typeof focused != "number", focused! >= data.length, height.get < itemSize].some(Boolean)) {
       return;
     }
@@ -107,29 +108,29 @@ export function FastList<T>({
   // key for where press this key the scroll gona scrolling speedly and is one of alt , control , shift
   const speedKey = useSettingValue("preferences/fastScrollKey.enum");
   // make component not every time changed
-  const maxHeight = React.useMemo(() => {
+  const maxHeight = useMemo(() => {
     return itemSize * data.length;
   }, [itemSize, data]);
   //
   // get fully scroll height for list with height of last height
-  const maxHeightWithLastItems = React.useMemo(() => {
+  const maxHeightWithLastItems = useMemo(() => {
     return maxHeight + itemSize * countLastItems;
   }, [maxHeight, itemSize, countLastItems]);
   // height of thumb in percantage;
-  const heightPercantage = React.useMemo(() => {
+  const heightPercantage = useMemo(() => {
     return (height.get * 100) / maxHeightWithLastItems;
   }, [maxHeightWithLastItems, height.get]);
   // top scroll value
-  const topScroll = React.useMemo(() => {
+  const topScroll = useMemo(() => {
     return (scroll.get * 100) / maxHeightWithLastItems;
   }, [maxHeightWithLastItems, scroll.get]);
   // render element list
   const isScrollAnimation = useSettingValue("preferences/scrollAnimaWtion.boolean.boolean");
   const scrollBarHoverd = useCopyState(false);
   const changableComponentViewConfig = useCopyState<null | DOMRect>(null);
-  const scrollBarThumbElement = React.createRef<HTMLDivElement>();
+  const scrollBarThumbElement = createRef<HTMLDivElement>();
   const colorMerge = useColorMerge();
-  const changePositionCallback = React.useCallback(
+  const changePositionCallback = useCallback(
     (clientY: number) => {
       const configuration = changableComponentViewConfig.get;
       if (configuration) {
@@ -146,12 +147,12 @@ export function FastList<T>({
     },
     [changableComponentViewConfig.get, scrollBarThumbElement, maxHeightWithLastItems],
   );
-  const scrollVisibility = React.useMemo(() => {
+  const scrollVisibility = useMemo(() => {
     return heightPercantage <= 100;
   }, [heightPercantage]);
-  const elementRef = React.createRef<HTMLDivElement>();
+  const elementRef = createRef<HTMLDivElement>();
   const eleRef = useCopyState<HTMLElement | null>(null);
-  React.useEffect(() => {
+  useEffect(() => {
     const scrollBarThumb = eleRef.get;
     if (scrollBarThumb) {
       const handleTouchMove = (e: TouchEvent) => {
@@ -170,7 +171,7 @@ export function FastList<T>({
       };
     }
   }, [eleRef.get, changePositionCallback]);
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   const scrollBarThumb = scrollBarElement.current;
   //   if (scrollBarThumb) {
   //     const handleTouchMove = (e: TouchEvent) => {
@@ -184,7 +185,7 @@ export function FastList<T>({
   //     };
   //   }
   // }, [scrollBarElement, changePositionCallback]);
-  React.useEffect(() => {
+  useEffect(() => {
     if (eleRef.get) {
       const callback = (e: WheelEvent) => {
         if (heightPercantage < 100) {
@@ -216,13 +217,13 @@ export function FastList<T>({
   }, [eleRef.get, maxHeightWithLastItems, height.get]);
   return (
     <Focus
-      {...props}
       focusId={focusId}
-      className="relative w-full h-full select-none"
+      className={tw("relative w-full h-full select-none", className)}
       style={{
         ...mergeObject(max && data.length * itemSize > max && { height: "50vh" }, max && data.length * itemSize < max && { height: data.length * itemSize }),
       }}
-      ignoreOutline={typeof focused == "number"}
+      {...props}
+      ignoreOutline={true}
       id={slotId}
     >
       <ChangableComponent

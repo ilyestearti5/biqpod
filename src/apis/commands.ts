@@ -798,5 +798,14 @@ export default {
       ],
       label: "bottom sheet : escape",
     },
+    "feedback/send": {
+      commands: [
+        {
+          payload: ["send-feedback"],
+          type: "actions/exec",
+        },
+      ],
+      label: "Help : Send Feedback",
+    },
   },
 };

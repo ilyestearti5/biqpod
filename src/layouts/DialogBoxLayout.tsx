@@ -1,8 +1,8 @@
 import dialogOpenSrc from "assets/audios/dialog-open.mp3";
-import React from "react";
+import { useEffect, useMemo } from "react";
 import { BlurOverlay } from "@/components/Overlays";
 import { EmptyComponent } from "@/components/EmptyComponent";
-import { useColorMerge, useSettingValue } from "@/hooks";
+import { playAudio, useColorMerge, useSettingValue } from "@/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Image } from "@/components/Image";
 import { BooleanFeild } from "@/components/Fields/BooleanField";
@@ -26,16 +26,17 @@ export const DialogBoxLayout = () => {
   const colorMerge = useColorMerge();
   const showMore = useCopyState(false);
   const checked = dialogTemps.useTemp<boolean>("checked");
-  React.useEffect(() => {
-    if (typeof config?.checkboxChecked == "boolean") {
-      checked.set(config.checkboxChecked);
+  useEffect(() => {
+    if (config?.checkboxChecked) {
+      checked.set(!!config.checkboxChecked);
     }
-  }, [config]);
-  React.useEffect(() => {
+  }, [config?.checkboxChecked]);
+  useEffect(() => {
     slotHooks.setOneFeild("dialog-list", "submited", null);
     slotHooks.setOneFeild("dialog-list", "focused", config?.defaultId);
-  }, [confirmId, config]);
-  React.useEffect(() => {
+    showMore.set(false);
+  }, [confirmId, config?.defaultId]);
+  useEffect(() => {
     slotHooks.setOneFeild("dialog-list", "focused", config?.defaultId || 0);
   }, [config]);
   useAction(
@@ -45,26 +46,24 @@ export const DialogBoxLayout = () => {
         slotHooks.setOneFeild("dialog-list", "submited", config.cancelId);
       }
     },
-    [config],
+    [config?.cancelId],
   );
-  const srcPlay = React.useMemo(() => {
+  const srcPlay = useMemo(() => {
     if (!confirmId) {
       return null;
     }
     return dialogOpenSrc;
-  }, [confirmId, config]);
+  }, [confirmId]);
   useAsyncEffect(async () => {
     if (!srcPlay) {
       return;
     }
-    const audio = document.createElement("audio");
-    audio.src = srcPlay;
-    await audio.play();
-  }, [confirmId, config]);
+    await playAudio(srcPlay);
+  }, [srcPlay]);
   const animated = useSettingValue("preferences/animation.boolean");
   return (
     <BlurOverlay hidden={!confirmId}>
-      <Card className="max-md:w-3/4 max-lg:w-2/3">
+      <Card className="max-md:w-11/12 max-lg:w-2/3">
         {config?.title && (
           <EmptyComponent>
             <div className="p-2">
@@ -108,7 +107,7 @@ export const DialogBoxLayout = () => {
                 onClick={() => {
                   showMore.set(!showMore.get);
                 }}
-                className="flex justify-between items-center w-full"
+                className="flex justify-between items-center w-full overflow-hidden"
               >
                 <div className="truncate">
                   <MarkDown value={config.message} />
@@ -119,12 +118,14 @@ export const DialogBoxLayout = () => {
             <Line />
           </EmptyComponent>
         )}
-        <Scroll className={tw("h-[0vh]", showMore.get && config?.detail && "h-[30vh]", animated && "transition-[height]")}>
-          {config?.detail && (
-            <div className="p-2">
-              <MarkDown value={config.detail} />
-            </div>
-          )}
+        <Scroll>
+          <div className={tw("max-h-[0vh]", showMore.get && config?.detail && "max-h-[45vh]", animated && "transition-[max-height]")}>
+            {config?.detail && (
+              <div className="p-2">
+                <MarkDown value={config.detail} />
+              </div>
+            )}
+          </div>
         </Scroll>
         {showMore.get && config?.detail && <Line />}
         {config && (

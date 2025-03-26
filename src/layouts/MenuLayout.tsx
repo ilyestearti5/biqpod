@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { mergeObject, tw } from "@/utils";
 import { Line } from "@/components/Line";
 import { KeyPanding } from "@/components/KeyPanding";
@@ -41,7 +41,7 @@ export const MenuRecord = ({ item, status, handelFocus, handelSubmit }: ListItem
           slotHooks.setOneFeild("menu-list", "focused", null);
         }}
         onClick={handelSubmit()}
-        className={"cursor-pointer flex items-center rounded-md px-4 py-2 w-full"}
+        className={"cursor-pointer flex items-center rounded-md px-4 py-2 max-md:py-3 w-full"}
       >
         <div>
           <div className="inline-flex flex-end items-center gap-1 w-[25px]">
@@ -66,7 +66,7 @@ export const MenuLayout = () => {
   const menuPosition = menuTemp.getTemp<Biqpod.Types.Axis>("position");
   const menuId = menuTemp.getTemp<string>("id");
   const submited = slotHooks.getOneFeild("menu-list", "submited");
-  React.useEffect(() => {
+  useEffect(() => {
     if (menuId && typeof submited == "number") {
       menuTemp.setTemp("result", submited);
       slotHooks.setOneFeild("menu-list", "submited", null);

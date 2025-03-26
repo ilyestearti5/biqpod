@@ -1,6 +1,6 @@
 import React from "react";
 import { StringFeild } from "./StringField";
-import { Setting, useCopyState, useSettingValue } from "@/hooks";
+import { Setting, useColorMerge, useCopyState, useSettingValue } from "@/hooks";
 import { tw } from "@/utils";
 import { RegexpFeild } from "./RegexpField";
 import { RecorderFeild } from "./RecorderField";
@@ -84,6 +84,7 @@ export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
     indexes.set({});
   }, []);
   const animated = useSettingValue("preferences/animation.boolean");
+  const colorMerge = useColorMerge();
   return (
     <div className="flex flex-col items-center gap-2 w-full">
       <JoinComponentBy
@@ -91,9 +92,19 @@ export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
           const { label, icon, type, id, config: secondryConfig, onNext } = data;
           const value = state.get[id] as any;
           const elementId = `full-field-${parentId}-${nanoid()}`;
+          const showed = indexes.get[index];
           return (
-            <div className="w-full cursor-pointer" key={id}>
+            <div
+              style={{
+                ...colorMerge("primary.background"),
+              }}
+              className={tw("p-0 rounded-xl w-full cursor-pointer", animated && "transition-[padding] duration-500", showed && "p-3")}
+              key={id}
+            >
               <div
+                style={{
+                  ...colorMerge("secondary.background"),
+                }}
                 onClick={(e) => {
                   if (document.getElementById("#" + elementId)?.contains(e.target as HTMLElement)) return;
                   indexes.set((s) => {
@@ -102,7 +113,7 @@ export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
                     return o;
                   });
                 }}
-                className="flex justify-between items-center px-2 w-full h-[50px]"
+                className="flex justify-between items-center px-2 rounded-xl w-full h-[50px]"
               >
                 <div className="flex items-center gap-1">
                   {icon && <Icon icon={icon} />}
@@ -152,7 +163,7 @@ export const FullField = ({ config, id: parentId, state }: FullFieldProps) => {
                   </div>
                 )}
               </div>
-              <div className={tw("flex justify-center h-[0px] overflow-hidden", animated && "transition-[height]", indexes.get[index] && "h-[150px]")}>
+              <div className={tw("flex justify-center max-h-[0px] overflow-hidden", animated && "transition-[max-height] duration-500", showed && "max-h-[150px]")}>
                 <FullFieldRecord
                   key={index}
                   type={type}
