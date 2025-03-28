@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { store } from "@/store";
-import { viewTemps, cameraTemp, iframeTemp } from "@/reducers/Object/allTemps";
+import { viewTemps, cameraTemp, iframeTemp, visibilityTemp } from "@/reducers/Object/allTemps";
 import { viewHooks } from "@/data/system/views.model";
 import { ToastType, toastHooks } from "@/data/system/toasts.model";
 import { TextAreaProps } from "@/components/TextArea";
@@ -853,3 +853,11 @@ export function getCookie(name: string): string | null {
   }
   return null;
 }
+
+export const showHelp = () => {
+  visibilityTemp.setTemp("help-is-opened", true);
+};
+
+export const closeHelp = () => {
+  visibilityTemp.setTemp("help-is-opened", false);
+};

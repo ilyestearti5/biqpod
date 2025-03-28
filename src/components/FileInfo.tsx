@@ -122,7 +122,7 @@ export interface RenderTypeProps {
 export const RenderType = ({ blob, overwrite, url, name }: RenderTypeProps): JSX.Element => {
   const fullyState = React.useMemo(() => {
     return { ...getDefaultIcons(), ...overwrite };
-  }, []);
+  }, [overwrite]);
   return typeof name == "string" ? (
     <RenderType name={fullyState[name]} blob={blob} overwrite={overwrite} url={url} />
   ) : typeof name == "function" ? (

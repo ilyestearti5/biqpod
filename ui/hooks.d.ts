@@ -622,6 +622,7 @@ declare namespace Biqpod {
             card: string;
             refCode: string;
             withDrawId?: string;
+            user?: string;
         }
         interface Withdraw {
             id: string;
@@ -1019,6 +1020,8 @@ export declare function closeApplications(): void;
 export declare function closeBottomSheet(id?: string): void;
 
 export declare function closeFrame(): void;
+
+export declare const closeHelp: () => void;
 
 export declare function closeNotifays(): void;
 
@@ -4607,6 +4610,8 @@ export declare function showApplications(): void;
 export declare function showBottomSheet(element: JSX.Element, { force, id: newId, min, max, overscroll }?: BottomSheetOptions): void;
 
 export declare function showFrame(src: string | URL, id?: string): string;
+
+export declare const showHelp: () => void;
 
 export declare function showNotification({ ...notification }: Partial<NotificationType>): void;
 

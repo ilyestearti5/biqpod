@@ -1,4 +1,4 @@
-import { W as a } from "./SeparatedComponents-DPehn4JG.mjs";
+import { W as a } from "./SeparatedComponents-lIIuP4se.mjs";
 class t extends a {
   async setNavigationBarColor(o) {
     console.log("Cannot setNavigationBarColor on web", o);

@@ -428,6 +428,7 @@ export declare namespace Biqpod {
             card: string;
             refCode: string;
             withDrawId?: string;
+            user?: string;
         }
         export interface Withdraw {
             id: string;

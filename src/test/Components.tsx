@@ -24,7 +24,7 @@ import {
   Tabs,
   Translate,
 } from "@/components";
-import { langHooks, openDatePicker, showToast, useColorMerge, useCopyState } from "@/hooks";
+import { langHooks, openDatePicker, showHelp, showToast, useColorMerge, useCopyState } from "@/hooks";
 import { Nothing, SettingValueType } from "@/types";
 import { delay, range } from "@/utils";
 import React from "react";
@@ -496,5 +496,19 @@ export const DatePickerCode = () => {
     >
       <Translate content="open date picker" />
     </Button>
+  );
+};
+
+export const HelpCode = () => {
+  return (
+    <div className="flex flex-col gap-2">
+      <Button
+        onClick={() => {
+          showHelp();
+        }}
+      >
+        Show Help
+      </Button>
+    </div>
   );
 };

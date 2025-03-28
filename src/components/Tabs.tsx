@@ -23,8 +23,8 @@ export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal",
   return (
     <div
       className={tw(
-        "flex p-2 border border-transparent border-solid rounded-full overflow-hidden",
-        direction == "horizontal" ? "rounded-full gap-x-2 flex-row items-stretch" : "flex-col gap-y-2 rounded-3xl max-sm:rounded-full",
+        "flex p-2 border border-transparent border-solid overflow-hidden",
+        direction == "horizontal" ? "gap-x-2 flex-row items-stretch rounded-full" : "flex-col gap-y-2 rounded-3xl",
         className,
       )}
       style={{
@@ -50,11 +50,7 @@ export const Tabs = ({ state, defaultValue, tabs = [], direction = "horizontal",
           return (
             <span>
               <Button
-                className={tw(
-                  "sm:px-7 sm:py-4 rounded-full w-fit max-sm:w-[40px] max-sm:h-[40px] text-xs transition-[background,color] duration-500",
-                  direction == "vertical" && "w-full",
-                  buttonClassName,
-                )}
+                className={tw("sm:px-7 sm:py-4 rounded-full w-fit text-xs transition-[background,color] duration-500", direction == "vertical" && "w-full", buttonClassName)}
                 style={{
                   ...colorMerge(
                     !isActive && "transparent",

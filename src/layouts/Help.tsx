@@ -1,6 +1,6 @@
 import { allIcons, and, getMainCloud, getProjectConfig, orderBy, where } from "@/apis";
 import { Button, CardWait, CircleTip, EmptyComponent, Field, Icon, IconProps, Image, Line, Scroll, Tip, Translate } from "@/components";
-import { execAction, fieldHooks, getTemp, imageExtensions, isLoading, openMenu, openPath, setFieldValue, showToast, useAction, useAsyncEffect, useCopyState, useUser } from "@/hooks";
+import { execAction, fieldHooks, getTemp, imageExtensions, isLoading, openMenu, openPath, setFieldValue, showToast, useAction, useAsyncEffect, useCopyState, useUser, visibilityTemp } from "@/hooks";
 import { Biqpod, Nothing, ProjectConfig } from "@/types";
 import { range, tw } from "@/utils";
 import { motion } from "framer-motion";
@@ -88,7 +88,7 @@ export const Help = () => {
   const isHelpStart = useCopyState(false);
   const isFullScreen = useCopyState(false);
   const helpCenterProjectInfo = useCopyState<Nothing | ProjectConfig>(null);
-  const isOpened = useCopyState(false);
+  const isOpened = visibilityTemp.useTemp<boolean>("help-is-opened");
   const currentProject = useCopyState<Nothing | ProjectConfig>(null);
   const projectId = getTemp<string>("projectId");
   useAsyncEffect(async () => {
@@ -172,11 +172,11 @@ export const Help = () => {
   }, [isOpened.get]);
   return (
     <div
+      hidden={!isOpened.get}
       className={tw(
         "right-5 bottom-5 z-[10000000000000000000000000] fixed flex flex-col bg-[--biqpod-primary-background] border border-[--biqpod-borders] border-solid rounded-2xl min-w-[0vw] min-h-[0vh] max-h-[80vh] max-md:max-h-[100vh] overflow-hidden transition-[transform,min-width,min-height,border-radius,bottom,right] duration-700 transform",
         isOpened.get && isHelpStart.get && "min-w-[40vw] max-md:min-w-[100vw] max-md:right-0 max-md:bottom-0 max-md:rounded-none max-md:min-h-[100vh] min-h-[30vh] bg-[--biqpod-primary-background]",
         isOpened.get && isHelpStart.get && isFullScreen.get && "min-w-[100vw] min-h-[100vh] right-0 bottom-0 rounded-none",
-        !isOpened.get && "translate-x-[70%]",
       )}
     >
       {isHelpStart.get && (
@@ -267,7 +267,7 @@ export const Help = () => {
                     <div className="rounded-2xl w-full h-full overflow-hidden">
                       <img draggable={false} src={photoState.get} className="w-full h-full object-cover" />
                     </div>
-                    <div className="right-0 bottom-0 absolute translate-x-1/2 translate-y-1/2 transform">
+                    <div className="right-0 bottom-0 absolute transform">
                       <CircleTip
                         icon={allIcons.regular.faTrashCan}
                         className="border border-[--biqpod-text-white] border-solid"
@@ -281,6 +281,23 @@ export const Help = () => {
                 <Line />
               </EmptyComponent>
             )}
+            {/* <div className="flex gap-2 p-2 overflow-x-auto capitalize">
+              {[
+                {
+                  prop: "reload page",
+                },
+                {
+                  prop: "clear cache",
+                },
+              ].map(({ prop }) => {
+                return (
+                  <Card key={prop} onClick={() => {}} className="hover:bg-[--biqpod-gray-opacity] p-2 cursor-pointer roundex-xl">
+                    {prop}
+                  </Card>
+                );
+              })}
+            </div>
+            <Line /> */}
             <div className="flex items-center gap-2 p-4">
               <div className="relative w-full">
                 <Field inputName="feedback-message" className="rounded-xl" placeholder="Enter Message" />
@@ -320,7 +337,7 @@ export const Help = () => {
       )}
       <div className="flex justify-between p-2">
         <div hidden={!isHelpStart.get} />
-        <div className={tw("flex gap-1", !isOpened.get && "flex-row-reverse")}>
+        <div className={tw("flex gap-1")}>
           <div
             onClick={() => {
               isHelpStart.set(!isHelpStart.get);
@@ -344,20 +361,11 @@ export const Help = () => {
               />
             </div>
           </div>
-          <div
-            onClick={() => {
-              isOpened.set(!isOpened.get);
-            }}
-            className="bg-[--biqpod-primary-background] rounded-2xl w-[50px] h-[50px] overflow-hidden text-2xl cursor-pointer"
-          >
+          <div onClick={() => {}} className="bg-[--biqpod-primary-background] rounded-2xl w-[50px] h-[50px] overflow-hidden text-2xl cursor-pointer">
             <div className="relative hover:bg-[--biqpod-gray-opacity] h-full">
               <Icon
-                icon={allIcons.solid.faChevronLeft}
-                iconClassName={tw("top-1/2 left-1/2 absolute rotate-0 scale-100 transition-[transform] -translate-x-1/2 -translate-y-1/2 duration-300 transform", isOpened.get && "scale-0 rotate-90")}
-              />
-              <Icon
-                icon={allIcons.solid.faChevronRight}
-                iconClassName={tw("top-1/2 left-1/2 absolute rotate-90 scale-0 transition-[transform] -translate-x-1/2 -translate-y-1/2 duration-300 transform", isOpened.get && "rotate-0 scale-100")}
+                icon={allIcons.solid.faXmark}
+                iconClassName={tw("top-1/2 left-1/2 absolute rotate-0 scale-100 transition-[transform] -translate-x-1/2 -translate-y-1/2 duration-300 transform", !isOpened.get && "scale-0 rotate-90")}
               />
             </div>
           </div>

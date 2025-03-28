@@ -62,6 +62,7 @@ import {
   FileFieldCode,
   FilterFieldCode,
   FullFieldCode,
+  HelpCode,
   ImageFieldCode,
   InfinityScrollCode,
   NumberFieldCode,
@@ -439,6 +440,10 @@ export function Test() {
                 {
                   label: "🖼️ Layouts 🖼️",
                   elements: [
+                    {
+                      jsxElement: <HelpCode />,
+                      label: "Help",
+                    },
                     {
                       jsxElement: <DatePickerCode />,
                       label: "Date Picker",

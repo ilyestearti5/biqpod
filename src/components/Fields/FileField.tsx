@@ -129,7 +129,13 @@ export function FileFeild({ state, config = {}, id }: FileFeildProps) {
                       color: "white",
                     }}
                     onClick={() => {
-                      state.set((s) => (s && s.filter((file) => file != href)) || null);
+                      state.set((s) => {
+                        if (!s) {
+                          return null;
+                        } else {
+                          return s.filter((_, i) => i != index);
+                        }
+                      });
                       status.set("ready");
                     }}
                     icon={allIcons.solid.faXmark}

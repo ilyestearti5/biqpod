@@ -1,8 +1,9 @@
-import { BlurOverlay, FastList, Line, MarkDown, CircleLoading, Field, Translate } from "@/components";
+import { BlurOverlay, FastList, Line, MarkDown, CircleLoading, Field, Translate, Button } from "@/components";
 import { useColorMerge, enumTemp, getSlotData, useSettingValue, slotHooks, useCopyState, fieldHooks, useMemoDelay, useDeviceResolution, store, getTempFromStore } from "@/hooks";
 import { SettingConfig } from "@/types";
 import { getFocus, include, mergeObject, tw } from "@/utils";
 import { createRef, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
 interface ListConfig {
   value: string;
   content?: string;
@@ -13,7 +14,7 @@ export const EnumLayout = () => {
   const id = enumTemp.getTemp<string>("id");
   const enumList = enumTemp.getTemp<ListConfig[]>("list");
   const value = fieldHooks.getOneFeild("find-item-from-enum", "value");
-  const [isLoading, animatedValue] = useMemoDelay(() => value, [value], 200);
+  const [isLoading, animatedValue] = useMemoDelay(() => value, [value], 100);
   const positions = enumTemp.getTemp<Omit<DOMRect, "toJSON">>("positions");
   const elementRef = createRef<HTMLDivElement>();
   const config = enumTemp.getTemp<SettingConfig["enum"]>("config");
@@ -96,16 +97,11 @@ export const EnumLayout = () => {
     <BlurOverlay
       className="scale-100 select-none"
       hidden={!id}
-      onClick={({ target }) => {
-        if (!elementRef.current?.contains(target as HTMLElement)) {
-          enumTemp.setTemp("id", null);
-        }
-      }}
       style={{
         ...colorMerge(isMobile && "shadow.color"),
       }}
     >
-      <div
+      <motion.div
         ref={elementRef}
         className={tw("absolute flex flex-col border border-transparent border-solid rounded-md max-md:rounded-3xl max-md:w-[80vw] overflow-hidden transition-[max-height] duration-700")}
         style={{
@@ -126,11 +122,12 @@ export const EnumLayout = () => {
               },
           ),
         }}
+        // add transition
       >
         {config?.search && (
           <div>
             <div className="p-3">
-              <Field placeholder="Type To Search" className={tw("max-md:rounded-ss-2xl max-md:rounded-se-2xl")} inputName="find-item-from-enum" />
+              <Field placeholder="Type To Search" className={tw("p-3 max-md:rounded-ss-2xl max-md:rounded-se-2xl max-md:text-2xl")} inputName="find-item-from-enum" />
             </div>
             <Line />
           </div>
@@ -142,22 +139,21 @@ export const EnumLayout = () => {
             focusId="enum-list"
             scrollWidth={isMobile ? 25 : undefined}
             itemSize={isMobile ? 50 : 30}
-            maxHeight={innersState.get.height / 2}
+            maxHeight={(innersState.get.height * 2) / 3}
             render={({ data, style, status, handel }) => {
               const colorMerge = useColorMerge();
               const choised = enumTemp.getTemp<string>("choised");
-              const hover = useCopyState(false);
               return (
                 <div
-                  onMouseEnter={() => hover.set(true)}
-                  onMouseLeave={() => hover.set(false)}
+                  onMouseEnter={() => {
+                    handel.focus();
+                  }}
                   style={{
                     ...style,
                     ...colorMerge(
                       choised == data.value && {
                         color: "primary",
                       },
-                      hover.get ? "gray.opacity" : "secondary.background",
                       status.isFocused && "primary",
                       status.isFocused && {
                         color: "primary.content",
@@ -171,7 +167,7 @@ export const EnumLayout = () => {
                     handel.submit();
                   }}
                   className={tw(
-                    "flex justify-center items-center gap-2 hover:bg-[var(--biqpod-gray-opacity-2)] active:bg-[var(--biqpod-gray-opacity-2)] max-md:p-1 transition-[background-color] cursor-pointer",
+                    "flex justify-center items-center gap-2 hover:bg-[var(--biqpod-gray-opacity-2)] active:bg-[var(--biqpod-gray-opacity-2)] max-md:p-1 cursor-pointer",
                     choised == data.value && "font-bold",
                   )}
                 >
@@ -202,7 +198,22 @@ export const EnumLayout = () => {
             <MarkDown value={focused?.desc || ""} />
           </div>
         </div>
-      </div>
+        <Line />
+        <div className="p-3">
+          <Button
+            onClick={() => {
+              enumTemp.setTemp("id", null);
+            }}
+            style={{
+              ...colorMerge("gray.opacity", {
+                color: "text.color",
+              }),
+            }}
+          >
+            <Translate content="cancel" />
+          </Button>
+        </div>
+      </motion.div>
     </BlurOverlay>
   );
 };

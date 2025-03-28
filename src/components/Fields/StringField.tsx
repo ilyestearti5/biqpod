@@ -1,8 +1,8 @@
-import React from "react";
+import { useEffect, useMemo } from "react";
 import { useColorMerge } from "@/hooks";
 import { Input } from "../Input";
 import { getFocus } from "@/utils";
-import { fieldHooks, initNewFeild, useEffectDelay } from "@/hooks";
+import { fieldHooks, initNewFeild } from "@/hooks";
 import { execAction, useAction } from "@/data/system/actions.model";
 import { Button } from "@/components/Button";
 import { Translate } from "../Translate";
@@ -21,7 +21,7 @@ export function StringFeild({ state, config = {}, id }: StringFeildProps) {
         state.set(value.get || "");
       }
     },
-    [value.get, id],
+    [value.get],
   );
   useAction(
     "string.cancel",
@@ -33,22 +33,17 @@ export function StringFeild({ state, config = {}, id }: StringFeildProps) {
         state.set(val);
       }
     },
-    [state.get, id, config],
+    [state.get],
   );
   const colorMerge = useColorMerge();
-  const currentValue = React.useMemo(() => {
+  const currentValue = useMemo(() => {
     return value.get || "";
   }, [value.get]);
-  const diffValue = React.useDeferredValue(currentValue);
-  useEffectDelay(
-    () => {
-      if (config.autoChange) {
-        state.set(diffValue);
-      }
-    },
-    [config.autoChange, diffValue],
-    200,
-  );
+  useEffect(() => {
+    if (config.autoChange) {
+      state.set(currentValue);
+    }
+  }, [currentValue]);
   return (
     <div className="flex justify-between items-center gap-3">
       <Input

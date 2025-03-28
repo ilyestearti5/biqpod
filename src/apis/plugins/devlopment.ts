@@ -241,44 +241,63 @@ export function initDevelopmentCloud({ port = 7985 }: DevCloudProps) {
   });
   // storage
   devCloud.set("storage", "createFile", async (path, content) => {
-    await sendRequest("/storage/createFile", {
+    const uri = getBaseUri();
+    uri.pathname = "/storage/createFile";
+    const formData = new FormData();
+    formData.append("path", toPath(path));
+    const blob =
+      typeof content === "string"
+        ? new Blob([content], {
+            type: "text/plain",
+          })
+        : content;
+
+    const blobEvrything = await new Response(blob).blob();
+    formData.append("content", blobEvrything);
+    await fetch(uri, {
+      body: formData,
       method: "POST",
-      body: JSON.stringify({
-        path,
-        content,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    }).then((s) => s.json());
   });
   devCloud.set("storage", "upsertFile", async (path, content) => {
-    await sendRequest("/storage/createFile", {
+    const uri = getBaseUri();
+    uri.pathname = "/storage/upsertFile";
+    const formData = new FormData();
+    formData.append("path", toPath(path));
+    const blob =
+      typeof content === "string"
+        ? new Blob([content], {
+            type: "text/plain",
+          })
+        : content;
+    const blobEvrything = await new Response(blob).blob();
+    formData.append("content", blobEvrything);
+    await fetch(uri, {
+      body: formData,
       method: "POST",
-      body: JSON.stringify({
-        path,
-        content,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    }).then((s) => s.json());
   });
   devCloud.set("storage", "updateFile", async (path, content) => {
-    await sendRequest("/storage/updateFile", {
+    const uri = getBaseUri();
+    uri.pathname = "/storage/updateFile";
+    const formData = new FormData();
+    formData.append("path", toPath(path));
+    const blob =
+      typeof content === "string"
+        ? new Blob([content], {
+            type: "text/plain",
+          })
+        : content;
+    const blobEvrything = await new Response(blob).blob();
+    formData.append("content", blobEvrything);
+    await fetch(uri, {
+      body: formData,
       method: "POST",
-      body: JSON.stringify({
-        path,
-        content,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    }).then((s) => s.json());
   });
   devCloud.set("storage", "deleteFile", async (path) => {
     await sendRequest("/storage/deleteFile", {
-      method: "POST",
+      method: "DELETE",
       body: JSON.stringify({
         path,
       }),
