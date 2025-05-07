@@ -1,0 +1,25 @@
+{
+  "name": "@biqpod/errors",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "Tiarti Ilyes",
+  "license": "ISC",
+  "description": "Errors",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js"
+    }
+  },
+  "scripts": {
+    "build:cjs": "tsc --outDir ./dist/cjs --module CommonJS",
+    "build:esm": "tsc --outDir ./dist/esm --module ESNext",
+    "build": "npm run build:cjs && npm run build:esm"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

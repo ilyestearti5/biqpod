@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true // Keep declaration as true for composite projects
+  },
+  "include": ["package.json"],
+  "exclude": ["vite.config.ts"] // Exclude vite.config.ts
+}

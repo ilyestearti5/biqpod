@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": false,
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "ES2021", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./ui", // Ensure this matches where you want the types to go
+    "paths": {
+      "@/*": ["*"],
+      "api/*": ["apis/*"],
+      "assets/*": ["assets/*"],
+      "components/*": ["components/*"],
+      "database/*": ["data/db/*"],
+      "hooks/*": ["hooks/*"],
+      "models/*": ["data/*"],
+      "utils/*": ["utils/*"]
+    },
+    // allow Json
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true
+  },
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}
